@@ -145,7 +145,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A09 — Поздний ответ экрана принимается за ответ нового запроса
 
-**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `BridgeConnection.java` (`request_id` в screen_request и точная сверка с `screenRequestEpoch`). Тесты: `tests/test_screen_server.py` (эхо request_id на Host), `android/app/src/test/.../BridgeConnectionTest.java` (Gradle 2026-11-08 не запускался). Исходная находка: CL-06.
+**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `BridgeConnection.java` (`request_id` в screen_request и точная сверка с `screenRequestEpoch`). Тесты: `tests/test_screen_server.py` (эхо request_id на Host), `android/app/src/test/.../BridgeConnectionTest.java` (Gradle `testDebugUnitTest --rerun` 2026-11-08: 161 passed). Исходная находка: CL-06.
 
 После timeout запроса 101 разрешён 102; поздний screen_offer 101 передаётся listener как 102. Java probe воспроизвёл stale ticket accepted=true. Host при новой выдаче заменяет ticket, поэтому просмотр получает отказ.
 

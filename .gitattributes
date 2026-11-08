@@ -1,0 +1,12 @@
+# Text is stored and checked out with LF on every machine, independent of
+# core.autocrlf. Source hashes (runtime receipt, build manifests) must not
+# change just because a file was checked out on Windows.
+* text=auto eol=lf
+
+# Exact bytes: the driver INF is compared byte-for-byte with the build output
+# and is covered by the driver catalog signature (.cat).
+*.inf -text
+
+*.png binary
+*.ico binary
+*.h264 binary

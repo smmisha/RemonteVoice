@@ -1,0 +1,281 @@
+{
+  "commit": "bb68ed5e770bce04dc5395ec9258dafab034184d",
+  "files": [
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Package\\package.VcxProj",
+      "git_blob": "7921c8d38e537653ef4193eb74c60c19795593f3",
+      "sha256": "c11bd973cfebec61e9eef8b229c5fbbf9e2555b0d8f9c8e81dd10cabfadf178d",
+      "bytes": 4336
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Package\\package.VcxProj.Filters",
+      "git_blob": "63b7554872e818884553750c49074d3ec6dae486",
+      "sha256": "752e45f6e932df2bdbe97c7953a28659e6362b05ebce76819cea2fe6366ef053",
+      "bytes": 1008
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\README.md",
+      "git_blob": "f7d41b38f7f34fa3916e566b83296cc4f1b6ff5c",
+      "sha256": "bc303d3a75ae3388fd86f7c5167c564c07e768db867f6d997643ed09289759d7",
+      "bytes": 10046
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\SimpleAudioSample.sln",
+      "git_blob": "8fc1ef170bfcd2da3e73880b39c0e7f494799775",
+      "sha256": "34a752d98d9882069308c5124a79906e208ff0a7e8da5248a80030d75da25621",
+      "bytes": 5755
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\Filters.vcxproj",
+      "git_blob": "1b343b45976dbaeefdb651cf7a3df3f9d58ead1a",
+      "sha256": "d89bbee811cab2c5be953aad99d9904161a76f8468e54c7d269137f813bbcf96",
+      "bytes": 11334
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\Filters.vcxproj.Filters",
+      "git_blob": "b573243b46c2325de451852993b4c460fda83f95",
+      "sha256": "3a9245375c99708aa8c6876bc8447c0f49576d4135347b5aa0575d3a25471d9b",
+      "bytes": 1077
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\micarray1toptable.h",
+      "git_blob": "3bbd80f34e1fdc8abae744902f62ab0e2af218e9",
+      "sha256": "57301df8e50928cc8cb23618ac64fbb9be2bb839b5f3a261d56abaa5b7496555",
+      "bytes": 7228
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\micarraytopo.cpp",
+      "git_blob": "ebb9784d72f70e7c639e9ce232f8c7f89e3d2904",
+      "sha256": "7b783f8cf163fe3549de64236a37f591bc795717809b3c0e2b2b395f18f56c28",
+      "bytes": 23891
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\micarraytopo.h",
+      "git_blob": "4f4a621f229f337daafd4992758738cb69ceaa59",
+      "sha256": "fc7349cf5447dca37ebf518bdc1afc116568e89cc32cc73cd0a87659bde778ec",
+      "bytes": 2581
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\micarraywavtable.h",
+      "git_blob": "536560382b3541486448b18b4ae49ac91fd4eb3e",
+      "sha256": "690509f9851c3f58eade493867bcfb7cd78d31d4aeea49bdd771f822c14b0c51",
+      "bytes": 7709
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\minipairs.h",
+      "git_blob": "b7d8950f45fa9433c8fe57853ebc0ac49708f4f8",
+      "sha256": "e47817bb956fbe418103de3fe5c1be854e917576aadaf0791555d6e93be56c97",
+      "bytes": 6056
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\speakertopo.cpp",
+      "git_blob": "d1635efa9c5a21b51a43fde746447aac1080ba18",
+      "sha256": "486580b6733add12bc159108c9caa634742ef9a4b14cfde55f164a410778105b",
+      "bytes": 2673
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\speakertopo.h",
+      "git_blob": "0eff1ebbe0edaf0901a8d909278a1c58b35198ce",
+      "sha256": "64eb861b0dc647c013cb704c3d200dd420ac1b0f8510dc8dac411adcf5ab4819",
+      "bytes": 480
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\speakertoptable.h",
+      "git_blob": "f9e54df63f700dd85b5dc9fba9074be669e46cb5",
+      "sha256": "895016cbd07ceb7d893efe02ad458e16d78c330e632b237288a4b3c60c987e77",
+      "bytes": 6964
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Filters\\speakerwavtable.h",
+      "git_blob": "e67a673c1c3c23ed7d011ef4718ea7db09630f34",
+      "sha256": "10f950408d77d6388103f3324c7b12fee29c623638c7501bf326804350268af4",
+      "bytes": 7207
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\Inc.vcxproj",
+      "git_blob": "46846d710350703c21c401b1578c0a08d0503d39",
+      "sha256": "bcdc68e1f669bea68f8e0cc9a5233072619bd6452f4ae2cf890b9076a8fa29c6",
+      "bytes": 9920
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\Inc.vcxproj.Filters",
+      "git_blob": "353662affbe80338c3638dc2558251d4f64d1976",
+      "sha256": "99c07878936aa4c279837b85bbe064514613e90e6a0874f52b8b01edfb7cef52",
+      "bytes": 1077
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\NewDelete.h",
+      "git_blob": "ebeab0377f28c362908db9499d03a884094c988f",
+      "sha256": "4c5bfa315cfbc536dfde02c8198ed2b7f471152abf0b6e67d7756cd5b030fe51",
+      "bytes": 2420
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\basetopo.h",
+      "git_blob": "a893aa3efadbdcdc05bcfd5ef9723cc2bb59019f",
+      "sha256": "2e917dbaf5f1b79b4d01041308b985cf81ebfe16a1f5802109ee4bec94a59347",
+      "bytes": 2639
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\common.h",
+      "git_blob": "2d2db7dbd96cc8cc1cac5c19971f80da2615cae5",
+      "sha256": "82fc312746ee7f424ce697cb1514b921c9ee9e891f72d77cab88c2dae27d9160",
+      "bytes": 15315
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\definitions.h",
+      "git_blob": "9fb4547aae287342924cfdbdf701053796a9df20",
+      "sha256": "7512272d6bc2dd028ae21783ad47f7b7f4c11dda622b5005e13f3e1f164e4ab3",
+      "bytes": 6659
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\endpoints.h",
+      "git_blob": "44a858a0cc1b9c088c7474c2536528e8e42c4c57",
+      "sha256": "48c9bfe6e76d40d9f7673ee31946562586a11fd26bd6742408e03ff9b148555d",
+      "bytes": 2601
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\kshelper.h",
+      "git_blob": "023f773a958613737a55bc4134100fb32a70a3ad",
+      "sha256": "94c4c5dc2fa6cae976361ca818ac9a8ea3ac0afd457f4bf6941f6bae22af23cf",
+      "bytes": 5885
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Inc\\mintopo.h",
+      "git_blob": "5e7fe466c25c3179d67a26e65eb4bebdd5ac60e4",
+      "sha256": "6927c19207d08f2059617486261e9720da0440ce44356a7f76242890096f5e9d",
+      "bytes": 2222
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\Main.vcxproj",
+      "git_blob": "b569da4df21ee8e4784d5260ad315cd5733a4631",
+      "sha256": "a28f5d5dd59b4d493a76cc58e117306061da50424b5b9ff0cbb41c944540f619",
+      "bytes": 20703
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\Main.vcxproj.Filters",
+      "git_blob": "0669f019d1ea81e4728d000d9dddde690aa32f80",
+      "sha256": "2847f2826c821554891d393c7d55f999c4c37886eb0951c967a7171a83914f8f",
+      "bytes": 1764
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\NewDelete.cpp",
+      "git_blob": "8ef3797deb13927e0fac7ebf311bb5ae57e039f4",
+      "sha256": "d43699924e75388f7319ba30fd7101ba9759f3c7cca55926e8f0fdf11e04eac6",
+      "bytes": 3138
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\SimpleAudioSample.inx",
+      "git_blob": "db2b62c1e0c161b9562c838c14f74e58543d6c2d",
+      "sha256": "d055427be8c5e4e3411f4b5f7232ca01a71134b3ee50dfbebff3c30595f5a14e",
+      "bytes": 7299
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\SimpleAudioSample.rc",
+      "git_blob": "7fbb48938185385455cd2d052cf509832abb83fe",
+      "sha256": "b9c8497998e9d868281e428b25a81ac83a48aa462b27d0d74cb8deee9c0f55c5",
+      "bytes": 622
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\adapter.cpp",
+      "git_blob": "a66ee5a29a74f39b8cfa38d920135c6f92f97d21",
+      "sha256": "8f6efb9c478840b25cf70c8ca55ae166376f32a13ee464554097873cfe21997a",
+      "bytes": 23283
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\basetopo.cpp",
+      "git_blob": "b29a9bb16393bec331ed3417de753deebc8b7004",
+      "sha256": "67c7f8025a986b4af206178d3049178880f41d180a896693bef38b447a74adb5",
+      "bytes": 18498
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\common.cpp",
+      "git_blob": "7c19130ef62e062d0490e843738dfa168d64b9c2",
+      "sha256": "8a31754d810a9d9b9f6a58b68b6efd51f5ceaaaa1a4e9a8887925fff5261d552",
+      "bytes": 78115
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\mintopo.cpp",
+      "git_blob": "6ab1624f8374a8e4b0b70891a3e8c2ba1bc3d766",
+      "sha256": "bc7db02fb9f5d8cf2cb25813bf9481101cf5dc7aa90be1c8fc2e74be38936549",
+      "bytes": 15109
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\minwavert.cpp",
+      "git_blob": "1d92073d119b07aa4fab1907f1826294f9b75f20",
+      "sha256": "8a666ed7e8f1ae3e5e78df4ce65911d8e540c6d3579687280266f0ac81184d31",
+      "bytes": 44957
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\minwavert.h",
+      "git_blob": "a5ed89ff1139d39f7aecfd2a1056f7679d09f04e",
+      "sha256": "e436d2bb6bc192921eb39a7dfd8bab9b2f138daabe09073e7e7fc76d00910e66",
+      "bytes": 7709
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\minwavertstream.cpp",
+      "git_blob": "c189c9390838013b8b40183ecf874f5dacda82ae",
+      "sha256": "196890d22169ffe1ef62a345eb642ddf9b6d95d9c5efc033423b624262b69547",
+      "bytes": 52674
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Main\\minwavertstream.h",
+      "git_blob": "0124cab2d387349dabe8add64701fcbd86d5abdb",
+      "sha256": "f99fd8327dcb91179992d13cde0e120878ff4bdc04f4fa50d6781600375c9886",
+      "bytes": 6455
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\ToneGenerator.cpp",
+      "git_blob": "868b7fe5172f095117a6276bac2fc83185e69ad2",
+      "sha256": "9313a2a29fe146f5cf5508281203a12572d96cc80c9ad08557e48df36dab415b",
+      "bytes": 7369
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\ToneGenerator.h",
+      "git_blob": "85b1229a5a89404dd7e94cddd8b1d798342a88ea",
+      "sha256": "171e4bbc6d3dafa5d2297d697f3ea72bc18d858a2628c99db8acdfedfb7e5448",
+      "bytes": 1619
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\Utilities.vcxproj",
+      "git_blob": "5efe1068df6d208343c29c1539309c3b311a148d",
+      "sha256": "f0554b795446670a6bbf29b26f766b29816fa8a7d50997b7dde527f3ae47097f",
+      "bytes": 11416
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\Utilities.vcxproj.Filters",
+      "git_blob": "7a4ebde28454e7bf79f9546951f0735110f6dbfb",
+      "sha256": "43562bdd2a753433bf2b83a6d5a2799c9c457fe45c622755e5cc1b4b22976911",
+      "bytes": 1261
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\hw.cpp",
+      "git_blob": "133bcc994d723aa9edb824760b1685b496376c20",
+      "sha256": "eaf02af0b9381b7c8208016e2e49b772f3e0352f31a4940b910a2a4d4616cabe",
+      "bytes": 7420
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\hw.h",
+      "git_blob": "3360c24acbc2c42884908284d5b60a360eddad1d",
+      "sha256": "5ad4597198703161c30e305ab110445a0c4081b1e2c51f72a89cec96fcebe4a7",
+      "bytes": 3112
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\kshelper.cpp",
+      "git_blob": "e71c602188a3c9caeccfbe87cbc086fa086a8247",
+      "sha256": "d0c10e68f8500b136f813f4266c0767ab9e3bb5ea274c7b9e3ce7753efda04fc",
+      "bytes": 26052
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\savedata.cpp",
+      "git_blob": "02c3f602ed23cc63529f456d2499d2eb8fe4ccaf",
+      "sha256": "6ae73f8d9587b9843a68ee07373e1b7074b55db513c70b62dbfbefc99f23b9c7",
+      "bytes": 27919
+    },
+    {
+      "path": "host\\driver\\reference\\simpleaudiosample\\Source\\Utilities\\savedata.h",
+      "git_blob": "c658ec710c039a797e4f8164593ce770cde38e63",
+      "sha256": "82eb9e696a1b56e11b2214ba31b474c609cdf5f10601cbab604f91801d9bf321",
+      "bytes": 5143
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">RemoteVoice</string>
+    <string name="channel_name">Соединение с ноутбуком</string>
+    <string name="channel_description">Передача звука RemoteVoice в локальной сети</string>
+</resources>

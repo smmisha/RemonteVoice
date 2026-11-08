@@ -1,0 +1,31 @@
+{
+  "observed_at_utc": "2026-10-22T23:01:18.913336+00:00",
+  "proof_level": "source-inspection-only",
+  "swift": null,
+  "swiftc": null,
+  "swift_compilation": "not_run",
+  "swift_probe": "not_run",
+  "ios_runtime_tests": "not_run",
+  "checks": {
+    "four_swift_files_utf8_and_balanced_delimiters": true,
+    "endpoint_exact_ascii_octets_without_compactMap": true,
+    "persisted_endpoint_revalidated": true,
+    "client_and_model_main_actor": true,
+    "single_bounded_pcm_sender_no_dispatch_per_frame": true,
+    "ack_before_capture_and_permission_identity_check": true,
+    "mute_discards_pcm_and_stops_capture_before_await": true,
+    "terminal_invalidates_and_clears_transport": true,
+    "model_generation_identity_and_task_cancellation": true,
+    "audio_permission_separate_and_start_unwinds": true,
+    "tap_never_waits_for_native_configuration_lock": true,
+    "playback_completion_has_separate_counter_lock": true,
+    "stale_pcm_dropped_before_dispatch_and_checked_again_at_send": true,
+    "standalone_probe_delimiters_and_29_cases": true
+  },
+  "sources": {
+    "ios/RemoteVoice/PairingInfo.swift": "ee6b85706261f033fca22eaa1d670fcd7646dbe5f16fcb69304046d616b311c6",
+    "ios/RemoteVoice/BridgeClient.swift": "a04b9b62adec147575645d07c529d61a766402532834f9ff3b9eb9b1e0486fd8",
+    "ios/RemoteVoice/BridgeModel.swift": "20ca36dbd1721a95fd4e9d40845f4ff3fd8acf2ec50b8cc76f32882de4fbbe4a",
+    "ios/RemoteVoice/PhoneAudioEngine.swift": "5189610b01f49282f801a2df7c6333eee107cde6280b26a026f5e5e4ae0db008"
+  }
+}

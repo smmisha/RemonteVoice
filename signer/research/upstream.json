@@ -1,0 +1,168 @@
+{
+  "checked_at": "2026-10-08T00:42:11.654681+00:00",
+  "repository": "nab138/iloader",
+  "commit": "80142ff82fc3dfa7312d77ea6151b4d20090151b",
+  "scope": "Source and licensing preflight for proposed LocalSign Windows utility; no compiled product or device signing verified",
+  "source_version": "2.3.6",
+  "files": [
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/LICENSE",
+      "git_blob_sha1": "78a8b6b5590d0df1d0f9e30a475a88e7069c3df7",
+      "sha256": "c6e929e3490b6475e382b4f74aaddd068deb3bf27cca2109821591e692dfcb3b",
+      "bytes": 1063,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/LICENSE"
+    },
+    {
+      "path": "LICENSE-BRANDING",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/LICENSE-BRANDING",
+      "git_blob_sha1": "43c5f5f787e0de8e7a4124f370fd7434405885e7",
+      "sha256": "8b93b7f322be6039c40638bf018e61d378cfa8e79c2490d000556dce59b86ccd",
+      "bytes": 1243,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/LICENSE-BRANDING"
+    },
+    {
+      "path": "package.json",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/package.json",
+      "git_blob_sha1": "a56071f9d226a83a2e9e19e737c803946727c9c0",
+      "sha256": "161e8d91b937ea05b9e3d90c9ca7e594920218cead982043af4b72227a0797c6",
+      "bytes": 1142,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/package.json"
+    },
+    {
+      "path": "src-tauri/Cargo.toml",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/Cargo.toml",
+      "git_blob_sha1": "b791ae754bd47dc0aabeec2cb669d03432be6cfe",
+      "sha256": "00f45fa6268a2230a3b0e377b9dd41c92c31d88ff88c23ddc2084989e327be02",
+      "bytes": 1803,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/Cargo.toml"
+    },
+    {
+      "path": "src-tauri/src/account.rs",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/src/account.rs",
+      "git_blob_sha1": "2808de47a47459bc3887f73bf7be1b39f1b4d318",
+      "sha256": "fc837ef53340fcce4cec9cea468bb05369f6c4426c15898cec0a0dfd67d7524c",
+      "bytes": 11066,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/src/account.rs"
+    },
+    {
+      "path": "src-tauri/src/secure_storage.rs",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/src/secure_storage.rs",
+      "git_blob_sha1": "7339921622eba10afb1a98a3216022f42ea15237",
+      "sha256": "0ed4c4cfcc283d7d5b44c09acdd6f58159417eccf002f2831ed39ae77a7822fb",
+      "bytes": 1628,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/src/secure_storage.rs"
+    },
+    {
+      "path": "src-tauri/src/logging.rs",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/src/logging.rs",
+      "git_blob_sha1": "a25cbfc92c0333267b3c5f59ebbbbae21027beeb",
+      "sha256": "a90ca1c67a9e51135e2f51ddb86d8f76e79d4cd5cfc83862b9a0c0a6c629f162",
+      "bytes": 3153,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/src/logging.rs"
+    },
+    {
+      "path": "src-tauri/src/sideload.rs",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/src/sideload.rs",
+      "git_blob_sha1": "661175ae2cc2aa4596d55ff2efc1c3580654bd6d",
+      "sha256": "879743bbc5f085a789ad2e88e83823125a1d3e1b872b518add62ce19d6b568a2",
+      "bytes": 6056,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/src/sideload.rs"
+    },
+    {
+      "path": "src-tauri/src/device.rs",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/src/device.rs",
+      "git_blob_sha1": "c62e6ca50836401e64cda6b1cb87e256e217d190",
+      "sha256": "ecf328bd443df5304489c776d5519eb91287c56d24b02be5fbe2553c142d5c5d",
+      "bytes": 6537,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/src/device.rs"
+    },
+    {
+      "path": "src/AppleID.tsx",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src/AppleID.tsx",
+      "git_blob_sha1": "c89caa6ec12e57343238f641363ca05f2ff02fc2",
+      "sha256": "bdce9f6555f260689f32a6fb72d403b86ac613c0f601541884c60941822576c7",
+      "bytes": 12840,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src/AppleID.tsx"
+    },
+    {
+      "path": "src-tauri/tauri.conf.json",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/tauri.conf.json",
+      "git_blob_sha1": "f96ce33d731a3778ecb9c5bfcb563b78eab58cb4",
+      "sha256": "3ed372546eac88b3ac2b0fbc0191fb949a237dfee812442fc4030efa25100b93",
+      "bytes": 1128,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/tauri.conf.json"
+    },
+    {
+      "path": ".github/workflows/build.yml",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/.github/workflows/build.yml",
+      "git_blob_sha1": "ae4b10bc2bec9de35a3a4fb95b30446464e076fc",
+      "sha256": "5aff694c20ba52836072a237d909b99e5b94cbba5d94055f2ef295ff092c8aa6",
+      "bytes": 7882,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/.github/workflows/build.yml"
+    },
+    {
+      "path": "src-tauri/Cargo.lock",
+      "source_url": "https://github.com/nab138/iloader/blob/80142ff82fc3dfa7312d77ea6151b4d20090151b/src-tauri/Cargo.lock",
+      "git_blob_sha1": "96b63cf11b0464d07150ba2ff9bfd87198944011",
+      "sha256": "6bf8af76f792944aa1565abd6e783e8cff6b901d4188bd9ee584b2536f06bf3b",
+      "bytes": 187831,
+      "snapshot_path": ".harness/evidence/signing-utility/upstream/src-tauri/Cargo.lock"
+    }
+  ],
+  "selected_locked_dependencies": [
+    {
+      "name": "apple-codesign-quick",
+      "version": "0.1.0",
+      "checksum": "519defc726db80b8a43836bbd6f69eb606a42783db799716a103436042593f0b"
+    },
+    {
+      "name": "idevice",
+      "version": "0.1.68",
+      "checksum": "f5d7799c8497cef60ddfd38f7d92e267b9fa5d0b18e7691d31041453007400ca"
+    },
+    {
+      "name": "isideload",
+      "version": "0.4.4",
+      "checksum": "85ceefdb91380923dae69895ae22c2152129fc2d5b95eb7f9c66c5980ff3761d"
+    }
+  ],
+  "source_findings": [
+    {
+      "file": "LICENSE",
+      "finding": "MIT source license requires retaining copyright and permission notice; dependency licenses not yet reviewed."
+    },
+    {
+      "file": "LICENSE-BRANDING",
+      "finding": "iloader name, logos and assets have separate restrictions; use separate product identity and review attribution."
+    },
+    {
+      "file": "src-tauri/src/secure_storage.rs",
+      "finding": "Falls back to FsStorage for sideloading data if keyring is unavailable; replacement required before privacy claims."
+    },
+    {
+      "file": "src-tauri/tauri.conf.json",
+      "finding": "Includes iloader upstream update endpoint and null CSP; custom product requires its own identity, update policy and CSP."
+    },
+    {
+      "file": "src-tauri/src/logging.rs",
+      "finding": "Arbitrary tracing fields are emitted to frontend; check and sanitize secret-bearing fields and dependency errors."
+    },
+    {
+      "file": "src-tauri/src/device.rs",
+      "finding": "Some diagnostic messages include device UDID; omit or redact it for product diagnostics."
+    },
+    {
+      "file": "src-tauri/Cargo.lock",
+      "finding": "Pins isideload 0.4.4; existing limited 0.4.3 source review does not verify this dependency."
+    }
+  ],
+  "confirmed_product_decision": "Automatic renewal on Windows when laptop is on and iPhone is reachable; user confirmed in current conversation.",
+  "limits": [
+    "Read-only source review, not a full security audit.",
+    "Transitive dependency licenses, binary correspondence and runtime network behavior unverified.",
+    "No custom Windows build, real signing, renewal cycle or Store acceptance verified."
+  ],
+  "credentials_recorded": false,
+  "commands_executed_from_upstream": false
+}

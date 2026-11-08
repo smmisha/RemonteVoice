@@ -1,0 +1,49 @@
+:root { font-family: "Segoe UI", system-ui, sans-serif; color: #e5e9f2; background: #10141d; font-synthesis: none; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 800px; margin: 0 auto; padding: 30px 32px; }
+header { display: flex; gap: 14px; align-items: center; margin-bottom: 24px; }
+h1 { font-size: 27px; margin: 0; letter-spacing: -.6px; }
+header p { color: #929eb3; font-size: 13px; margin: 4px 0 0; }
+.mark { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; font-size: 25px; font-weight: 700; border-radius: 13px; background: #d1edb0; color: #183918; }
+.badge { margin-left: auto; font-size: 11px; color: #a3adc0; padding: 6px 9px; border: 1px solid #343e50; border-radius: 20px; white-space: nowrap; }
+.badge.success { color: #c0e59c; border-color: #415f31; }
+.storage { font-size: 12px; color: #a4b0c2; display: flex; align-items: center; gap: 8px; margin: 0 0 19px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #9e8b52; }
+.dot.green { background: #b2df8e; }
+section { border: 1px solid #2b3445; background: #171d29; border-radius: 15px; padding: 20px; margin-bottom: 14px; }
+.section-heading, .section-heading > div { display: flex; align-items: center; gap: 10px; }
+.section-heading { justify-content: space-between; gap: 12px; }
+.number { font-size: 11px; font-weight: 700; color: #a7b3c7; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid #3b485e; border-radius: 7px; }
+h2 { font-size: 16px; margin: 0; font-weight: 600; }
+.hint, .empty, .signed-in p { color: #9ba8bd; font-size: 12px; line-height: 1.6; margin: 12px 0; }
+label { display: block; font-size: 12px; color: #b8c3d5; margin-top: 14px; }
+input, select { width: 100%; padding: 11px 12px; border: 1px solid #3a465d; border-radius: 8px; background: #101621; color: #e5e9f2; margin-top: 7px; font: inherit; font-size: 14px; outline: none; }
+input:focus, select:focus { border-color: #b1d792; box-shadow: 0 0 0 2px #b1d79225; }
+input::placeholder { color: #657188; }
+button { border: 0; border-radius: 8px; padding: 10px 15px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+button:focus-visible { outline: 2px solid #c6e3a8; outline-offset: 3px; }
+button:disabled { cursor: default; opacity: .45; }
+.secondary { border: 1px solid #3b475d; background: #222b3c; color: #d4deee; }
+.secondary:hover:enabled { background: #303d53; }
+.primary { background: #c6e3a8; color: #1e3113; width: 100%; font-size: 14px; padding: 14px; }
+.primary:hover:enabled { background: #daedc5; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ipa { display: grid; gap: 5px; padding: 15px 0 0; }
+.ipa strong { font-size: 17px; }
+.ipa span, .ipa small { font-size: 12px; color: #95a3ba; }
+.ipa code { color: #bed3a8; font-size: 12px; overflow-wrap: anywhere; }
+.signed-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.status { min-height: 43px; padding: 8px 0 12px; font-size: 12px; line-height: 1.55; color: #a6b4c9; display: flex; gap: 10px; align-items: start; }
+.status.error { color: #f3a6a1; }
+.notice { padding: 12px; background: #243044; color: #bdcee8; margin-bottom: 18px; border-radius: 9px; font-size: 13px; }
+footer { font-size: 11px; color: #7f8da5; line-height: 1.6; margin-top: 15px; }
+.spinner { display: inline-block; flex-shrink: 0; width: 12px; height: 12px; border: 2px solid #45556b; border-top-color: #c6e3a8; border-radius: 50%; animation: rotate 1s linear infinite; margin-top: 3px; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+.overlay { position: fixed; inset: 0; background: #060a12d9; display: grid; place-items: center; padding: 24px; }
+.modal { max-width: 410px; width: 100%; border: 1px solid #45536a; border-radius: 15px; padding: 25px; background: #1b2331; }
+.modal p { font-size: 13px; line-height: 1.6; color: #abb8cd; }
+.modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+.modal-actions .primary { flex: 1; }
+@media (max-width: 650px) { main { padding: 20px 16px; } header { flex-wrap: wrap; } .fields { grid-template-columns: 1fr; gap: 0; } section { padding: 16px; } .section-heading { flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }

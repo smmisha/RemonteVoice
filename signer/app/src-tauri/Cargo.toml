@@ -1,0 +1,33 @@
+[package]
+name = "localsign"
+version = "0.1.0"
+description = "Personal Windows IPA signer prototype"
+edition = "2024"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+idevice = { version = "=0.1.68", features = ["usbmuxd"] }
+isideload = { version = "=0.4.4", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
+keyring = { version = "3.6.3", features = ["windows-native"] }
+futures = "0.3.31"
+tokio = { version = "1.49.0", features = ["sync", "time"] }
+rustls = "0.23.36"
+rootcause = "0.12.1"
+plist = "1.8.0"
+zip = { version = "=4.6.1", default-features = false, features = ["deflate"] }
+sha2 = "0.10"
+url = "2"
+zeroize = "1"
+
+[profile.release]
+strip = true

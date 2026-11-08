@@ -1,0 +1,30 @@
+{
+  "repository": "nab138/iloader",
+  "commit": "80142ff82fc3dfa7312d77ea6151b4d20090151b",
+  "files": [
+    {
+      "path": "src-tauri/src/lib.rs",
+      "sha": "b217fe90539fb81c16a6b6a37002fb31d2615771"
+    },
+    {
+      "path": "src-tauri/src/error.rs",
+      "sha": "51e77427a9749b5bf020b75150ba4590a4bfd6bc"
+    },
+    {
+      "path": "src-tauri/src/operation.rs",
+      "sha": "2d7a0be1e597570b84e5e20d9d69bc95b895bf1b"
+    },
+    {
+      "path": "src-tauri/src/main.rs",
+      "sha": "5f4d79f4f0eed6317fda751dceb1f03850a534cb"
+    },
+    {
+      "path": "src-tauri/build.rs",
+      "sha": "d860e1e6a7cac333c3cc0bc9cb67faf286b07d69"
+    },
+    {
+      "path": "src-tauri/capabilities/default.json",
+      "sha": "c4e131abd1cc22d611108fdbfcb8674942fd2a3c"
+    }
+  ]
+}

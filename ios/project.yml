@@ -1,0 +1,23 @@
+name: RemoteVoice
+options:
+  bundleIdPrefix: dev.remotevoice
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  RemoteVoice:
+    type: application
+    platform: iOS
+    sources:
+      - path: RemoteVoice
+        excludes:
+          - Info.plist
+    info:
+      path: RemoteVoice/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.remotevoice.ios
+        PRODUCT_NAME: RemoteVoice
+        SWIFT_VERSION: "5.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "NO"

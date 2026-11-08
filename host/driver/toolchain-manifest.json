@@ -1,0 +1,35 @@
+[
+  {
+    "package": "microsoft.windows.wdk.x64",
+    "version": "10.0.26100.6584",
+    "archive_sha512": "jhddaBnhMDqt3GVr32RVTtaR0KHmZDjY0JCTMn10OQpk4+AShXCK9QA09vBazp8ni1Mju84qM5SGXfIfnyOJ+g==",
+    "sha256": "c393d03dfb640b5c92f546b32f6770ef68cd3aaf691956e7d66d8e2c28a1b55e",
+    "archive_bytes": 110872506,
+    "uncompressed_bytes": 319156045,
+    "nuget_signature_present": true,
+    "publisher_signature_verified": true,
+    "path": "host\\driver\\.tools\\microsoft.windows.wdk.x64.10.0.26100.6584"
+  },
+  {
+    "package": "microsoft.windows.sdk.cpp.x64",
+    "version": "10.0.26100.6584",
+    "archive_sha512": "+5EwELwOvsSzgGrHDQ0stdaOtYZHGfJ9cvx9bN6D88KzOU+JLsFL1bEKE4K7U0kd99rva/uv1P5aDvQWRCg7OQ==",
+    "sha256": "c29ce7a4641cb37ee32ebb8078cc65cfbabc7025076bcfba869039204b1e960d",
+    "archive_bytes": 52245405,
+    "uncompressed_bytes": 198133705,
+    "nuget_signature_present": true,
+    "publisher_signature_verified": true,
+    "path": "host\\driver\\.tools\\microsoft.windows.sdk.cpp.x64.10.0.26100.6584"
+  },
+  {
+    "package": "microsoft.windows.sdk.cpp",
+    "version": "10.0.26100.6584",
+    "archive_sha512": "KrHXNRT0sr3BqmvVBir0Z/cr1I66MvmZ6YTwBazi0Tz7P356uRCCynjl3/rZwsS0JLYCdD/+flTSN101rcmm+g==",
+    "sha256": "5d31b38205bdd9ac761b4cb39fbbc6b7209b01c11194324afc674d7d119483a0",
+    "archive_bytes": 160036542,
+    "uncompressed_bytes": 682856530,
+    "nuget_signature_present": true,
+    "publisher_signature_verified": true,
+    "path": "host\\driver\\.tools\\microsoft.windows.sdk.cpp.10.0.26100.6584"
+  }
+]

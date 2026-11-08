@@ -471,4 +471,9 @@ class AudioBridge:
             samples = np.repeat(samples, 2, axis=1)
         elif samples.shape[1] > 2:
             samples = samples[:, :2]
-        return np.ascontiguousarray(np.nan_to_num(samples, copy=False), dtype="<f4")
+        # Non-finite endpoint samples become silence. nan_to_num's default
+        # maps +/-Inf to +/-float32 max, which passes protocol validation and
+        # reaches the phone as a full-scale spike.
+        return np.ascontiguousarray(
+            np.nan_to_num(samples, copy=False, nan=0.0, posinf=0.0, neginf=0.0), dtype="<f4"
+        )

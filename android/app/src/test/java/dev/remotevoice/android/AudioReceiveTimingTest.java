@@ -25,14 +25,44 @@ public final class AudioReceiveTimingTest {
         assertTrue(event.contains("packet=2 clock_ns=330000000 gap_ms=330 callback_ms=2 previous_callback_ms=1"));
     }
 
-    @Test public void showsWhenPreviousConsumerExplainsTheGapAndBoundsLogging() {
+    @Test public void showsWhenPreviousConsumerExplainsTheGap() {
         AtomicLong now = new AtomicLong();
         AudioReceiveTiming timing = new AudioReceiveTiming(now::get);
         timing.begin(); now.set(200_000_000);
         assertTrue(timing.finish().contains("callback_ms=200"));
-        now.set(210_000_000); timing.begin(); now.set(211_000_000); assertNull(timing.finish());
+        now.set(210_000_000); timing.begin(); now.set(211_000_000);
+        assertTrue(timing.finish().contains("gap_ms=210 callback_ms=1 previous_callback_ms=200 gap_seq=1"));
         now.set(1_300_000_000); timing.begin(); now.set(1_301_000_000);
-        assertTrue(timing.finish().contains("previous_callback_ms=1"));
+        assertTrue(timing.finish().contains("previous_callback_ms=1 gap_seq=2"));
+    }
+
+    @Test public void everyArrivalGapAtThresholdIsReportedAndNumberedWithoutRateLimit() {
+        AtomicLong now = new AtomicLong();
+        AudioReceiveTiming timing = new AudioReceiveTiming(now::get);
+        timing.begin(); now.set(1_000_000); assertNull(timing.finish());
+        now.set(120_000_000); timing.begin(); now.set(121_000_000);
+        assertTrue(timing.finish().contains("packet=2 clock_ns=120000000 gap_ms=120 callback_ms=1 previous_callback_ms=1 gap_seq=1"));
+        now.set(239_999_999); timing.begin(); now.set(240_000_000);
+        assertNull(timing.finish());
+        now.set(400_000_000); timing.begin(); now.set(401_000_000);
+        assertTrue(timing.finish().contains("packet=4 clock_ns=400000000 gap_ms=160 callback_ms=1 previous_callback_ms=0 gap_seq=2"));
+        now.set(530_000_000); timing.begin(); now.set(531_000_000);
+        assertTrue(timing.finish().contains("packet=5 clock_ns=530000000 gap_ms=130 callback_ms=1 previous_callback_ms=1 gap_seq=3"));
+        assertTrue(timing.maximum().contains("gap_events=3"));
+    }
+
+    @Test public void slowCallbackWithoutArrivalGapStaysRateLimitedAndUnnumbered() {
+        AtomicLong now = new AtomicLong();
+        AudioReceiveTiming timing = new AudioReceiveTiming(now::get);
+        timing.begin(); now.set(40_000_000);
+        String first = timing.finish();
+        assertTrue(first.contains("callback_ms=40"));
+        assertFalse(first.contains("gap_seq="));
+        now.set(50_000_000); timing.begin(); now.set(90_000_000);
+        assertNull(timing.finish());
+        now.set(300_000_000); timing.begin(); now.set(301_000_000);
+        assertTrue(timing.finish().contains("gap_ms=250 callback_ms=1 previous_callback_ms=40 gap_seq=1"));
+        assertTrue(timing.maximum().contains("gap_events=1"));
     }
 
     @Test public void preservesMaximumAndItsReaderIntervalWhenLoggingIsSuppressed() {
@@ -46,9 +76,9 @@ public final class AudioReceiveTimingTest {
         now.set(150_000_000); cpu.set(1_000_001); timing.begin();
         assertNotNull(timing.finish());
         now.set(515_000_000); cpu.set(3_000_001); queue.set(2_000_000);
-        timing.begin(); assertNull(timing.finish());
+        timing.begin(); assertTrue(timing.finish().contains("gap_seq=2"));
         String maximum = timing.maximum();
-        assertTrue(maximum.contains("packet=3 clock_ns=515000000 gap_ns=365000000"));
+        assertTrue(maximum.contains("packet=3 clock_ns=515000000 gap_ns=365000000 gap_events=2"));
         assertTrue(maximum.contains("reader_valid=1 reader_span_ns=365000000 reader_cpu_ns=2000000"));
         assertTrue(maximum.contains("reader_runqueue_ns=2000000 reader_residual_ns=361000000"));
         now.set(525_000_000); timing.begin(); timing.finish();
@@ -67,7 +97,9 @@ public final class AudioReceiveTimingTest {
         now.set(150_000_000); timing.begin(); timing.finish();
         String atClose = timing.maximum();
         timing.freezeMaximum(); timing.freezeMaximum();
-        now.set(1_000_000_000); timing.begin(); timing.finish();
+        assertTrue(atClose.contains("gap_events=1"));
+        now.set(1_000_000_000); timing.begin();
+        assertTrue(timing.finish().contains("gap_seq=0"));
         assertEquals(atClose, timing.maximum());
     }
 

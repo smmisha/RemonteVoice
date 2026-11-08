@@ -7,8 +7,10 @@ final class AudioReceiveTiming {
     private final LongSupplier clock;
     private final ReaderThreadTiming reader;
     private final Object publicationLock = new Object();
-    private boolean frozen;
+    private volatile boolean frozen;
+    static final long GAP_EVENT_NS = 120_000_000L;
     private long packets, previousEntry, previousCallback, entry, gap, lastReport;
+    private volatile long gapEvents;
     private boolean entered, reported;
     private ReaderThreadTiming.Interval readerInterval;
     private volatile Maximum maximum;
@@ -49,6 +51,7 @@ final class AudioReceiveTiming {
         Maximum value = maximum;
         return value == null ? null : "audio_reader_maximum packet=" + value.packet
                 + " clock_ns=" + value.at + " gap_ns=" + value.gap
+                + " gap_events=" + gapEvents
                 + (value.interval == null ? " reader_valid=0" : value.interval.fields());
     }
 
@@ -65,13 +68,18 @@ final class AudioReceiveTiming {
         long callback = Math.max(0, end - entry);
         long previous = previousCallback;
         previousCallback = callback;
-        if (gap < 120_000_000L && callback < 30_000_000L) return null;
-        if (reported && end - lastReport < 1_000_000_000L) return null;
+        boolean gapEvent = gap >= GAP_EVENT_NS;
+        if (!gapEvent && callback < 30_000_000L) return null;
+        // Arrival gaps of 120 ms or more are always reported and numbered, so a reader of the
+        // log can verify that none was lost. Only slow-callback-only events stay rate-limited.
+        // After closing the count is frozen with the maximum; a late event is marked gap_seq=0.
+        if (!gapEvent && reported && end - lastReport < 1_000_000_000L) return null;
         reported = true;
         lastReport = end;
         return "audio_receive_timing packet=" + packets + " clock_ns=" + entry
                 + " gap_ms=" + gap / 1_000_000L + " callback_ms=" + callback / 1_000_000L
                 + " previous_callback_ms=" + previous / 1_000_000L
+                + (gapEvent ? " gap_seq=" + (frozen ? 0 : ++gapEvents) : "")
                 + (readerInterval == null ? "" : readerInterval.fields());
     }
 }

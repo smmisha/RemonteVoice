@@ -99,6 +99,50 @@ class AudioSystemCaptureBufferTests(unittest.TestCase):
             bridge.stop()
 
 
+class AudioSystemCaptureNonFiniteTests(unittest.TestCase):
+    def test_nonfinite_capture_samples_become_silence_without_ending_session(self):
+        websocket = SimpleNamespace(send=AsyncMock())
+        bridge = AudioBridge(
+            "capture", "playback", MagicMock(spec=asyncio.AbstractEventLoop),
+            websocket, asyncio.Lock(), MagicMock(),
+        )
+        first = np.full((FRAME_SAMPLES, SYSTEM_CHANNELS), 0.5, dtype="<f4")
+        first[3, 0], first[7, 1], first[9, 0] = np.nan, np.inf, -np.inf
+        second = np.full((FRAME_SAMPLES, SYSTEM_CHANNELS), -0.25, dtype="<f4")
+        second[0, 0] = np.nan
+        normal = np.full((FRAME_SAMPLES, SYSTEM_CHANNELS), 0.125, dtype="<f4")
+        frames = [first.copy(), second.copy(), normal.copy()]
+        completed = MagicMock()
+
+        def complete_send(timeout):
+            if websocket.send.await_count == len(frames):
+                bridge._stop.set()
+
+        def dispatch_send(coroutine, loop):
+            asyncio.run(coroutine)
+            return completed
+
+        completed.result.side_effect = complete_send
+        try:
+            with patch("remotevoice.audio.sc.get_microphone") as get_microphone, patch(
+                "remotevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch_send
+            ), patch.object(bridge, "_report_failure") as report_failure:
+                recorder = get_microphone.return_value.recorder.return_value.__enter__.return_value
+                recorder.record.side_effect = frames
+                bridge._capture_system_audio()
+
+            report_failure.assert_not_called()
+            expected_first = np.full((FRAME_SAMPLES, SYSTEM_CHANNELS), 0.5, dtype="<f4")
+            expected_first[3, 0] = expected_first[7, 1] = expected_first[9, 0] = 0.0
+            expected_second = np.full((FRAME_SAMPLES, SYSTEM_CHANNELS), -0.25, dtype="<f4")
+            expected_second[0, 0] = 0.0
+            expected = [expected_first, expected_second, normal]
+            self.assertEqual(websocket.send.await_args_list,
+                             [call(bytes((SYSTEM_FRAME,)) + frame.tobytes()) for frame in expected])
+        finally:
+            bridge.stop()
+
+
 class AudioWorkerFailureDiagnosticsTests(unittest.TestCase):
     def bridge(self):
         return AudioBridge(

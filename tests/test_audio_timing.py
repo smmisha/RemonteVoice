@@ -116,8 +116,31 @@ class TimingTests(unittest.TestCase):
             trace=json.loads(timing.flush_trace().read_text('utf-8'))
             self.assertEqual(observer.call_count,3)
             self.assertEqual(trace['tcp_omitted'],1)
+            self.assertEqual(trace['tcp_retention'],{'sample_limit':2,'history_complete':False})
             self.assertEqual([row['frame'] for row in trace['tcp_samples']],[3,4])
             self.assertTrue(all('secret' not in row for row in trace['tcp_samples']))
+
+    def test_explicit_long_history_keeps_transport_statistics_for_the_same_span(self):
+        observer = unittest.mock.Mock(return_value={'rtt_us': 500})
+        with tempfile.TemporaryDirectory() as directory, patch.object(SystemAudioTiming, '_TCP_LIMIT', 2):
+            default = SystemAudioTiming(trace_directory=directory, tcp_observer=observer)
+            self.assertEqual(default._tcp_samples.maxlen, 2)
+            short = SystemAudioTiming(trace_directory=directory, tcp_observer=observer, trace_packet_limit='15')
+            self.assertEqual(short._tcp_samples.maxlen, 2)
+            invalid = SystemAudioTiming(trace_directory=directory, tcp_observer=observer, trace_packet_limit='90001')
+            self.assertEqual(invalid._tcp_samples.maxlen, 2)
+            self.assertEqual(SystemAudioTiming(trace_directory=directory, tcp_observer=observer,
+                trace_packet_limit='90000')._tcp_samples.maxlen, 9000)
+            timing = SystemAudioTiming(trace_directory=directory, tcp_observer=observer, trace_packet_limit='31')
+            self.assertEqual(timing._tcp_samples.maxlen, 4)
+            for start in (0, 150_000_000, 300_000_000, 450_000_000):
+                timing.clock = iter([start+v for v in range(7)]).__next__
+                for phase in timing._PHASES: timing.mark(phase)
+                timing.finish()
+            trace = json.loads(timing.flush_trace().read_text('utf-8'))
+            self.assertEqual(trace['tcp_omitted'], 0)
+            self.assertEqual([row['frame'] for row in trace['tcp_samples']], [1, 2, 3, 4])
+            self.assertEqual(trace['tcp_retention'], {'sample_limit': 4, 'history_complete': True})
 
     def test_failed_transport_statistics_do_not_abort_packet_processing(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -16,6 +16,9 @@ class SystemAudioTiming:
     _TRACE_LIMIT = 6000  # Last minute at 100 packets/s; opt-in scalar rows only.
     _TRACE_MAX_LIMIT = 90000  # Explicit diagnostic history, about 15 minutes.
     _TCP_LIMIT = 600
+    # TCP is sampled at most once per 100 ms, i.e. about once per 10 packets at 100 packets/s.
+    # An explicit long packet history keeps TCP rows for the same span instead of the last minute.
+    _TCP_PACKETS_PER_SAMPLE = 10
     _CAPTURE_SLOW_LIMIT = 128
     _PHASES = ('read_start', 'read_end', 'send_enter', 'send_lock', 'send_done')
     _CAPTURE_NATIVE_COLUMNS = ('frame', 'thread_cpu_ns', 'available_calls', 'available_ns',
@@ -52,7 +55,10 @@ class SystemAudioTiming:
         self._trace_count = 0
         self._trace_flushed = False
         self._tcp_observer = tcp_observer
-        self._tcp_samples = deque(maxlen=self._TCP_LIMIT)
+        self._tcp_limit = self._TCP_LIMIT
+        if self._trace_retention_selection == 'explicit':
+            self._tcp_limit = max(self._TCP_LIMIT, -(-self._trace_limit // self._TCP_PACKETS_PER_SAMPLE))
+        self._tcp_samples = deque(maxlen=self._tcp_limit)
         self._tcp_count = 0
         self._tcp_last = None
         self.thread_clock = time.thread_time_ns
@@ -308,7 +314,9 @@ class SystemAudioTiming:
                               last_retained_frame=self._trace[-1][0],
                               omitted_packets=self._trace_count-len(self._trace)))
             if self._tcp_observer is not None:
-                report.update(tcp_samples=list(self._tcp_samples), tcp_omitted=self._tcp_count-len(self._tcp_samples))
+                report.update(tcp_samples=list(self._tcp_samples), tcp_omitted=self._tcp_count-len(self._tcp_samples),
+                              tcp_retention=dict(sample_limit=self._tcp_limit,
+                                  history_complete=self._tcp_count == len(self._tcp_samples)))
             if self._capture_native_rows is not None:
                 report.update(capture_native_columns=list(self._CAPTURE_NATIVE_COLUMNS),
                     capture_native_rows=list(self._capture_native_rows),

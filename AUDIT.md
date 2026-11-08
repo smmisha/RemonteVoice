@@ -49,7 +49,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A01 — Второй Host отбирает маршруты действующей сессии
 
-**P1 · Воспроизведено · открыто.** Место: `host/remotevoice/host_app.py:143`. Исходная находка: HOST-01.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/host_app.py` (`HostLease` захватывается до TLS, сопряжения и recovery). Тесты: `tests/test_host_lease.py` (`test_second_constructor_cannot_enter_initializer_or_recover_routes`, `test_no_lease_means_no_recovery_mutations`). Исходная находка: HOST-01.
 
 Открытие второго окна вызывает recovery до блокировки владельца. В безопасной пробе все роли живого первого Host были переключены в физические устройства второго.
 
@@ -61,7 +61,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A02 — Остановка теряет ссылки на ещё живые аудиопотоки
 
-**P1 · Воспроизведено · открыто.** Место: `host/remotevoice/audio.py:246`. Исходная находка: HOST-03.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/audio.py` (`stop` сохраняет живые потоки и бросает `AudioStopError`). Тест: `tests/test_audio.py::test_incomplete_stop_retains_workers_and_repeated_stop_confirms_exit`. Исходная находка: HOST-03.
 
 После join(timeout=1) список работников очищается без is_alive. Инертный поток продолжал работать после возврата stop; сервер может начать новый движок на тех же endpoints.
 
@@ -73,7 +73,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A03 — Отказ busy потребляет PIN и заменяет токен без передачи клиенту
 
-**P1 · Воспроизведено · открыто.** Место: `host/remotevoice/server.py:149`. Исходная находка: PROTO-01.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/server.py` (слот занимается до чтения credential, `authenticate` только после подготовки маршрутов). Тест: `tests/test_server.py::test_busy_slot_does_not_read_or_consume_pin`. Исходная находка: PROTO-01.
 
 При занятом слоте authenticate выполняется раньше проверки lock на строке 164. Новый PIN заменяет сохранённый токен, затем клиент закрывается с кодом 4002 до auth_ok. Старый токен и PIN уже недействительны, новый токен клиент не получил.
 
@@ -133,7 +133,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A08 — Ошибка вывода оставляет частично активированный сеанс
 
-**P2 · Воспроизведено · открыто.** Место: `host/remotevoice/host_app.py:867`. Исходная находка: HOST-02.
+**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/host_app.py` (результат `_activate_output_route` проверяется, при отказе `_stop_host` с сохранением первичной ошибки). Тесты: `tests/test_host_lease.py::test_partial_activation_restores_all_and_preserves_primary_error`, `tests/test_host_output_routing.py`. Исходная находка: HOST-02.
 
 Физический mic заглушён, виртуальный вход выбран; _activate_output_route возвращает false, но результат игнорируется. Проба оставила server_running=true и ноль вызовов остановки.
 
@@ -145,7 +145,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A09 — Поздний ответ экрана принимается за ответ нового запроса
 
-**P2 · Воспроизведено · открыто.** Место: `android/app/src/main/java/dev/remotevoice/android/BridgeConnection.java:177`. Исходная находка: CL-06.
+**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `BridgeConnection.java` (`request_id` в screen_request и точная сверка с `screenRequestEpoch`). Тесты: `tests/test_screen_server.py` (эхо request_id на Host), `android/app/src/test/.../BridgeConnectionTest.java` (Gradle 2026-11-08 не запускался). Исходная находка: CL-06.
 
 После timeout запроса 101 разрешён 102; поздний screen_offer 101 передаётся listener как 102. Java probe воспроизвёл stale ticket accepted=true. Host при новой выдаче заменяет ticket, поэтому просмотр получает отказ.
 
@@ -157,7 +157,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A10 — Unicode credential вызывает необработанный TypeError
 
-**P2 · Воспроизведено · открыто.** Место: `host/remotevoice/pairing.py:48`. Исходная находка: PROTO-02.
+**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remotevoice/pairing.py` (`_valid_credential`), `server.py` (отказ учитывается в `PairingAttemptLimiter`). Приёмка: `tests/test_pairing.py::test_malformed_credentials_cannot_change_pairing`. Исходная находка: PROTO-02.
 
 hmac.compare_digest двух str не поддерживает не-ASCII. Проба credential=тест получила TypeError вместо нормального отказа; auth handler не перехватывает этот тип и не отмечает такой отказ в limiter.
 
@@ -169,7 +169,7 @@ hmac.compare_digest двух str не поддерживает не-ASCII. Пр�
 
 ### A11 — NaN проходит протокол и достигает аудиоадаптера
 
-**P2 · Воспроизведено · открыто.** Место: `host/remotevoice/audio.py:307`. Исходная находка: PROTO-03.
+**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remotevoice/protocol.py` (`validate_audio_payload` отклоняет NaN/Inf в обоих направлениях: `submit_phone_audio` и `encode_system_frame`). Приёмка: `tests/test_audio.py::test_nonfinite_microphone_frames_never_reach_queue_or_player`. Исходная находка: PROTO-03.
 
 decode_audio_frame проверяет размер, но не числа. Синтетический кадр из 480 NaN прошёл submit_phone_audio и был передан fake player.play. Реальное устройство и опасный сигнал не использовались.
 
@@ -193,7 +193,7 @@ connectionFailed отменяет socket, но не вызывает invalidateA
 
 ### A13 — Чистые CI-сборки не сохраняют подпись обновления APK
 
-**P2 · Наблюдаемая конфигурация · открыто.** Место: `.github/workflows/android.yml:14`. Исходная находка: D03.
+**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08; требует настройки владельцем.** Место: `android/app/build.gradle` (подпись из `REMOTEVOICE_RELEASE_*` с проверкой сертификата), `.github/workflows/android.yml` (PR и форки собирают только unsigned; job `signed-release-candidate` включается переменной `REMOTEVOICE_ANDROID_RELEASE_ENABLED` и environment `android-release` с секретами ключа). Исходная находка: D03.
 
 Hosted runner собирает debug APK без provisioning стабильного ключа; build.gradle не задаёт проектную signing identity. Новая чистая сборка может не обновиться поверх установленного локального APK. Текущая установленная 0.1.3 этим не объявляется сломанной.
 
@@ -217,7 +217,7 @@ CHK-022 содержит Python-тесты конфигурации, но не i
 
 ### A15 — Рабочий Host запускается диагностическим wrapper без build manifest
 
-**P2 · Наблюдаемая конфигурация · открыто.** Место: `.harness/evidence/run-updated-host.py:36`. Исходная находка: D02.
+**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/deployment.py` (`write_receipt` пишет `runtime.json` с PID, версией и SHA-256 exe или снимка исходников сразу после захвата lease), `host/launcher.py` — единственная точка входа. Тесты: `tests/test_deployment.py`. Исходная находка: D02.
 
 Wrapper подменяет _set_status и автоматически запускает Host; обычный launcher отличается. Текущий процесс/порт прочитаны, но startup receipt не связывает загруженный Python snapshot с artifact hash. Хеш текущего диска не доказывает загруженные ранее байты.
 
@@ -229,7 +229,7 @@ Wrapper подменяет _set_status и автоматически запус�
 
 ### A16 — Текущее локальное дерево не имеет Git baseline
 
-**P2 · Наблюдаемая конфигурация · открыто.** Место: `.git`. Исходная находка: D04.
+**P2 · Наблюдаемая конфигурация · закрыто 2026-11-08.** Место: `.git` (первый коммит `96a2381`, 355 файлов; `.harness` намеренно вне Git по `.gitignore`). Исходная находка: D04.
 
 git ls-files дал0, коммитов нет, все исходники untracked. Исторический GitHub CI не связывает текущие исправления M: с проверенным commit. Пустой git diff не означает отсутствие изменений.
 
@@ -253,7 +253,7 @@ PERM-002/DEC-004 и часть blockers всё ещё описывают отс�
 
 ### A18 — Проверка hash не связывает байты, которые будут подписаны
 
-**P2 · Путь подтверждён кодом · открыто.** Место: `signer/app/src-tauri/src/main.rs:237`. Исходная находка: D06.
+**P2 · Путь подтверждён кодом · исправлено в коде, сверено 2026-11-08.** Место: `signer/app/src-tauri/src/main.rs`, `ipa.rs` (подпись идёт из защищённого snapshot, handle удерживается до конца операции). Rust-тесты: `cargo test --locked` — 20 passed (2026-11-08). Исходная находка: D06.
 
 После проверки hash путь вновь используется после await и открывается библиотекой. Замена файла в этом интервале позволяет подписывать другие байты, чем показанные пользователю. Реальная подмена/подпись не выполнялась.
 
@@ -265,7 +265,7 @@ PERM-002/DEC-004 и часть blockers всё ещё описывают отс�
 
 ### A19 — Нет общей политики дедлайнов и восстановления неизвестной установки
 
-**P2 · Путь подтверждён кодом · открыто.** Место: `signer/app/src-tauri/src/main.rs:220`. Исходная находка: D07.
+**P2 · Путь подтверждён кодом · исправлено в коде, сверено 2026-11-08.** Место: `signer/app/src-tauri/src/operation.rs` (журнал `install-effects`, `InstallEffect::begin`, `pending_install`, `resolve_install_effect`; таймаут оставляет durable gate вместо слепого повтора). Rust-тесты: `cargo test --locked` — 20 passed (2026-11-08). Исходная находка: D07.
 
 busy lock удерживается через device/install await без общей политики отмены/дедлайна. Нет durable effect ID и восстановления unknown после перезапуска. Фактическое зависание внешней библиотеки не воспроизводилось.
 

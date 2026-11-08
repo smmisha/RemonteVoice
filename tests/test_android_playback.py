@@ -33,7 +33,7 @@ class AndroidPlaybackIntegrationTests(unittest.TestCase):
         text = (ROOT / 'android/app/src/main/java/dev/remotevoice/android/PhoneAudioEngine.java').read_text(encoding='utf-8')
         self.assertNotIn('synchronized void offer', text)
         offer = text.split('void offer(float[] samples)', 1)[1].split('synchronized void assertProgress()', 1)[0]
-        entry, playback_offer = offer.split('private void offer(Playback playback, float[] samples, long waitStarted)', 1)
+        entry, playback_offer = offer.split('private void offer(Playback playback, float[] samples, long waitStarted, long packet)', 1)
         before_lock = entry.split('synchronized (this)', 1)[0]
         under_lock = playback_offer.split('synchronized (playback)', 1)[1]
         self.assertIn('long waitStarted = diagnostics ? System.nanoTime() : 0;', before_lock)

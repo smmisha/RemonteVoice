@@ -220,8 +220,8 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         self.safety_class.start.side_effect = SafetyGuardError('helper unavailable')
         with patch('remotevoice.host_app.RemoteVoiceServer') as server, patch(
-            'remotevoice.host_app.messagebox.showerror'
-        ):
+            'remotevoice.host_app.OutputRoute'
+        ), patch('remotevoice.host_app.messagebox.showerror'):
             window._start_host()
         server.assert_not_called()
         self.assertFalse(window.server_running)
@@ -247,6 +247,8 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         old_guard = window._safety_guard
         with patch('remotevoice.host_app.RemoteVoiceServer'), patch(
+            'remotevoice.host_app.OutputRoute'
+        ), patch('remotevoice.host_app.messagebox.showerror'), patch(
             'remotevoice.host_app.threading.Thread'
         ):
             window._start_host()

@@ -162,6 +162,11 @@ class HeadlessHostTests(unittest.TestCase):
         microphones_patch = patch("remotevoice.host_app.sc.all_microphones", return_value=[])
         self.microphones = microphones_patch.start()
         self.addCleanup(microphones_patch.stop)
+        # A real Tk message box blocks forever on a headless CI runner; tests
+        # that assert a dialog still patch this child mock explicitly.
+        messagebox_patch = patch("remotevoice.host_app.messagebox")
+        self.messagebox = messagebox_patch.start()
+        self.addCleanup(messagebox_patch.stop)
 
 
 class HostOutputRoutingTests(HeadlessHostTests):

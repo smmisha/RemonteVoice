@@ -21,6 +21,18 @@ label { display: block; font-size: 12px; color: #b8c3d5; margin-top: 14px; }
 input, select { width: 100%; padding: 11px 12px; border: 1px solid #3a465d; border-radius: 8px; background: #101621; color: #e5e9f2; margin-top: 7px; font: inherit; font-size: 14px; outline: none; }
 input:focus, select:focus { border-color: #b1d792; box-shadow: 0 0 0 2px #b1d79225; }
 input::placeholder { color: #657188; }
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' fill='none' stroke='%23a9b6ca' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+  padding-right: 38px;
+  line-height: 1.25;
+}
+select:disabled { opacity: .55; cursor: default; }
+select::-ms-expand { display: none; }
 button { border: 0; border-radius: 8px; padding: 10px 15px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
 button:focus-visible { outline: 2px solid #c6e3a8; outline-offset: 3px; }
 button:disabled { cursor: default; opacity: .45; }

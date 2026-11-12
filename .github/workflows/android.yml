@@ -22,8 +22,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Prepare Android SDK
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;35.0.0'
       - name: Check client and build unsigned release
         working-directory: android
         run: gradle --no-daemon --no-configuration-cache --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleRelease
@@ -64,8 +65,9 @@ jobs:
         with:
           gradle-version: '8.13'
           cache-disabled: true
-      - name: Prepare Android SDK
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;35.0.0'
       - name: Stage explicitly configured signing material
         id: signing
         env:

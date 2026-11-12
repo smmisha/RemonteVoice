@@ -28,8 +28,15 @@ jobs:
         working-directory: host
 
       - name: Run host tests
-        run: python -m unittest discover -s ..\tests -v
+        timeout-minutes: 15
+        shell: python
         working-directory: host
+        run: |
+          import faulthandler, sys, unittest
+          faulthandler.dump_traceback_later(300, exit=True)
+          suite = unittest.TestLoader().discover(r'..\tests')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          sys.exit(0 if result.wasSuccessful() else 1)
 
       - name: Package Windows host
         # Keep the recovery helper a single independent process, without a

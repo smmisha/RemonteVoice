@@ -173,9 +173,9 @@ class HostOutputRoutingTests(HeadlessHostTests):
     def test_backend_preparation_failure_prevents_server_and_guard_start(self):
         window = self.configured_window()
         self.mixer_configure.side_effect = AudioBackendError('Known component unavailable')
-        with patch('remotevoice.host_app.RemoteVoiceServer') as server, patch(
-            'remotevoice.host_app.messagebox.showerror'
-        ) as error:
+        with patch('remotevoice.host_app.OutputRoute'), patch(
+            'remotevoice.host_app.RemoteVoiceServer'
+        ) as server, patch('remotevoice.host_app.messagebox.showerror') as error:
             window._start_host()
         server.assert_not_called()
         self.safety_class.start.assert_not_called()

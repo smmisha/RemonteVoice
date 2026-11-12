@@ -9,6 +9,7 @@ __pycache__/
 host/build/
 host/dist/
 host/*.spec
+!host/RemoteVoicePair.spec
 ios/RemoteVoice.xcodeproj/
 ios/DerivedData/
 .harness/candidate.json

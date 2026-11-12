@@ -1317,6 +1317,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--autostart", action="store_true", help="Start with saved audio configuration")
     parser.add_argument("--safety-guard", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--driver-backend-lab", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--driver-direct", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--broker-lab-probe", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--broker-lab-synthetic", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--broker-lab-report", type=Path, help=argparse.SUPPRESS)
@@ -1359,7 +1360,10 @@ def main(argv: list[str] | None = None) -> None:
         # A log destination must not prevent audio recovery or launching UI.
         logging.basicConfig(level=logging.INFO)
     try:
-        if options.driver_backend_lab:
+        if options.driver_direct:
+            from .installed_driver_host import InstalledDriverHost
+            app = HostWindow(driver_runtime_factory=lambda: InstalledDriverHost(sink_kind="direct"))
+        elif options.driver_backend_lab:
             from .installed_driver_host import InstalledDriverHost
             app = HostWindow(driver_runtime_factory=InstalledDriverHost)
         else:

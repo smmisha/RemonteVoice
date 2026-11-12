@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Обновляет установленный RemonteVoice новым пакетом, сохраняя настройки.
 .PARAMETER Package

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Устанавливает RemonteVoice в профиль пользователя (без прав администратора).
 .PARAMETER Package

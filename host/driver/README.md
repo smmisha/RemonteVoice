@@ -137,3 +137,38 @@ the source Windows 11 INF and working Host are not changed by that preparation.
    applicable Store acceptance. None is established by this local build.
 
 REQ-037/REQ-038, TASK-053 and clean-Windows acceptance remain open.
+
+## Working development path on the build host (2026-11-13)
+
+Verified on the owner's laptop (Windows 11 10.0.26300, Secure Boot off), not a
+release configuration:
+
+- test signing was enabled with `bcdedit /set testsigning on`; the driver package
+  is staged as `oem22.inf` and the root device is `ROOT\MEDIA\0001` because
+  `ROOT\MEDIA\0000` belongs to Voicemeeter on this host. The manifest of every
+  packaged pair must therefore be built with
+  `--driver-instance 'ROOT\MEDIA\0001'`;
+- the driver backend loads the protected client manifest, which only accepts an
+  installation under `C:\Windows` or `Program Files` with a trusted owner and no
+  write rights for the user (`windows_broker_identity.installation_roots` and
+  `_protected`). A per-user `%LOCALAPPDATA%` installation is rejected by design,
+  so development uses `C:\Program Files\RemonteVoice-Dev` (owner
+  `BUILTIN\Administrators`, `BUILTIN\Users` read+execute);
+- the protected broker still fails its handshake on this prototype: after the
+  greeting the client closes the pipe (`CLOSE`) and the session does not confirm
+  the muted state. Development therefore uses the direct sink
+  (`host/remontevoice/direct_mic_sink.py`, `--driver-direct`), which the Host may
+  only use when it runs with the rights the driver requires (SYSTEM or
+  Administrators, see `src/Main/rv_mic_access.h`);
+- measured: a 440 Hz tone written through `DriverMicWriter` appears on
+  `Набор микрофонов (RemonteVoice Audio Development)` (peak 0.30); with the phone
+  session active and the phone microphone enabled, the same endpoint carried the
+  phone voice (peak 0.755, rms 0.050) while Windows used the driver endpoints as
+  its defaults;
+- rollback: `lab/disable-unused-buses.ps1` reverses the bus disabling,
+  `uninstall-host-driver.ps1` removes the driver package and certificate,
+  `bcdedit /set testsigning off` restores the boot policy, then reboot.
+
+Windows 11 acceptance, a working privileged broker, release signing and a real
+installer remain open; the direct sink is a development path, not the product.
+

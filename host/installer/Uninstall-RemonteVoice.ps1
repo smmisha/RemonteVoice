@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Удаляет RemonteVoice, установленный Install-RemonteVoice.ps1.
 .PARAMETER InstallRoot

@@ -39,7 +39,10 @@ class InstalledDriverHostSnapshot:
 
 
 class InstalledDriverHost:
-    def __init__(self) -> None:
+    def __init__(self, *, sink_kind: str = "broker") -> None:
+        if sink_kind not in ("broker", "direct"):
+            raise ValueError("Unknown microphone sink kind")
+        self._sink_kind = sink_kind
         self._lock = threading.Lock()
         self._control = threading.Lock()
         self._stop = threading.Event()
@@ -49,6 +52,14 @@ class InstalledDriverHost:
         self._construction_unknown = False
         self._error: str | None = None
         self.backend = DriverAudioBackend(self.observe, max_age=0.5)
+
+    def _sink_factory(self, installation):
+        """Protected broker sink by default; direct sink for elevated development runs."""
+        if self._sink_kind == "direct":
+            from .direct_mic_sink import DirectMicSink
+            instance = installation.driver_instance_id
+            return lambda: DirectMicSink(instance)
+        return lambda: BrokerMicSink(open_installed_broker_client)
 
     @property
     def snapshot(self) -> InstalledDriverHostSnapshot:
@@ -114,8 +125,7 @@ class InstalledDriverHost:
                 self._inventory = WindowsDriverEndpointInventory(installation.driver_instance_id)
                 self._check_starting()
                 phase = "runtime construction"
-                self._runtime = DriverBackendRuntime(self._inventory,
-                    lambda: BrokerMicSink(open_installed_broker_client))
+                self._runtime = DriverBackendRuntime(self._inventory, self._sink_factory(installation))
                 self._runtime_clean = False
                 phase = "runtime start"
                 self._check_starting()

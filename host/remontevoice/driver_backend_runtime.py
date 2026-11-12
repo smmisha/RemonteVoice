@@ -168,6 +168,14 @@ class DriverBackendRuntime:
             if self._stop.is_set():
                 raise DriverRuntimeError('Runtime startup cancelled')
             self._sink.start()
+            # A frozen client verifies the protected bundle and connects the pipe
+            # before its first observation; wait for that bounded readiness instead
+            # of demanding the muted confirmation after a fixed one-second start.
+            ready_deadline = time.monotonic() + 5.0
+            while not self._sink.is_available() and time.monotonic() < ready_deadline:
+                if self._stop.is_set():
+                    raise DriverRuntimeError('Runtime startup cancelled')
+                time.sleep(0.02)
             if self._sink.set_enabled(False, timeout=1.0) is not True:
                 raise DriverRuntimeError('Muted broker startup not confirmed')
             status = self._sink.snapshot

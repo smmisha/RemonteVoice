@@ -1368,11 +1368,13 @@ def main(argv: list[str] | None = None) -> None:
         logging.basicConfig(level=logging.INFO)
     try:
         from .installed_driver_host import InstalledDriverHost
-        if options.driver_backend_lab:
-            app = HostWindow(driver_runtime_factory=InstalledDriverHost)
-        else:
-            # The own-driver backend is the product path; Voicemeeter is retired.
+        if options.driver_direct:
+            # Development path: the host itself needs administrator rights.
             app = HostWindow(driver_runtime_factory=lambda: InstalledDriverHost(sink_kind="direct"))
+        else:
+            # Product path: the privileged broker (started by the logon task)
+            # writes to the driver, the host runs as a normal user.
+            app = HostWindow(driver_runtime_factory=InstalledDriverHost)
     except HostLeaseError:
         return
     if options.autostart:

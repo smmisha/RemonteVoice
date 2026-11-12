@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>RemonteVoice driver-mode host (own microphone)</Description>
+    <Description>RemonteVoice privileged audio broker (own microphone)</Description>
     <URI>\RemonteVoice</URI>
   </RegistrationInfo>
   <Triggers>
@@ -37,8 +37,8 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>C:\Program Files\RemonteVoice-Dev\RemonteVoice.exe</Command>
-      <Arguments>--driver-direct --autostart</Arguments>
+      <Command>C:\Program Files\RemonteVoice-Dev\RemonteVoiceBroker.exe</Command>
+      <Arguments></Arguments>
       <WorkingDirectory>C:\Program Files\RemonteVoice-Dev</WorkingDirectory>
     </Exec>
   </Actions>

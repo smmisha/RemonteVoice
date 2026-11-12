@@ -11,8 +11,6 @@ targets:
       - path: RemoteVoice
         excludes:
           - Info.plist
-    info:
-      path: RemoteVoice/Info.plist
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.remotevoice.ios
@@ -21,3 +19,4 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: "NO"
+        INFOPLIST_FILE: RemoteVoice/Info.plist

@@ -1,16 +1,20 @@
 use rootcause::Report;
 use serde::Serialize;
 
-// Only fixed messages cross IPC. Dependency reports may contain account or device data.
+// Only fixed text and Apple numeric auth codes cross IPC. Dependency reports may
+// contain account or device data and are never exported.
 #[derive(Debug, Clone, Serialize)]
 pub struct AppError {
     pub code: &'static str,
-    pub message: &'static str,
+    pub message: String,
 }
 
 impl AppError {
-    pub const fn new(code: &'static str, message: &'static str) -> Self {
-        Self { code, message }
+    pub fn new(code: &'static str, message: impl Into<String>) -> Self {
+        Self {
+            code,
+            message: message.into(),
+        }
     }
 
     pub fn busy() -> Self {
@@ -39,9 +43,15 @@ impl From<Report> for AppError {
                         "account_locked",
                         "Apple заблокировала вход. Проверьте учётную запись на сайте Apple.",
                     ),
-                    SideloadError::AuthWithMessage(_, _) => Self::new(
+                    SideloadError::AuthWithMessage(-20101, _) => Self::new(
                         "apple_auth",
-                        "Apple отклонила вход. Проверьте учётную запись и подтверждение 2FA.",
+                        "Apple отклонила Apple ID или пароль (код -20101).",
+                    ),
+                    SideloadError::AuthWithMessage(code, _) => Self::new(
+                        "apple_auth",
+                        format!(
+                            "Apple отклонила вход (код {code}). Проверьте Apple ID, пароль и 2FA."
+                        ),
                     ),
                     SideloadError::DeveloperError(_, _) => Self::new(
                         "apple_developer",

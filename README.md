@@ -2,6 +2,8 @@
 
 **12 ноября 2026 проект RemoteVoice переименован в RemonteVoice, подписчик — в iReSign.** Изменены bundle ID, applicationId, URL-схема, Python-пакет, имена EXE и профиль Windows. Совместимость со старыми установками, pairing и данными решается отдельно: [RENAME-MIGRATION.md](RENAME-MIGRATION.md).
 
+**GitHub Actions собрал новый iOS IPA:** run `43257038979`, файл `RemonteVoice-iPhone-unsigned.ipa`, bundle ID `dev.remontevoice.ios`, SHA-256 `b23e9080d17519e3d97ba79fa3eae9ee09eb574155b16091b5d5f9d41f5918fa`. Windows и Android workflows также прошли.
+
 **Установлены Windows 0.1.40 и Android 0.1.40 (debug); release APK 0.1.40 подписан локальным ключом.** Открывайте ярлык **RemonteVoice** на рабочем столе: сервер находится внутри Windows-приложения, установленный Voicemeeter Banana запускается автоматически. H.264-кодировщик запускается самим Host только на время разрешённого просмотра. Чат для работы приложения не требуется. Первоначальная установка аудиодрайвера и наличие FFmpeg для видеорежима остаются зависимостями этой локальной версии; при отсутствии кодировщика используется JPEG.
 
 ## Установка и обновление Windows

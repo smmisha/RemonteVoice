@@ -26,10 +26,10 @@ iReSign остаётся прототипом: вход, подпись, уст�
    ожидается `"protectedStorage": true` и подключённое устройство в `devices`.
    Если устройств нет, проверить USB, разблокировку и доверие компьютеру.
 2. Запустить `iReSign.exe`, выбрать iPhone и IPA RemonteVoice. Убедиться, что
-   показаны имя, bundle ID и SHA-256. Текущий файл
-   `RemonteVoice-Install/RemonteVoice-iPhone-unsigned.ipa` — старый артефакт с
-   bundle ID `dev.remotevoice.ios`; для нового RemonteVoice нужен IPA, собранный
-   из `ios/project.yml` после переименования.
+   показаны имя, bundle ID и SHA-256. Канонический файл
+   `RemonteVoice-Install/RemonteVoice-iPhone-unsigned.ipa` собран CI из
+   `ios/project.yml`: bundle ID `dev.remontevoice.ios`, SHA-256
+   `b23e9080d17519e3d97ba79fa3eae9ee09eb574155b16091b5d5f9d41f5918fa`.
 3. Ввести адрес Anisette (`http://127.0.0.1:6969` для локального), Apple Account и
    пароль. Включить «Сохранить сессию для автопродления», если продление должно
    работать после перезапуска. Подтвердить 2FA.

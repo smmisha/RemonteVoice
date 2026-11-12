@@ -48,10 +48,17 @@
 
 ## Что проверено после переименования
 
-- Host: 939 Python-тестов, 0 ошибок.
-- Android: debug-сборка, 163 JVM-теста, lint — 21 предупреждение, без ошибок.
-- iOS: source-inspection checks прошли; Swift/Xcode не собирались на Windows.
-- Host PyInstaller: собран `host/build/dist/RemonteVoicePair`.
+- GitHub Actions: оба workflow завершились успешно; macOS-раннер собрал
+  симулятор, unsigned iPhone app и IPA `RemonteVoice-iPhone-unsigned.ipa`
+  (bundle ID `dev.remontevoice.ios`, SHA-256
+  `b23e9080d17519e3d97ba79fa3eae9ee09eb574155b16091b5d5f9d41f5918fa`).
+- Host: 939 Python-тестов, 0 ошибок; Windows-артефакт `RemonteVoice-Windows`
+  собран на CI.
+- Android: debug-сборка, 163 JVM-теста, lint — 21 предупреждение, без ошибок;
+  CI собрал unsigned release-артефакт.
+- iOS: source-inspection checks прошли; CI выполнил XcodeGen, Xcode build и
+  упаковку IPA.
+- Host PyInstaller: локально собран `host/build/dist/RemonteVoicePair`.
 - iReSign: 39 Rust-тестов, Clippy, frontend build, EXE, Anisette provisioning.
 - Реальная установка на iPhone/Android, новый драйвер и миграция старых данных
   не проверялись.

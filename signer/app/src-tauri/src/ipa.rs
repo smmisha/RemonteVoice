@@ -286,7 +286,7 @@ mod tests {
     }
     fn fixture(entries: &[(&str, &str)]) -> Fixture {
         let path = std::env::temp_dir().join(format!(
-            "localsign-test-{}-{}.ipa",
+            "iresign-test-{}-{}.ipa",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -303,12 +303,12 @@ mod tests {
         writer.finish().unwrap();
         Fixture(path)
     }
-    const INFO: &str = "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>dev.localsign.fixture</string><key>CFBundleName</key><string>Fixture</string><key>CFBundleVersion</key><string>1</string></dict></plist>";
+    const INFO: &str = "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>dev.iresign.fixture</string><key>CFBundleName</key><string>Fixture</string><key>CFBundleVersion</key><string>1</string></dict></plist>";
     #[test]
     fn inspects_valid_ipa() {
         let file = fixture(&[("Payload/Fixture.app/Info.plist", INFO)]);
         let result = inspect(file.0.clone()).unwrap();
-        assert_eq!(result.bundle_id, "dev.localsign.fixture");
+        assert_eq!(result.bundle_id, "dev.iresign.fixture");
         assert_eq!(result.name, "Fixture");
         assert_eq!(result.sha256.len(), 64);
     }
@@ -352,7 +352,7 @@ mod tests {
 
     fn staging_directory() -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "localsign-stage-test-{}-{}-{}",
+            "iresign-stage-test-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -374,7 +374,7 @@ mod tests {
         assert_ne!(snapshot, source.0);
         std::fs::write(&source.0, b"different bytes after user approval").unwrap();
         assert_eq!(fingerprint(&snapshot).unwrap(), approved);
-        assert_eq!(staged.info().bundle_id, "dev.localsign.fixture");
+        assert_eq!(staged.info().bundle_id, "dev.iresign.fixture");
         staged.verify().unwrap();
         drop(staged);
         assert!(!snapshot.exists());

@@ -1,9 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod archive;
+mod autostart;
 mod device;
 mod error;
 mod ipa;
 mod operation;
+mod renewal;
+mod session;
 mod storage;
 
 use error::AppError;
@@ -23,16 +27,33 @@ use tauri_plugin_dialog::DialogExt;
 use tokio::sync::{Mutex as AsyncMutex, oneshot};
 use zeroize::Zeroizing;
 
-type Signer = Sideloader<MaxCertsCallbackBox>;
-type Challenge = Arc<Mutex<Option<oneshot::Sender<String>>>>;
+pub(crate) type Signer = Sideloader<MaxCertsCallbackBox>;
+pub(crate) type Challenge = Arc<Mutex<Option<oneshot::Sender<String>>>>;
 
-#[derive(Default)]
-struct Runtime {
-    busy: AsyncMutex<()>,
-    signer: AsyncMutex<Option<Signer>>,
-    selected_device: Mutex<Option<String>>,
-    selected_ipa: Mutex<Option<Arc<ipa::StagedIpa>>>,
-    challenge: Challenge,
+pub(crate) struct Runtime {
+    pub(crate) busy: AsyncMutex<()>,
+    pub(crate) signer: AsyncMutex<Option<Signer>>,
+    pub(crate) selected_device: Mutex<Option<String>>,
+    pub(crate) selected_ipa: Mutex<Option<Arc<ipa::StagedIpa>>>,
+    pub(crate) challenge: Challenge,
+    pub(crate) renewal: Mutex<renewal::PlanState>,
+    pub(crate) renewal_kick: tokio::sync::Notify,
+    pub(crate) session: Mutex<session::SessionView>,
+}
+
+impl Default for Runtime {
+    fn default() -> Self {
+        Self {
+            busy: AsyncMutex::new(()),
+            signer: AsyncMutex::new(None),
+            selected_device: Mutex::new(None),
+            selected_ipa: Mutex::new(None),
+            challenge: Arc::new(Mutex::new(None)),
+            renewal: Mutex::new(renewal::PlanState::default()),
+            renewal_kick: tokio::sync::Notify::new(),
+            session: Mutex::new(session::SessionView::default()),
+        }
+    }
 }
 
 #[tauri::command]
@@ -45,7 +66,7 @@ async fn list_devices() -> Result<Vec<device::DeviceInfo>, AppError> {
     device::list().await
 }
 
-fn data_directory(app: &tauri::AppHandle) -> Result<std::path::PathBuf, AppError> {
+pub(crate) fn data_directory(app: &tauri::AppHandle) -> Result<std::path::PathBuf, AppError> {
     app.path().app_local_data_dir().map_err(|_| {
         AppError::new(
             "application_storage",
@@ -96,15 +117,23 @@ async fn choose_ipa(
     Ok(Some(info))
 }
 
+fn is_loopback_http(url: &url::Url) -> bool {
+    url.scheme() == "http"
+        && matches!(
+            url.host_str(),
+            Some("127.0.0.1") | Some("localhost") | Some("::1") | Some("[::1]")
+        )
+}
+
 fn anisette_url(value: &str) -> Result<String, AppError> {
     let error = || {
         AppError::new(
             "anisette_url",
-            "Введите HTTPS-адрес своего Anisette-сервиса без пароля, query или fragment.",
+            "Введите HTTPS-адрес своего Anisette-сервиса (или http://127.0.0.1:порт для локального) без пароля, query или fragment.",
         )
     };
     let url = url::Url::parse(value.trim()).map_err(|_| error())?;
-    if url.scheme() != "https"
+    if (url.scheme() != "https" && !is_loopback_http(&url))
         || url.host_str().is_none()
         || !url.username().is_empty()
         || url.password().is_some()
@@ -116,6 +145,13 @@ fn anisette_url(value: &str) -> Result<String, AppError> {
     Ok(url.as_str().trim_end_matches('/').to_string())
 }
 
+fn anisette_check() -> AppError {
+    AppError::new(
+        "anisette_check",
+        "Anisette-сервис недоступен или не завершил провижининг.",
+    )
+}
+
 // Login flow adapted from iloader (MIT). No arbitrary tracing/log files are enabled.
 #[tauri::command]
 async fn login_new(
@@ -124,6 +160,7 @@ async fn login_new(
     email: String,
     password: String,
     anisette_server: String,
+    persist_session: bool,
 ) -> Result<(), AppError> {
     let _busy = state.busy.try_lock().map_err(|_| AppError::busy())?;
     let password = Zeroizing::new(password);
@@ -183,12 +220,55 @@ async fn login_new(
             "Apple не ответила на запрос сессии разработчика.",
         )
     })??;
+    let email_for_view = email.clone();
+    // The password is not stored. Only the technical account session (SPD) can be
+    // kept, explicitly and in Windows Credential Manager, for later renewal.
+    // A storage failure must not discard an already completed Apple login; the
+    // session stays active for this run and the user is told it was not saved.
+    let mut storage_error = None;
+    if persist_session {
+        match account.spd.clone() {
+            Some(spd) => {
+                if session::save_record_async(email.clone(), url.clone(), spd)
+                    .await
+                    .is_err()
+                {
+                    storage_error = Some(AppError::new(
+                        "session_storage",
+                        "Вход выполнен, но сессию не удалось сохранить в защищённом хранилище. Она действует только до перезапуска.",
+                    ));
+                }
+            }
+            None => {
+                storage_error = Some(AppError::new(
+                    "session_storage",
+                    "Вход выполнен, но данные сессии Apple недоступны для сохранения. Сессия действует только до перезапуска.",
+                ));
+            }
+        }
+    } else {
+        session::delete_record_async().await?;
+    }
+    let stored = persist_session && storage_error.is_none();
     let signer = SideloaderBuilder::<MaxCertsCallbackBox>::new(session, email)
-        .machine_name("LocalSign".into())
+        .machine_name("iReSign".into())
         .storage(storage::protected_storage()?)
         .max_certs_behavior(MaxCertsBehavior::Error)
         .build();
     *state.signer.lock().await = Some(signer);
+    {
+        let mut view = state.session.lock().map_err(|_| AppError::busy())?;
+        *view = session::SessionView {
+            status: "active",
+            email: Some(email_for_view),
+            stored,
+        };
+    }
+    session::emit(&app, &state);
+    state.renewal_kick.notify_one();
+    if let Some(error) = storage_error {
+        return Err(error);
+    }
     Ok(())
 }
 
@@ -215,9 +295,17 @@ fn submit_two_factor(state: State<'_, Runtime>, code: String) -> Result<(), AppE
 }
 
 #[tauri::command]
-async fn logout(state: State<'_, Runtime>) -> Result<(), AppError> {
+async fn logout(app: tauri::AppHandle, state: State<'_, Runtime>) -> Result<(), AppError> {
     let _busy = state.busy.try_lock().map_err(|_| AppError::busy())?;
+    // Remove the stored session first. If storage is unavailable, keep the live
+    // session and report the failure instead of silently restoring it next start.
+    session::delete_record_async().await?;
     *state.signer.lock().await = None;
+    {
+        let mut view = state.session.lock().map_err(|_| AppError::busy())?;
+        *view = session::SessionView::default();
+    }
+    session::emit(&app, &state);
     Ok(())
 }
 
@@ -272,6 +360,11 @@ async fn install_ipa(app: tauri::AppHandle, state: State<'_, Runtime>) -> Result
     if result.is_err() {
         // A canceled/failed opaque operation may leave signer internals partially updated.
         *guard = None;
+        session::mark_inactive(&app, &state);
+    } else {
+        // Refresh the stored profile expiry for an app that is already tracked for
+        // renewal. Failure here never turns a successful install into an error.
+        renewal::note_install_success(&app, signer, &udid, &info.bundle_id, &info.sha256).await;
     }
     drop(staged); // Keep the protected snapshot handle alive through the whole library operation.
     result.map(|_| ())
@@ -319,6 +412,12 @@ fn resolve_install_effect(
     )
 }
 
+fn local_data_directory() -> Option<std::path::PathBuf> {
+    let context: tauri::Context<tauri::Wry> = tauri::generate_context!();
+    let identifier = context.config().identifier.clone();
+    std::env::var_os("LOCALAPPDATA").map(|root| std::path::PathBuf::from(root).join(identifier))
+}
+
 fn main() {
     rustls::crypto::aws_lc_rs::default_provider()
         .install_default()
@@ -360,6 +459,89 @@ fn main() {
         }
         return;
     }
+    if args.get(1).is_some_and(|s| s == "--check-renewal") {
+        let Some(directory) = local_data_directory() else {
+            println!(
+                "{}",
+                serde_json::json!({"error": "local_app_data_unavailable"})
+            );
+            std::process::exit(1);
+        };
+        let summary = renewal::check_summary(&directory);
+        println!("{summary}");
+        if summary
+            .get("error")
+            .and_then(serde_json::Value::as_str)
+            .is_some()
+        {
+            std::process::exit(1);
+        }
+        return;
+    }
+    if args.get(1).is_some_and(|s| s == "--check-session") {
+        let stored = session::exists(&session::WindowsStore).unwrap_or(false);
+        println!("{}", serde_json::json!({"stored": stored}));
+        return;
+    }
+    if args.get(1).is_some_and(|s| s == "--check-session-storage") {
+        match session::self_test() {
+            Ok(()) => println!(
+                "{}",
+                serde_json::json!({"saved": true, "roundTrip": true, "cleared": true})
+            ),
+            Err(error) => {
+                println!("{}", serde_json::to_string(&error).unwrap());
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+    if args.get(1).is_some_and(|s| s == "--check-anisette") {
+        let Some(value) = args.get(2) else {
+            println!(
+                "{}",
+                serde_json::json!({"error": "anisette_url", "message": "Укажите URL Anisette-сервиса."})
+            );
+            std::process::exit(1);
+        };
+        let runtime = tokio::runtime::Runtime::new().expect("Runtime unavailable");
+        let result = runtime.block_on(async {
+            let url = anisette_url(value)?;
+            let provider =
+                RemoteV3AnisetteProvider::new(&url, storage::protected_storage()?, "0".to_string())
+                    .map_err(|_| anisette_check())?;
+            let mut account = AppleAccount::builder("iresign-check@example.invalid")
+                .anisette_provider(provider)
+                .build()
+                .await
+                .map_err(|_| anisette_check())?;
+            let client = account.grandslam_client.clone();
+            tokio::time::timeout(
+                Duration::from_secs(120),
+                account.anisette_generator.get_anisette_data(client),
+            )
+            .await
+            .map_err(|_| {
+                AppError::new(
+                    "anisette_timeout",
+                    "Anisette-сервис не завершил провижининг за две минуты.",
+                )
+            })?
+            .map_err(|_| anisette_check())?;
+            Ok::<(), AppError>(())
+        });
+        match result {
+            Ok(()) => println!(
+                "{}",
+                serde_json::json!({"reachable": true, "provisioned": true})
+            ),
+            Err(error) => {
+                println!("{}", serde_json::to_string(&error).unwrap());
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
     if args.get(1).is_some_and(|s| s == "--diagnostics") {
         let runtime = tokio::runtime::Runtime::new().expect("Runtime unavailable");
         let result = runtime.block_on(device::list());
@@ -369,14 +551,33 @@ fn main() {
         };
         println!(
             "{}",
-            serde_json::json!({"product":"LocalSign", "version":env!("CARGO_PKG_VERSION"),
+            serde_json::json!({"product":"iReSign", "version":env!("CARGO_PKG_VERSION"),
             "protectedStorage":storage::protected_storage().is_ok(), "devices":devices, "deviceError":error})
         );
         return;
     }
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_dialog::init())
         .manage(Runtime::default())
+        .setup(|app| {
+            if autostart::launched_by_autostart(&std::env::args().collect::<Vec<_>>())
+                && let Some(window) = app.get_webview_window("main")
+            {
+                let _ = window.minimize();
+            }
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                renewal::initialize(handle).await;
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             protected_storage_available,
             list_devices,
@@ -387,7 +588,18 @@ fn main() {
             logout,
             install_ipa,
             pending_install,
-            resolve_install_effect
+            resolve_install_effect,
+            renewal::renewal_status,
+            renewal::set_renewal_settings,
+            renewal::set_tracked_app_enabled,
+            renewal::track_current_app,
+            renewal::untrack_app,
+            renewal::renew_now,
+            renewal::check_renewals_now,
+            renewal::reset_renewal_plan,
+            renewal::set_autostart,
+            session::session_state,
+            session::forget_stored_session
         ])
         .run(tauri::generate_context!())
         .expect("Application initialization failed");
@@ -402,10 +614,21 @@ mod tests {
             anisette_url("https://example.com/").unwrap(),
             "https://example.com"
         );
+        assert_eq!(
+            anisette_url("http://127.0.0.1:6969/").unwrap(),
+            "http://127.0.0.1:6969"
+        );
+        assert_eq!(
+            anisette_url("http://localhost:6969").unwrap(),
+            "http://localhost:6969"
+        );
+        assert!(anisette_url("http://[::1]:6969").is_ok());
         for url in [
             "",
             "example.com",
             "http://example.com",
+            "http://192.168.1.10:6969",
+            "http://127.0.0.2:6969",
             "https://user:pass@example.com",
             "https://example.com/?token=fixture",
             "https://example.com/#fragment",

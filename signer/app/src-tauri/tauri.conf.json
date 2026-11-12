@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "LocalSign",
+  "productName": "iReSign",
   "version": "0.1.0",
-  "identifier": "dev.remotevoice.localsign",
+  "identifier": "dev.remotevoice.iresign",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://127.0.0.1:1420",
@@ -10,7 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "label": "main", "title": "LocalSign — прототип", "width": 820, "height": 860, "minWidth": 580, "minHeight": 650, "incognito": true }],
+    "windows": [{ "label": "main", "title": "iReSign — прототип", "width": 820, "height": 860, "minWidth": 580, "minHeight": 650, "incognito": true }],
     "security": {
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'; frame-src 'none'"
     }

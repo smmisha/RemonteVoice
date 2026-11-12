@@ -385,7 +385,7 @@ mod tests {
                 .unwrap()
                 .as_nanos();
             let path = std::env::temp_dir().join(format!(
-                "localsign-operation-test-{}-{now}-{}",
+                "iresign-operation-test-{}-{now}-{}",
                 std::process::id(),
                 EFFECT_SEQUENCE.fetch_add(1, Ordering::Relaxed)
             ));

@@ -49,28 +49,39 @@ async fn list_inner() -> Result<Vec<DeviceInfo>, AppError> {
     let devices = mux.get_devices().await.map_err(|_| device_error())?;
     let addr = UsbmuxdAddr::from_env_var().map_err(|_| device_error())?;
     let mut result = Vec::new();
+    let mut first_error = None;
     for device in devices {
         if !matches!(device.connection_type, Connection::Usb) {
             continue;
         }
-        let provider = device.to_provider(addr.clone(), "LocalSign");
-        let mut lockdown = LockdownClient::connect(&provider)
-            .await
-            .map_err(|_| device_error())?;
-        let name = lockdown
-            .get_value(Some("DeviceName"), None)
-            .await
-            .map_err(|_| device_error())?;
-        let version = lockdown
-            .get_value(Some("ProductVersion"), None)
-            .await
-            .map_err(|_| device_error())?;
+        let provider = device.to_provider(addr.clone(), "iReSign");
+        let Ok(mut lockdown) = LockdownClient::connect(&provider).await else {
+            first_error.get_or_insert_with(device_error);
+            continue;
+        };
+        let Ok(name) = lockdown.get_value(Some("DeviceName"), None).await else {
+            first_error.get_or_insert_with(device_error);
+            continue;
+        };
+        let Ok(version) = lockdown.get_value(Some("ProductVersion"), None).await else {
+            first_error.get_or_insert_with(device_error);
+            continue;
+        };
+        let (Some(name), Some(version)) = (name.as_string(), version.as_string()) else {
+            first_error.get_or_insert_with(device_error);
+            continue;
+        };
         result.push(DeviceInfo {
-            name: name.as_string().ok_or_else(device_error)?.to_string(),
-            version: version.as_string().ok_or_else(device_error)?.to_string(),
+            name: name.to_string(),
+            version: version.to_string(),
             udid: device.udid,
             connection_type: "USB",
         });
+    }
+    if result.is_empty()
+        && let Some(error) = first_error
+    {
+        return Err(error);
     }
     Ok(result)
 }
@@ -88,7 +99,7 @@ async fn provider_inner(udid: &str) -> Result<UsbmuxdProvider, AppError> {
         return Err(device_error());
     }
     let addr = UsbmuxdAddr::from_env_var().map_err(|_| device_error())?;
-    Ok(device.to_provider(addr, "LocalSign"))
+    Ok(device.to_provider(addr, "iReSign"))
 }
 
 #[cfg(test)]

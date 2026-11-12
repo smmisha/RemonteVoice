@@ -2,7 +2,7 @@
   "checked_at": "2026-10-08T00:42:11.654681+00:00",
   "repository": "nab138/iloader",
   "commit": "80142ff82fc3dfa7312d77ea6151b4d20090151b",
-  "scope": "Source and licensing preflight for proposed LocalSign Windows utility; no compiled product or device signing verified",
+  "scope": "Source and licensing preflight for proposed iReSign Windows utility; no compiled product or device signing verified",
   "source_version": "2.3.6",
   "files": [
     {

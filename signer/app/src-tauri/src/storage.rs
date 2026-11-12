@@ -1,12 +1,12 @@
 use crate::error::AppError;
 use isideload::util::{keyring_storage::KeyringStorage, storage::SideloadingStorage};
 
-pub const SERVICE: &str = "dev.remotevoice.localsign.v1";
+pub const SERVICE: &str = "dev.remotevoice.iresign.v1";
 
 pub fn protected_storage() -> Result<Box<dyn SideloadingStorage>, AppError> {
     let entry =
         keyring::Entry::new(SERVICE, "availability-probe").map_err(|_| AppError::storage())?;
-    let expected = b"LocalSign storage check";
+    let expected = b"iReSign storage check";
     entry
         .set_secret(expected)
         .map_err(|_| AppError::storage())?;

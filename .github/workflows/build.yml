@@ -47,7 +47,7 @@ jobs:
           launcher.py
         working-directory: host
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteVoice-Windows
           path: host/build/dist/RemoteVoice/
@@ -98,19 +98,19 @@ jobs:
           cd "$RUNNER_TEMP/RemoteVoiceIPA"
           ditto -c -k --sequesterRsrc --keepParent Payload "$RUNNER_TEMP/RemoteVoice-iPhone-unsigned.ipa"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteVoice-iOS-Simulator
           path: ${{ runner.temp }}/RemoteVoiceSimulator/Build/Products/Release-iphonesimulator/RemoteVoice.app
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteVoice-iPhone-unsigned
           path: ${{ runner.temp }}/RemoteVoiceDevice/Build/Products/Release-iphoneos/RemoteVoice.app
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteVoice-iPhone-unsigned-IPA
           path: ${{ runner.temp }}/RemoteVoice-iPhone-unsigned.ipa

@@ -19,10 +19,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.13'
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
         with:
           packages: 'platforms;android-36 build-tools;35.0.0'
       - name: Check client and build unsigned release
@@ -31,12 +31,12 @@ jobs:
       - name: Describe unsigned artifact (not an installable update)
         shell: pwsh
         run: ./android/scripts/signing-manifest.ps1 -ApkPath android/app/build/outputs/apk/release/app-release-unsigned.apk -OutputDirectory android/build/unsigned-release-artifact -Unsigned
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteVoice-Android-unsigned-release-not-installable
           path: android/build/unsigned-release-artifact/
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: RemoteVoice-Android-checks
@@ -61,11 +61,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.13'
           cache-disabled: true
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
         with:
           packages: 'platforms;android-36 build-tools;35.0.0'
       - name: Stage explicitly configured signing material
@@ -116,7 +116,7 @@ jobs:
         env:
           REMOTEVOICE_RELEASE_CERT_SHA256: ${{ vars.REMOTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
         run: ./android/scripts/signing-manifest.ps1 -ApkPath android/app/build/outputs/apk/release/app-release.apk -OutputDirectory android/build/signed-release-artifact
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.signing.outputs.configured == 'true'
         with:
           name: RemoteVoice-Android-signed-release-candidate

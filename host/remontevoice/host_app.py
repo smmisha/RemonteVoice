@@ -97,6 +97,7 @@ class HostWindow(tk.Tk):
         if driver_runtime_factory is not None and not callable(driver_runtime_factory):
             raise TypeError('Trusted inert driver runtime factory required')
         self._driver_runtime_factory = driver_runtime_factory
+        self.driver_mode = driver_runtime_factory is not None
         self._driver_runtime = None
         self._driver_startup_worker = self._driver_cleanup_worker = None
         self._driver_generation = 0
@@ -579,6 +580,8 @@ class HostWindow(tk.Tk):
         return voicemeeter_window
 
     def _refresh_voicemeeter_status(self) -> None:
+        if getattr(self, "driver_mode", False):
+            return
         module = self._voicemeeter_window_module()
         try:
             running = module.running()
@@ -604,6 +607,8 @@ class HostWindow(tk.Tk):
         self._refresh_voicemeeter_status()
 
     def _toggle_voicemeeter_window(self) -> None:
+        if getattr(self, "driver_mode", False):
+            return
         module = self._voicemeeter_window_module()
         try:
             if self.keep_voicemeeter_hidden_var.get():
@@ -615,6 +620,8 @@ class HostWindow(tk.Tk):
         self._refresh_voicemeeter_status()
 
     def _show_voicemeeter(self) -> None:
+        if getattr(self, "driver_mode", False):
+            return
         module = self._voicemeeter_window_module()
         try:
             module.show()
@@ -1360,14 +1367,12 @@ def main(argv: list[str] | None = None) -> None:
         # A log destination must not prevent audio recovery or launching UI.
         logging.basicConfig(level=logging.INFO)
     try:
-        if options.driver_direct:
-            from .installed_driver_host import InstalledDriverHost
-            app = HostWindow(driver_runtime_factory=lambda: InstalledDriverHost(sink_kind="direct"))
-        elif options.driver_backend_lab:
-            from .installed_driver_host import InstalledDriverHost
+        from .installed_driver_host import InstalledDriverHost
+        if options.driver_backend_lab:
             app = HostWindow(driver_runtime_factory=InstalledDriverHost)
         else:
-            app = HostWindow()
+            # The own-driver backend is the product path; Voicemeeter is retired.
+            app = HostWindow(driver_runtime_factory=lambda: InstalledDriverHost(sink_kind="direct"))
     except HostLeaseError:
         return
     if options.autostart:

@@ -381,19 +381,20 @@ def build_ui(window) -> None:
         ("Микрофон ноутбука", window.local_microphone_var, "local_microphone_summary"),
     ], row=1)
 
-    voicemeeter = card(audio.body, "Voicemeeter Banana", row=2)
-    label(voicemeeter, "Нужен только как аудиодвижок: окно держать открытым не обязательно.",
-          row=1, pady=(px(8), px(10)))
-    window.voicemeeter_status = label(voicemeeter, variable=window.voicemeeter_status_var,
-                                      row=2, pady=(0, px(10)))
-    window.keep_voicemeeter_hidden_check = RoundedCheck(
-        voicemeeter, text="Скрывать окно Voicemeeter",
-        variable=window.keep_voicemeeter_hidden_var,
-        command=window._toggle_voicemeeter_window)
-    window.keep_voicemeeter_hidden_check.grid(row=3, column=0, sticky="w", pady=(0, px(10)))
-    window.show_voicemeeter_button = RoundedButton(voicemeeter, "Показать Voicemeeter",
-                                                   window._show_voicemeeter)
-    window.show_voicemeeter_button.grid(row=4, column=0, sticky="w")
+    if not getattr(window, "driver_mode", False):
+        voicemeeter = card(audio.body, "Voicemeeter Banana", row=2)
+        label(voicemeeter, "Нужен только как аудиодвижок: окно держать открытым не обязательно.",
+              row=1, pady=(px(8), px(10)))
+        window.voicemeeter_status = label(voicemeeter, variable=window.voicemeeter_status_var,
+                                          row=2, pady=(0, px(10)))
+        window.keep_voicemeeter_hidden_check = RoundedCheck(
+            voicemeeter, text="Скрывать окно Voicemeeter",
+            variable=window.keep_voicemeeter_hidden_var,
+            command=window._toggle_voicemeeter_window)
+        window.keep_voicemeeter_hidden_check.grid(row=3, column=0, sticky="w", pady=(0, px(10)))
+        window.show_voicemeeter_button = RoundedButton(voicemeeter, "Показать Voicemeeter",
+                                                       window._show_voicemeeter)
+        window.show_voicemeeter_button.grid(row=4, column=0, sticky="w")
 
     detail = ttk.Frame(audio.body)
     detail.grid(row=3, column=0, sticky="ew")

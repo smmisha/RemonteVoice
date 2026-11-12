@@ -10,6 +10,15 @@
 
 `host/installer/` содержит Install/Update/Uninstall скрипты: Install ставит приложение в `%LOCALAPPDATA%\RemonteVoice\app`, создаёт ярлыки и запись удаления; Update заменяет файлы, сохраняя настройки; Uninstall удаляет приложение, ярлыки и запись. Проверены установка, обновление и удаление на тестовой папке. Release-подпись Android включается переменными `REMONTEVOICE_RELEASE_*`; локальный keystore и пароль лежат в `android/keys/` (вне git) — их нужно забэкапить, иначе будущие release-обновления не подпишутся тем же ключом.
 
+### Собственный аудиодрайвер (рабочий путь с 13.11.2026)
+
+- Драйвер `RemonteVoiceAudio` установлен как тестово подписанный: пакет `oem22.inf`, устройство `ROOT\MEDIA\0001`, включён `testsigning`, Secure Boot на машине выключен. Голос телефона приходит на устройство записи `Набор микрофонов (RemonteVoice Audio Development)` — измерено peak 0.755 при включённом микрофоне телефона.
+- Приложение развёрнуто в `C:\Program Files\RemonteVoice-Dev`: защищённая установка обязательна, backend принимает только `Program Files` или `C:\Windows` с владельцем из доверенных и без права записи у пользователя.
+- Запуск — задача планировщика `RemonteVoice` («наивысшие права», при входе); ярлыки на рабочем столе и в «Пуск» запускают её. Драйвер принимает PCM только от администратора/SYSTEM, поэтому прямой режим идёт через задачу и не спрашивает UAC.
+- Voicemeeter выведен из цепочки: его драйвер и устройство удалены, лишние шины исчезли из списков приложений. В коде драйверный backend теперь выбирается по умолчанию, а карточка Voicemeeter в интерфейсе скрыта.
+- Ограничения: тестовая подпись годится только для этой машины; broker-путь (запуск без задачи) пока не проходит первый обмен состоянием; приёмка Windows 11, подпись и установщик остаются открытыми.
+- Откат: `host\driver\lab\uninstall-host-driver.ps1`, затем `bcdedit /set testsigning off` и перезагрузка; задача удаляется командой `schtasks /delete /tn RemonteVoice /f`.
+
 Передача состояния для новой сессии — `.harness/evidence/HANDOVER-2026-11-12.md`.
 
 Windows EXE текущей сборки — `host/build/dist/RemonteVoicePair/RemonteVoice.exe`; исторические пакеты в `host/build` сохранили прежние имена `RemoteVoice`. APK текущей debug-сборки — `android/preview/RemonteVoice-Android-debug.apk`; release APK 0.1.40 сохранён как `android/preview/RemonteVoice-Android-0.1.40-release.apk` (cert SHA-256 `24e7a3bf3ceda0f066213ea97a84d840e717641fedc7cf40683255a2a41f22ed`).

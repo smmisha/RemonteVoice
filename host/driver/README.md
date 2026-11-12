@@ -1,4 +1,4 @@
-# RemoteVoice audio driver — development only
+# RemonteVoice audio driver — development only
 
 This is a development prototype derived from Microsoft's
 `audio/simpleaudiosample`, pinned at
@@ -42,7 +42,7 @@ acceptance remain open. See [the lab record](lab/README.md).
   Actual startup and audio transfer passed in the isolated Windows 10 guest.
 
 The running Host still uses Voicemeeter. A source-only user-mode KS writer now
-exists in `host/remotevoice/driver_mic.py` and `windows_driver_transport.py`; it
+exists in `host/remontevoice/driver_mic.py` and `windows_driver_transport.py`; it
 is not selected by the Host. The production service, Windows 11 acceptance,
 release signing and installer remain open. Do not select this as a ready backend.
 
@@ -89,9 +89,9 @@ $env:RV_REQUIRE_DRIVER_TEST_DLL='1'
 .venv/Scripts/python.exe -m unittest discover -s tests -p 'test_driver_mic*.py' -v
 ```
 
-Output: `host/build/driver-development/RemoteVoiceAudio.sys`, INF, import list,
+Output: `host/build/driver-development/RemonteVoiceAudio.sys`, INF, import list,
 compiler/linker/verifier logs and SHA-256 input/build manifest. The INF refers
-to `RemoteVoiceAudio.cat`; passing `infverif /u` does not create that catalog or
+to `RemonteVoiceAudio.cat`; passing `infverif /u` does not create that catalog or
 certify the driver. A separate local preparation generated an unsigned catalog
 in `host/build/driver-catalog-development`, with an Inf2Cat log and hash manifest.
 Its x64 targets are `10_CO_X64`, `10_NI_X64`, `10_GE_X64`; actual guest/26H2

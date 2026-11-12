@@ -1,13 +1,13 @@
 # Read-only guest feasibility check. No driver, certificate, registry or BCD writes.
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-if ($PSScriptRoot -cne 'C:\RemoteVoice-Control' -or -not (Test-Path -LiteralPath 'C:\RemoteVoice-Reports')) {
+if ($PSScriptRoot -cne 'C:\RemonteVoice-Control' -or -not (Test-Path -LiteralPath 'C:\RemonteVoice-Reports')) {
     throw 'Sandbox-only environment probe'
 }
 $marker = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'probe.json') -Raw | ConvertFrom-Json
 if ($marker.mode -cne 'environment-read-only') { throw 'Unexpected probe scope' }
 [void][guid]::Parse($marker.probe_id)
-$resultPath = 'C:\RemoteVoice-Reports\environment.json'
+$resultPath = 'C:\RemonteVoice-Reports\environment.json'
 if (Test-Path -LiteralPath $resultPath) { throw 'Refusing to overwrite an earlier report' }
 $report = [ordered]@{schema_version=1;probe_id=$marker.probe_id;success=$false;error=$null
     cleanup_confirmed=$true;run_as_system=$false;os_build=$null;enable_lua=$null
@@ -47,7 +47,7 @@ try {
     Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-public static class RemoteVoiceReadOnlyCI {
+public static class RemonteVoiceReadOnlyCI {
     [StructLayout(LayoutKind.Sequential)]
     struct CodeIntegrity { public uint Length; public uint Options; }
     [DllImport("ntdll.dll")]
@@ -61,7 +61,7 @@ public static class RemoteVoiceReadOnlyCI {
     }
 }
 '@
-    $flags = [RemoteVoiceReadOnlyCI]::ReadFlags()
+    $flags = [RemonteVoiceReadOnlyCI]::ReadFlags()
     $report.ci_query_succeeded = $true
     $report.ci_flags = [long]$flags
     $report.ci_enabled = (($flags -band 1) -ne 0)

@@ -14,10 +14,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, build_manifest, parse_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, build_manifest, parse_manifest
 
 HOST = Path(__file__).resolve().parent
-SPEC = HOST / "RemoteVoicePair.spec"
+SPEC = HOST / "RemonteVoicePair.spec"
 
 
 def _hash(path):
@@ -27,15 +27,15 @@ def _hash(path):
 
 def _sources():
     sources = [SPEC, Path(__file__).resolve(), HOST / "broker_launcher.py",
-               HOST / "launcher.py", HOST / "requirements.txt", HOST / "RemoteVoice.ico"]
-    sources += sorted((HOST / "remotevoice").rglob("*.py"))
+               HOST / "launcher.py", HOST / "requirements.txt", HOST / "RemonteVoice.ico"]
+    sources += sorted((HOST / "remontevoice").rglob("*.py"))
     return {path.relative_to(HOST).as_posix(): _hash(path) for path in sources}
 
 
 def build_pair(output, driver_instance_id=r"ROOT\MEDIA\0000", *, runner=None) -> Path:
-    """Create output/dist/RemoteVoicePair and report files; runner is test-only."""
+    """Create output/dist/RemonteVoicePair and report files; runner is test-only."""
     # Validate exact driver policy before any filesystem mutation.
-    from remotevoice.broker_package_manifest import _instance
+    from remontevoice.broker_package_manifest import _instance
     _instance(driver_instance_id)
     version = importlib.metadata.version("pyinstaller")  # Existing installation only.
     sources = _sources()
@@ -57,7 +57,7 @@ def build_pair(output, driver_instance_id=r"ROOT\MEDIA\0000", *, runner=None) ->
             stdout=log, stderr=subprocess.STDOUT, check=True, timeout=1200)
     if _sources() != sources:
         raise RuntimeError("Build sources changed; preserve this output and use a new directory")
-    package = directories["dist"] / "RemoteVoicePair"
+    package = directories["dist"] / "RemonteVoicePair"
     encoded = build_manifest(package, driver_instance_id)
     manifest = parse_manifest(encoded)
     with (package / MANIFEST_NAME).open("xb") as target:

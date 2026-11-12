@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from remotevoice import capture_wait_timing as wait
+from remontevoice import capture_wait_timing as wait
 
 
 MONITORING_AVAILABLE = (
@@ -223,7 +223,7 @@ class CaptureWaitMonitoringTests(unittest.TestCase):
         self.assertFalse(observed.snapshot()['usable'])
 
     def test_busy_slots_remain_owned_by_foreign_tools(self):
-        names = {3: 'remotevoice-test-busy3', 4: 'remotevoice-test-busy4'}
+        names = {3: 'remontevoice-test-busy3', 4: 'remontevoice-test-busy4'}
         try:
             for tool, name in names.items():
                 self.monitor.use_tool_id(tool, name)
@@ -276,7 +276,7 @@ class CaptureWaitMonitoringTests(unittest.TestCase):
 
     def test_lost_slot_ownership_never_frees_the_replacement_tool(self):
         recorder, observed = self.observe()
-        foreign = 'remotevoice-test-replacement'
+        foreign = 'remontevoice-test-replacement'
         with observed:
             tool = observed.tool
             self.monitor.free_tool_id(tool)
@@ -304,7 +304,7 @@ class CaptureWaitMonitoringTests(unittest.TestCase):
 
     def test_ownership_replacement_between_cleanup_steps_cannot_clear_foreign_hooks(self):
         recorder, observed = self.observe()
-        foreign = 'remotevoice-test-replacement-during-cleanup'
+        foreign = 'remontevoice-test-replacement-during-cleanup'
         original_set_local = self.monitor.set_local_events
         original_free = self.monitor.free_tool_id
         original_use = self.monitor.use_tool_id

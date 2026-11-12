@@ -31,18 +31,18 @@ $signatureValid = $LASTEXITCODE -eq 0
 $certificateSha256 = $null
 if ($Unsigned) {
     if ($signatureValid) { throw 'Expected an unsigned release artifact, but APK signature verification succeeded.' }
-    $artifactName = 'RemoteVoice-Android-unsigned-release-not-installable.apk'
+    $artifactName = 'RemonteVoice-Android-unsigned-release-not-installable.apk'
     $artifactKind = 'unsigned-release-not-installable'
 } else {
     if (!$signatureValid) { throw 'Release APK signature verification failed.' }
     $certificateMatches = [regex]::Matches(($verification -join "`n"), '(?m)^Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$')
     if ($certificateMatches.Count -ne 1) { throw 'Expected exactly one verified APK signer certificate.' }
     $certificateSha256 = $certificateMatches[0].Groups[1].Value.ToLowerInvariant()
-    $expectedFingerprint = ([string]$env:REMOTEVOICE_RELEASE_CERT_SHA256).Replace(':', '').Trim().ToLowerInvariant()
+    $expectedFingerprint = ([string]$env:REMONTEVOICE_RELEASE_CERT_SHA256).Replace(':', '').Trim().ToLowerInvariant()
     if ($expectedFingerprint -notmatch '^[0-9a-f]{64}$' -or $certificateSha256 -ne $expectedFingerprint) {
         throw 'APK signer fingerprint does not match the configured release identity.'
     }
-    $artifactName = 'RemoteVoice-Android-signed-release-candidate.apk'
+    $artifactName = 'RemonteVoice-Android-signed-release-candidate.apk'
     $artifactKind = 'signed-release-candidate'
 }
 

@@ -3,15 +3,15 @@ plugins { id 'com.android.application' }
 // Release credentials are supplied only by an explicit owner-controlled build.
 // The local debug keystore/configuration remains independent of this identity.
 def releaseSigningEnvironment = [
-    storeFile: System.getenv('REMOTEVOICE_RELEASE_STORE_FILE'),
-    storePassword: System.getenv('REMOTEVOICE_RELEASE_STORE_PASSWORD'),
-    keyAlias: System.getenv('REMOTEVOICE_RELEASE_KEY_ALIAS'),
-    keyPassword: System.getenv('REMOTEVOICE_RELEASE_KEY_PASSWORD'),
-    certificateSha256: System.getenv('REMOTEVOICE_RELEASE_CERT_SHA256')
+    storeFile: System.getenv('REMONTEVOICE_RELEASE_STORE_FILE'),
+    storePassword: System.getenv('REMONTEVOICE_RELEASE_STORE_PASSWORD'),
+    keyAlias: System.getenv('REMONTEVOICE_RELEASE_KEY_ALIAS'),
+    keyPassword: System.getenv('REMONTEVOICE_RELEASE_KEY_PASSWORD'),
+    certificateSha256: System.getenv('REMONTEVOICE_RELEASE_CERT_SHA256')
 ]
 def hasReleaseSigning = releaseSigningEnvironment.values().any { it != null && !it.isEmpty() }
 if (hasReleaseSigning && !releaseSigningEnvironment.values().every { it != null && !it.isEmpty() }) {
-    throw new GradleException('Incomplete RemoteVoice release signing environment')
+    throw new GradleException('Incomplete RemonteVoice release signing environment')
 }
 def expectedReleaseCertificate = hasReleaseSigning ? releaseSigningEnvironment.certificateSha256
         .replace(':', '').trim().toLowerCase(Locale.ROOT) : null
@@ -20,15 +20,15 @@ if (hasReleaseSigning && !(expectedReleaseCertificate ==~ /[0-9a-f]{64}/)) {
 }
 
 android {
-    namespace 'dev.remotevoice.android'
+    namespace 'dev.remontevoice.android'
     compileSdk 36
     defaultConfig {
-        applicationId 'dev.remotevoice.android'
+        applicationId 'dev.remontevoice.android'
         minSdk 26
         targetSdk 36
         versionCode 41
         versionName '0.1.40'
-        testInstrumentationRunner 'dev.remotevoice.android.ViewerInstrumentation'
+        testInstrumentationRunner 'dev.remontevoice.android.ViewerInstrumentation'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17

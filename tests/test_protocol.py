@@ -1,7 +1,7 @@
 import struct
 import unittest
 
-from remotevoice.protocol import (
+from remontevoice.protocol import (
     FRAME_SAMPLES,
     MIC_FRAME,
     SYSTEM_FRAME,

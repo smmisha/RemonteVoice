@@ -10,9 +10,9 @@ import unittest
 from unittest.mock import patch
 
 from websockets.asyncio.client import connect
-from remotevoice.certificates import load_or_create_identity
-from remotevoice.pairing import PairingManager
-from remotevoice.server import RemoteVoiceServer
+from remontevoice.certificates import load_or_create_identity
+from remontevoice.pairing import PairingManager
+from remontevoice.server import RemonteVoiceServer
 
 
 class LosslessTransportTests(unittest.IsolatedAsyncioTestCase):
@@ -34,13 +34,13 @@ class LosslessTransportTests(unittest.IsolatedAsyncioTestCase):
 
             with socket.socket() as reservation:
                 reservation.bind(('127.0.0.1',0));port=reservation.getsockname()[1]
-            server=RemoteVoiceServer('127.0.0.1',port,'inert','inert',identity,pairing,
+            server=RemonteVoiceServer('127.0.0.1',port,'inert','inert',identity,pairing,
                 lambda status:ready.set() if status=='server_ready' else None,audio_factory=InertAudio)
-            with patch.dict(os.environ,{'REMOTEVOICE_AUDIO_COMPRESSION_EXPERIMENTAL':'1' if enabled else '0'}):
+            with patch.dict(os.environ,{'REMONTEVOICE_AUDIO_COMPRESSION_EXPERIMENTAL':'1' if enabled else '0'}):
                 task=asyncio.create_task(server.run())
                 try:
                     await asyncio.wait_for(ready.wait(),5)
-                    async with connect(f'wss://127.0.0.1:{port}',ssl=tls,server_hostname='remotevoice.local',
+                    async with connect(f'wss://127.0.0.1:{port}',ssl=tls,server_hostname='remontevoice.local',
                                        compression=None,proxy=None) as client:
                         message={'type':'auth','credential':pairing.pairing_pin}
                         if requested:message['system_deflate']=True

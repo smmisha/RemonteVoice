@@ -1,7 +1,7 @@
 """Labels must stay readable without changing the persisted device identity."""
 import unittest
 
-from remotevoice.desktop_ui import device_choices
+from remontevoice.desktop_ui import device_choices
 
 
 class DeviceChoiceTests(unittest.TestCase):

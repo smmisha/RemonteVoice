@@ -1,5 +1,5 @@
 {
-  "observed_at_utc": "2026-10-22T23:01:18.913336+00:00",
+  "observed_at_utc": "2026-11-12T15:59:44.225093+00:00",
   "proof_level": "source-inspection-only",
   "swift": null,
   "swiftc": null,
@@ -23,9 +23,9 @@
     "standalone_probe_delimiters_and_29_cases": true
   },
   "sources": {
-    "ios/RemoteVoice/PairingInfo.swift": "ee6b85706261f033fca22eaa1d670fcd7646dbe5f16fcb69304046d616b311c6",
-    "ios/RemoteVoice/BridgeClient.swift": "a04b9b62adec147575645d07c529d61a766402532834f9ff3b9eb9b1e0486fd8",
-    "ios/RemoteVoice/BridgeModel.swift": "20ca36dbd1721a95fd4e9d40845f4ff3fd8acf2ec50b8cc76f32882de4fbbe4a",
-    "ios/RemoteVoice/PhoneAudioEngine.swift": "5189610b01f49282f801a2df7c6333eee107cde6280b26a026f5e5e4ae0db008"
+    "ios/RemonteVoice/PairingInfo.swift": "5cbacdcc6e0e3a16c35e720fe6ea742883740c58b166e5659e4a1df7735a6338",
+    "ios/RemonteVoice/BridgeClient.swift": "33e880f51cdede0b7ce5d202a4de395238576b07213b5b96eaca323cb3f3d91a",
+    "ios/RemonteVoice/BridgeModel.swift": "661925a8a30da7c2b32d4f1cc23f6df7c9e2f700e4effb7a924a22b702d57c71",
+    "ios/RemonteVoice/PhoneAudioEngine.swift": "5189610b01f49282f801a2df7c6333eee107cde6280b26a026f5e5e4ae0db008"
   }
 }

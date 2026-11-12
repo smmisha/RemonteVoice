@@ -3,14 +3,14 @@ import unittest
 import ctypes as ct
 from types import SimpleNamespace
 
-from remotevoice.windows_broker_manifest import PinnedInstalledManifest, InstalledManifestError, _ManifestApi
-from remotevoice.broker_package_manifest import MAX_MANIFEST_BYTES
-from remotevoice.windows_broker_identity import _Ace, _FileInfo, _Security
+from remontevoice.windows_broker_manifest import PinnedInstalledManifest, InstalledManifestError, _ManifestApi
+from remontevoice.broker_package_manifest import MAX_MANIFEST_BYTES
+from remontevoice.windows_broker_identity import _Ace, _FileInfo, _Security
 
-ROOT = r'c:\program files\remotevoice'
-FILES = {'RemoteVoiceBroker.exe':'a'*64,'RemoteVoice.exe':'b'*64,
+ROOT = r'c:\program files\remontevoice'
+FILES = {'RemonteVoiceBroker.exe':'a'*64,'RemonteVoice.exe':'b'*64,
          '_internal/python314.dll':'c'*64,'_internal/base_library.zip':'d'*64}
-PAYLOAD = {'schema_version':1,'broker':'RemoteVoiceBroker.exe','client':'RemoteVoice.exe',
+PAYLOAD = {'schema_version':1,'broker':'RemonteVoiceBroker.exe','client':'RemonteVoice.exe',
            'driver_instance_id':r'ROOT\MEDIA\0000','files':FILES}
 TRUST = _Security('S-1-5-18',True,(_Ace(0,0,0x10000000,'S-1-5-32-544'),))
 
@@ -18,7 +18,7 @@ TRUST = _Security('S-1-5-18',True,(_Ace(0,0,0x10000000,'S-1-5-32-544'),))
 class Api:
     def __init__(self):
         self.opened={};self.closed=[];self.reads=[];self.close_fails=False
-        self.image=ROOT+r'\remotevoice.exe';self.writable_dir=None
+        self.image=ROOT+r'\remontevoice.exe';self.writable_dir=None
         self.extra_file=False;self.wrong_hash=False
         self.files=dict(FILES)
     def open_process(self,pid):
@@ -38,8 +38,8 @@ class Api:
         self.reads.append(self.opened[handle][0]);return json.dumps({**PAYLOAD,'files':self.files}).encode()
     def children(self,path):
         if path==ROOT:
-            result=[('RemoteVoiceBroker.exe',False),('RemoteVoice.exe',False),
-                    ('remotevoice-installation.json',False),('_internal',True)]
+            result=[('RemonteVoiceBroker.exe',False),('RemonteVoice.exe',False),
+                    ('remontevoice-installation.json',False),('_internal',True)]
             if self.extra_file:result.append(('extra.dll',False))
             return result
         return [('python314.dll',False),('base_library.zip',False)]
@@ -60,7 +60,7 @@ class InstalledManifestTests(unittest.TestCase):
         self.assertFalse(owner.cleanup_confirmed)
         self.assertEqual(installation.client_executable,api.image)
         self.assertEqual(len(installation.trusted_files),4)
-        self.assertEqual(api.reads,[ROOT+r'\remotevoice-installation.json'])
+        self.assertEqual(api.reads,[ROOT+r'\remontevoice-installation.json'])
         self.assertEqual(api.closed,[])
         owner.close()
         self.assertFalse(owner.is_verified);self.assertTrue(owner.cleanup_confirmed)
@@ -68,7 +68,7 @@ class InstalledManifestTests(unittest.TestCase):
         with self.assertRaises(InstalledManifestError):owner.load()
 
     def test_workspace_or_wrong_executable_fails_before_manifest_read(self):
-        for image in (r'C:\Python314\python.exe',r'C:\Users\User\RemoteVoice.exe'):
+        for image in (r'C:\Python314\python.exe',r'C:\Users\User\RemonteVoice.exe'):
             api=Api();api.image=image;owner=PinnedInstalledManifest('client',api=api)
             with self.assertRaises(InstalledManifestError):owner.load()
             self.assertEqual(api.reads,[]);self.assertTrue(owner.cleanup_confirmed)

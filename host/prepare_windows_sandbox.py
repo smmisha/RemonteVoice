@@ -9,7 +9,7 @@ from pathlib import Path
 import uuid
 import xml.etree.ElementTree as ET
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, MAX_MANIFEST_BYTES, build_manifest, parse_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, MAX_MANIFEST_BYTES, build_manifest, parse_manifest
 
 SCRIPT = Path(__file__).resolve().parent / "sandbox" / "smoke.ps1"
 ENVIRONMENT_SCRIPT = SCRIPT.with_name("inspect_environment.ps1")
@@ -59,12 +59,12 @@ def prepare_sandbox(package: Path, output: Path) -> Path:
         "manifest_sha256": hashlib.sha256(encoded).hexdigest(),
         "files": dict(manifest.files),
     }, sort_keys=True), "utf-8")
-    path = output / "RemoteVoice-Smoke.wsb"
-    _configuration(path, ((package, r"C:\RemoteVoice-Package", True),
-                          (control, r"C:\RemoteVoice-Control", True),
-                          (reports, r"C:\RemoteVoice-Reports", False)),
+    path = output / "RemonteVoice-Smoke.wsb"
+    _configuration(path, ((package, r"C:\RemonteVoice-Package", True),
+                          (control, r"C:\RemonteVoice-Control", True),
+                          (reports, r"C:\RemonteVoice-Reports", False)),
                    r'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass '
-                   r'-File "C:\RemoteVoice-Control\smoke.ps1"')
+                   r'-File "C:\RemonteVoice-Control\smoke.ps1"')
     (output / "preparation.json").write_text(json.dumps({
         "schema_version": 1, "prepared_only": True, "started": False,
         "memory_in_mb": 2048, "package": str(package),
@@ -89,9 +89,9 @@ def prepare_environment(output: Path) -> Path:
     (control / ENVIRONMENT_SCRIPT.name).write_bytes(script)
     marker = dict(mode="environment-read-only", probe_id=str(uuid.uuid4()))
     (control / "probe.json").write_text(json.dumps(marker), "utf-8")
-    path = output / "RemoteVoice-Environment.wsb"
-    _configuration(path, ((control, r"C:\RemoteVoice-Control", True),
-                          (reports, r"C:\RemoteVoice-Reports", False)))
+    path = output / "RemonteVoice-Environment.wsb"
+    _configuration(path, ((control, r"C:\RemonteVoice-Control", True),
+                          (reports, r"C:\RemonteVoice-Reports", False)))
     (output / "preparation.json").write_text(json.dumps(dict(
         schema_version=1, prepared_only=True, started=False, memory_in_mb=2048,
         mode=marker["mode"], probe_id=marker["probe_id"],

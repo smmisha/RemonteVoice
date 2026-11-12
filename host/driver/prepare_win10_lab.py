@@ -34,8 +34,8 @@ def main() -> None:
     binary = ROOT / manifest["binary"]
     if sha(binary) != manifest["binary_sha256"]:
         raise RuntimeError("Kernel binary no longer matches build manifest")
-    original = (HERE / "RemoteVoiceAudio.inf").read_bytes()
-    if original != (BUILD / "RemoteVoiceAudio.inf").read_bytes():
+    original = (HERE / "RemonteVoiceAudio.inf").read_bytes()
+    if original != (BUILD / "RemonteVoiceAudio.inf").read_bytes():
         raise RuntimeError("Built INF no longer matches source")
     if original.count(b"NTamd64.10.0...22000") != 2:
         raise RuntimeError("Expected exactly two Windows 11 INF decorations")
@@ -47,12 +47,12 @@ def main() -> None:
         if not tool.is_file():
             raise RuntimeError(f"Missing approved local tool: {tool}")
     OUT.mkdir(exist_ok=False)  # Never overwrite an existing or signed package.
-    (OUT / "RemoteVoiceAudio.sys").write_bytes(binary.read_bytes())
-    inf = OUT / "RemoteVoiceAudio.inf"
+    (OUT / "RemonteVoiceAudio.sys").write_bytes(binary.read_bytes())
+    inf = OUT / "RemonteVoiceAudio.inf"
     inf.write_bytes(derived)
     (OUT / "inf-derivation.diff").write_text("".join(difflib.unified_diff(
         original.decode().splitlines(keepends=True), derived.decode().splitlines(keepends=True),
-        fromfile="source/RemoteVoiceAudio.inf", tofile="windows10-lab/RemoteVoiceAudio.inf")), "utf-8", newline="")
+        fromfile="source/RemonteVoiceAudio.inf", tofile="windows10-lab/RemonteVoiceAudio.inf")), "utf-8", newline="")
     commands = {
         "infverif": [str(verifier), "/u", str(inf)],
         "inf2cat": [str(catalog_tool), f"/driver:{OUT}", "/os:10_VB_X64", "/verbose"],
@@ -62,7 +62,7 @@ def main() -> None:
         (OUT / f"{name}.log").write_bytes(result.stdout + result.stderr)
         if result.returncode:
             raise RuntimeError(f"{name} exit {result.returncode}; see output log")
-    files = ("RemoteVoiceAudio.sys", "RemoteVoiceAudio.inf", "RemoteVoiceAudio.cat")
+    files = ("RemonteVoiceAudio.sys", "RemonteVoiceAudio.inf", "RemonteVoiceAudio.cat")
     receipt = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "purpose": "Experimental Windows 10 >=19041 x64 lab attempt only",

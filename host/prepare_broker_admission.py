@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 import uuid
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, build_manifest, parse_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, build_manifest, parse_manifest
 
 SCRIPT = Path(__file__).resolve().parent / 'driver/lab/Invoke-HostAdmission.ps1'
 
@@ -34,7 +34,7 @@ def prepare(package, output, *, label, program_files=None):
     files = dict(manifest.files)
     files[MANIFEST_NAME] = hashlib.sha256(encoded).hexdigest()
     plan = dict(schema_version=1, operation_id=str(uuid.uuid4()), label=label,
-        source=str(package), target=ntpath.join(program_files, 'RemoteVoice-AdmissionLab-' + label),
+        source=str(package), target=ntpath.join(program_files, 'RemonteVoice-AdmissionLab-' + label),
         files=files, broker_args=['--lab-muted-only'], client_args=['--broker-lab-probe'],
         soft_stop_seconds=60, hard_exit_seconds=90, driver_install=False,
         microphone_enable=False, audio_route_changes=False,

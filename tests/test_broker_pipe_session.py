@@ -5,9 +5,9 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from remotevoice.broker_pipe_session import BrokerPipeSession, BrokerSessionError
-from remotevoice.driver_mic import MicWriterState
-from remotevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
+from remontevoice.broker_pipe_session import BrokerPipeSession, BrokerSessionError
+from remontevoice.driver_mic import MicWriterState
+from remontevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
 
 HELLO = b'RVMB\x01\x03\x00\x00'
 CLOSE = b'RVMB\x01\x04\x00\x00'
@@ -99,7 +99,7 @@ class BrokerPipeSessionTests(unittest.TestCase):
                     session._worker_failed.set()
                 if condition == 'finished':
                     session._finish.set()
-                with patch('remotevoice.broker_pipe_session.time.monotonic', return_value=10.0):
+                with patch('remontevoice.broker_pipe_session.time.monotonic', return_value=10.0):
                     flags, _ = struct.unpack('<BQ', session._status_payload())
                     self.assertEqual(session.is_available(), condition == 'fresh')
                 self.assertEqual(flags, 1 if condition == 'fresh' else 0)
@@ -194,7 +194,7 @@ class BrokerPipeSessionTests(unittest.TestCase):
         verifier.forget_pipe_peer.side_effect = OSError('pending identity')
         broker = Mock(cleanup_confirmed=True)
         broker.poll.side_effect = fatal
-        with patch('remotevoice.broker_pipe_session.MicBroker', return_value=broker):
+        with patch('remontevoice.broker_pipe_session.MicBroker', return_value=broker):
             with self.assertRaises(FatalPoll) as raised:
                 session.serve(threading.Event())
         self.assertIs(raised.exception, fatal)
@@ -230,7 +230,7 @@ class BrokerPipeSessionTests(unittest.TestCase):
                 triggered.set()
                 raise fatal
         broker.poll.side_effect = poll
-        with patch('remotevoice.broker_pipe_session.MicBroker', return_value=broker):
+        with patch('remontevoice.broker_pipe_session.MicBroker', return_value=broker):
             with self.assertRaises(FatalPoll) as raised:
                 session.serve(threading.Event())
         self.assertIs(raised.exception, fatal)
@@ -249,7 +249,7 @@ class BrokerPipeSessionTests(unittest.TestCase):
         verifier.forget_pipe_peer.side_effect = OSError('pending identity')
         broker = Mock(cleanup_confirmed=True)
         broker.shutdown.side_effect = fatal
-        with patch('remotevoice.broker_pipe_session.MicBroker', return_value=broker):
+        with patch('remontevoice.broker_pipe_session.MicBroker', return_value=broker):
             with self.assertRaises(FatalShutdown) as raised:
                 session.serve(threading.Event())
         self.assertIs(raised.exception, fatal)

@@ -3,7 +3,7 @@ import threading
 import unittest
 from unittest.mock import MagicMock, patch
 
-from remotevoice import voicemeeter_routes as routes
+from remontevoice import voicemeeter_routes as routes
 from test_voicemeeter_routes import FakeApi, FakeClock
 
 
@@ -272,7 +272,7 @@ class VoicemeeterSessionTests(unittest.TestCase):
         api.VBVMR_IsParametersDirty.side_effect = [-2, -2, -2, 1, 1, 1]
         session = routes._MixerSession(lambda: api)
         clock = FakeClock()
-        with self.assertLogs('remotevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
+        with self.assertLogs('remontevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
             session.configure_routes()
             session.close()
         text = '\n'.join(logs.output)
@@ -287,7 +287,7 @@ class VoicemeeterSessionTests(unittest.TestCase):
         api.VBVMR_IsParametersDirty.return_value = -2
         session = routes._MixerSession(lambda: api)
         clock = FakeClock()
-        with self.assertLogs('remotevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
+        with self.assertLogs('remontevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
             with self.assertRaises(routes.VoicemeeterRoutingError):
                 session.configure_routes()
             session.close()
@@ -302,7 +302,7 @@ class VoicemeeterSessionTests(unittest.TestCase):
         api.VBVMR_IsParametersDirty.return_value = -2
         api.VBVMR_RunVoicemeeter.side_effect = OSError('PRIVATE PATH AND DEVICE DATA')
         session = routes._MixerSession(lambda: api)
-        with self.assertLogs('remotevoice.voicemeeter_routes', level='INFO') as logs:
+        with self.assertLogs('remontevoice.voicemeeter_routes', level='INFO') as logs:
             with self.assertRaises(routes.VoicemeeterRoutingError) as error:
                 session.configure_routes()
             session.close()
@@ -328,7 +328,7 @@ class VoicemeeterSessionTests(unittest.TestCase):
         api.VBVMR_IsParametersDirty.side_effect = [-2, -1]
         session = routes._MixerSession(lambda: api)
         clock = FakeClock()
-        with self.assertLogs('remotevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
+        with self.assertLogs('remontevoice.voicemeeter_routes', level='INFO') as logs, patch.object(routes, 'time', clock):
             with self.assertRaises(routes.VoicemeeterRoutingError) as error:
                 session.configure_routes()
             session.close()

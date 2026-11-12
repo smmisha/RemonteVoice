@@ -233,7 +233,7 @@ static
 SIMPLEAUDIOSAMPLE_PROPERTY_ITEM PropertiesMicArrayWaveFilter[] =
 {
     {
-        { &KSPROPSETID_RemoteVoiceMic, 0, KSPROPERTY_TYPE_SET, PropertyHandler_WaveFilter },
+        { &KSPROPSETID_RemonteVoiceMic, 0, KSPROPERTY_TYPE_SET, PropertyHandler_WaveFilter },
         0, 0, NULL, NULL, NULL, NULL, 0
     },
     {

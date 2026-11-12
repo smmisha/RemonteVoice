@@ -3,7 +3,7 @@ import gc
 import unittest
 import weakref
 
-from remotevoice import windows_broker_pipe as pipe
+from remontevoice import windows_broker_pipe as pipe
 
 
 class FakeApi:
@@ -122,7 +122,7 @@ class NativePipeTests(unittest.TestCase):
             item.close()
 
     def server(self):
-        server = pipe.NativePipeServer("RemoteVoice-unit", "S-1-5-5-1-42", api=self.api)
+        server = pipe.NativePipeServer("RemonteVoice-unit", "S-1-5-5-1-42", api=self.api)
         self.objects.append(server)
         return server
 
@@ -134,7 +134,7 @@ class NativePipeTests(unittest.TestCase):
     def test_server_has_first_single_local_byte_instance_and_narrow_exact_logon_acl(self):
         server = self.server()
         name, access, mode, instances, size, sddl = self.api.created[0]
-        self.assertEqual(name, "\\\\.\\pipe\\RemoteVoice-unit")
+        self.assertEqual(name, "\\\\.\\pipe\\RemonteVoice-unit")
         self.assertEqual(access, pipe.PIPE_ACCESS_DUPLEX | pipe.FILE_FLAG_FIRST_PIPE_INSTANCE | pipe.FILE_FLAG_OVERLAPPED)
         self.assertEqual(mode, pipe.PIPE_REJECT_REMOTE_CLIENTS)  # byte read/type/wait modes are zero.
         self.assertEqual((instances, size), (1, 1928))
@@ -145,9 +145,9 @@ class NativePipeTests(unittest.TestCase):
         self.assertGreater(server.handle, 2**32)
 
     def test_name_and_sid_injection_rejected_before_native_api(self):
-        for name in ("other", "RemoteVoice-", "RemoteVoice-a\\nested", "RemoteVoice-a\0b",
-                     "\\\\server\\pipe\\RemoteVoice-a", "\\\\.\\pipe\\RemoteVoice-a/b",
-                     "RemoteVoice-a.b", "RemoteVoice-" + "a" * 65, None):
+        for name in ("other", "RemonteVoice-", "RemonteVoice-a\\nested", "RemonteVoice-a\0b",
+                     "\\\\server\\pipe\\RemonteVoice-a", "\\\\.\\pipe\\RemonteVoice-a/b",
+                     "RemonteVoice-a.b", "RemonteVoice-" + "a" * 65, None):
             with self.assertRaises(ValueError):
                 pipe.NativePipeServer(name, "S-1-5-5-1-42", api=self.api)
             with self.assertRaises(ValueError):
@@ -155,7 +155,7 @@ class NativePipeTests(unittest.TestCase):
         for sid in ("S-1-5-18", "S-1-5-21-1", "S-1-5-5-01-2", "S-1-5-5-1-4294967296",
                     "S-1-5-5-1-2)(A;;GA;;;WD)", "S-1-5-5-1-2\0", None):
             with self.assertRaises(ValueError):
-                pipe.NativePipeServer("RemoteVoice-test", sid, api=self.api)
+                pipe.NativePipeServer("RemonteVoice-test", sid, api=self.api)
         self.assertEqual(self.api.created, [])
         self.assertEqual(self.api.opened, [])
 
@@ -283,7 +283,7 @@ class NativePipeTests(unittest.TestCase):
             with self.assertRaises(expected) as raised:
                 connection.read_exact(8, 0.1)
             self.assertTrue(connection.failed)
-            self.assertNotIn("RemoteVoice-unit", str(raised.exception))
+            self.assertNotIn("RemonteVoice-unit", str(raised.exception))
             self.assertFalse(connection.cleanup_pending)
             connection.close()
 
@@ -327,15 +327,15 @@ class NativePipeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 connection.read_exact(8, timeout)
             with self.assertRaises(ValueError):
-                pipe.NativePipeClient.connect("RemoteVoice-unit", timeout, api=self.api)
+                pipe.NativePipeClient.connect("RemonteVoice-unit", timeout, api=self.api)
         self.assertEqual(self.api.starts, [])
         self.assertEqual(self.api.opened, [])
 
     def test_client_uses_identification_sqos_specific_rights_and_no_create_instance(self):
-        connection = pipe.NativePipeClient.connect("\\\\.\\pipe\\RemoteVoice-client", 0.2, api=self.api)
+        connection = pipe.NativePipeClient.connect("\\\\.\\pipe\\RemonteVoice-client", 0.2, api=self.api)
         self.objects.append(connection)
         name, access, flags = self.api.opened[0]
-        self.assertEqual(name, "\\\\.\\pipe\\RemoteVoice-client")
+        self.assertEqual(name, "\\\\.\\pipe\\RemonteVoice-client")
         self.assertEqual(access, pipe.CLIENT_ACCESS)
         self.assertEqual(access & 4, 0)
         self.assertEqual(flags, pipe.FILE_FLAG_OVERLAPPED | pipe.SECURITY_SQOS_PRESENT | pipe.SECURITY_IDENTIFICATION)
@@ -343,11 +343,11 @@ class NativePipeTests(unittest.TestCase):
     def test_client_busy_wait_is_bounded_and_message_pipe_is_rejected_and_closed(self):
         self.api.open_results = [(None, 231)]
         with self.assertRaises(pipe.PipeTimeoutError):
-            pipe.NativePipeClient.connect("RemoteVoice-unit", 0.1, api=self.api)
+            pipe.NativePipeClient.connect("RemonteVoice-unit", 0.1, api=self.api)
         self.assertEqual(len(self.api.opened), 1)
         self.api.flags = 4
         with self.assertRaises(pipe.PipeError):
-            pipe.NativePipeClient.connect("RemoteVoice-unit", 0.1, api=self.api)
+            pipe.NativePipeClient.connect("RemonteVoice-unit", 0.1, api=self.api)
         self.assertIn(self.api.pipe_handle, self.api.closed)
 
     def test_event_and_handle_close_failures_keep_ownership_for_retry(self):

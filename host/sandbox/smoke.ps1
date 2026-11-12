@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 if ($env:USERNAME -cne 'WDAGUtilityAccount') { throw 'Sandbox-only smoke script' }
-$resultPath = 'C:\RemoteVoice-Reports\result.json'
+$resultPath = 'C:\RemonteVoice-Reports\result.json'
 if (Test-Path -LiteralPath $resultPath) { throw 'Refusing to overwrite an earlier report' }
 $report = [ordered]@{
     schema_version = 1; success = $false; error = $null
@@ -37,12 +37,12 @@ function Invoke-BoundedCase([string]$Name, [string]$Executable, [string]$Argumen
     if (-not $clean) { $report.cleanup_confirmed = $false }
 }
 try {
-    $expected = Get-Content -LiteralPath 'C:\RemoteVoice-Control\expected.json' -Raw | ConvertFrom-Json
-    $work = Join-Path $env:LOCALAPPDATA ('RemoteVoice-Smoke-' + [guid]::NewGuid().ToString('N'))
+    $expected = Get-Content -LiteralPath 'C:\RemonteVoice-Control\expected.json' -Raw | ConvertFrom-Json
+    $work = Join-Path $env:LOCALAPPDATA ('RemonteVoice-Smoke-' + [guid]::NewGuid().ToString('N'))
     [void](New-Item -ItemType Directory -Path $work)
-    Copy-Item -LiteralPath 'C:\RemoteVoice-Package' -Destination (Join-Path $work 'package') -Recurse
+    Copy-Item -LiteralPath 'C:\RemonteVoice-Package' -Destination (Join-Path $work 'package') -Recurse
     $package = Join-Path $work 'package'
-    $manifest = Join-Path $package 'remotevoice-installation.json'
+    $manifest = Join-Path $package 'remontevoice-installation.json'
     if ((Get-FileHash -LiteralPath $manifest -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expected.manifest_sha256) {
         throw 'Manifest mismatch'
     }
@@ -59,7 +59,7 @@ try {
     Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-public static class RemoteVoiceSandboxToken {
+public static class RemonteVoiceSandboxToken {
     [DllImport("kernel32.dll")] static extern IntPtr GetCurrentProcess();
     [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
     [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenProcessToken(IntPtr p, uint a, out IntPtr t);
@@ -87,14 +87,14 @@ public static class RemoteVoiceSandboxToken {
 }
 '@
     $report.cleanup_confirmed = $false
-    $token = [RemoteVoiceSandboxToken]::Read()
+    $token = [RemonteVoiceSandboxToken]::Read()
     $report.cleanup_confirmed = $true
     $report.account_token_type = $token[0]
     $report.linked_token_present = ($token[1] -eq 1)
-    Invoke-BoundedCase 'broker_workspace' (Join-Path $package 'RemoteVoiceBroker.exe') '' 1
-    Invoke-BoundedCase 'broker_policy' (Join-Path $package 'RemoteVoiceBroker.exe') '--policy untrusted.json' 64
+    Invoke-BoundedCase 'broker_workspace' (Join-Path $package 'RemonteVoiceBroker.exe') '' 1
+    Invoke-BoundedCase 'broker_policy' (Join-Path $package 'RemonteVoiceBroker.exe') '--policy untrusted.json' 64
     $probePath = Join-Path $work 'muted.json'
-    Invoke-BoundedCase 'client_muted' (Join-Path $package 'RemoteVoice.exe') `
+    Invoke-BoundedCase 'client_muted' (Join-Path $package 'RemonteVoice.exe') `
         ('--broker-lab-probe --broker-lab-report "' + $probePath + '"') 1
     $probe = Get-Content -LiteralPath $probePath -Raw | ConvertFrom-Json
     if ($probe.success -isnot [bool] -or $probe.success -or

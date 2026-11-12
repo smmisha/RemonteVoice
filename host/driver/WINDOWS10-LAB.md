@@ -2,9 +2,9 @@
 
 The user requested reuse of existing Windows rather than installing a new guest
 OS. `Delo-Win10-22H2-test` resumed but displayed "An operating system wasn't
-found"; it was powered off. Its snapshot `RemoteVoice-before-tests-20261025`
+found"; it was powered off. Its snapshot `RemonteVoice-before-tests-20261025`
 remains. The user then explicitly selected the primary `Delo-Win10-22H2` with a
-protective snapshot. `RemoteVoice-before-main-tests-20261025` was created and
+protective snapshot. `RemonteVoice-before-main-tests-20261025` was created and
 confirmed before resuming it. Both disk chains passed the read-only consistency
 check. The primary guest reached its desktop; Tools metadata reports Windows 10
 Home 22H2 x64 build 19045.6456. It has 3 GB RAM, two CPUs and BIOS firmware.

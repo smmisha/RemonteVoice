@@ -2,8 +2,8 @@ import struct
 import unittest
 from unittest.mock import Mock
 
-from remotevoice.broker_pipe_client import BrokerPipeClient, BrokerClientError, BrokerClientOpenError
-from remotevoice.mic_broker import PeerIdentity
+from remontevoice.broker_pipe_client import BrokerPipeClient, BrokerClientError, BrokerClientOpenError
+from remontevoice.mic_broker import PeerIdentity
 
 PEER = PeerIdentity('S-1-5-21-1000','S-1-5-5-1-42',1,'a'*64)
 

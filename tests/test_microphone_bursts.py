@@ -11,12 +11,12 @@ from unittest.mock import Mock
 
 import numpy as np
 
-from remotevoice import protocol
-from remotevoice.audio_timing import SystemAudioTiming
-from remotevoice.windows_audio_playback import guard_playback_buffer
+from remontevoice import protocol
+from remontevoice.audio_timing import SystemAudioTiming
+from remontevoice.windows_audio_playback import guard_playback_buffer
 
 
-SOURCE = Path(__file__).resolve().parents[1] / 'host/remotevoice/audio.py'
+SOURCE = Path(__file__).resolve().parents[1] / 'host/remontevoice/audio.py'
 
 
 def bridge_class(clock, output=None):

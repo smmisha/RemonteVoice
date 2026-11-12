@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from remotevoice.pairing import PairingAttemptLimiter, PairingManager
+from remontevoice.pairing import PairingAttemptLimiter, PairingManager
 
 
 class PairingTests(unittest.TestCase):

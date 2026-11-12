@@ -23,7 +23,7 @@ MSIX, Store-пакет или PE-подпись издателя.
 ```powershell
 signer/app/src-tauri/target/debug/iresign.exe --diagnostics
 signer/app/src-tauri/target/debug/iresign.exe --check-frontend
-signer/app/src-tauri/target/debug/iresign.exe --check-ipa "RemoteVoice-Install/RemoteVoice-iPhone-unsigned.ipa"
+signer/app/src-tauri/target/debug/iresign.exe --check-ipa "RemonteVoice-Install/RemonteVoice-iPhone-unsigned.ipa"
 signer/app/src-tauri/target/debug/iresign.exe --check-renewal
 signer/app/src-tauri/target/debug/iresign.exe --check-session
 signer/app/src-tauri/target/debug/iresign.exe --check-session-storage
@@ -35,7 +35,7 @@ signer/app/src-tauri/target/debug/iresign.exe --check-anisette http://127.0.0.1:
 читает список автопродления и печатает только настройки, bundle ID, хеш UDID и
 сроки. `--check-session` проверяет только наличие сохранённой сессии.
 `--check-session-storage` записывает фиктивную не-Apple сессию в отдельное
-пространство `dev.remotevoice.iresign.v1.selftest` в Windows Credential
+пространство `dev.remontevoice.iresign.v1.selftest` в Windows Credential
 Manager, проверяет чтение и удаляет её; реальные токены и основная сессия не
 затрагиваются. `--check-anisette` проверяет доступность Anisette и при
 необходимости выполняет провижининг; Apple Account для этого не нужен.

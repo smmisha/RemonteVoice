@@ -6,8 +6,8 @@ import subprocess
 import sys
 from unittest.mock import patch
 from PIL import Image
-from remotevoice.h264_stream import AccessUnits, Encoder, StreamError, MAX_ACCESS_UNIT, create_encoder, _capture_rgb, encoder_available
-from remotevoice.screen import _NATIVE_CAPTURE_LOCK
+from remontevoice.h264_stream import AccessUnits, Encoder, StreamError, MAX_ACCESS_UNIT, create_encoder, _capture_rgb, encoder_available
+from remontevoice.screen import _NATIVE_CAPTURE_LOCK
 
 AUD = b'\x00\x00\x00\x01\x09\xf0'
 IDR = AUD + b'\x00\x00\x01\x67sps\x00\x00\x01\x68pps\x00\x00\x01\x65first'
@@ -73,9 +73,9 @@ class NativePipeTests(unittest.IsolatedAsyncioTestCase):
     @unittest.skipUnless(os.name == 'nt', 'Windows encoder job containment')
     async def test_host_process_exit_terminates_its_owned_encoder_job(self):
         # A disposable Python parent stands in for the Host. No desktop data,
-        # FFmpeg, audio engine, or installed RemoteVoice process is touched.
+        # FFmpeg, audio engine, or installed RemonteVoice process is touched.
         script = (
-            'import sys;from remotevoice.h264_stream import Encoder;'
+            'import sys;from remontevoice.h264_stream import Encoder;'
             'e=Encoder([sys._base_executable,"-c","import time;time.sleep(60)"],lambda:True);'
             'e.start();print(e.process.pid,flush=True);sys.stdin.buffer.read(1)'
         )
@@ -146,13 +146,13 @@ class NativePipeTests(unittest.IsolatedAsyncioTestCase):
 class RawCaptureTests(unittest.TestCase):
     def test_missing_encoder_capability_never_starts_a_process_or_installs_anything(self):
         for executable, expected in [(None, False), ('test-encoder', True)]:
-            with patch('remotevoice.h264_stream.shutil.which', return_value=executable), \
-                    patch('remotevoice.h264_stream.subprocess.Popen') as spawn:
+            with patch('remontevoice.h264_stream.shutil.which', return_value=executable), \
+                    patch('remontevoice.h264_stream.subprocess.Popen') as spawn:
                 self.assertEqual(encoder_available(), expected)
                 spawn.assert_not_called()
     def test_encoder_uses_owned_raw_pipe_without_gdigrab_or_capture_at_construction(self):
-        with patch('remotevoice.h264_stream.shutil.which', return_value='test-encoder'), \
-                patch('remotevoice.windows_screen.capture_primary_image') as capture:
+        with patch('remontevoice.h264_stream.shutil.which', return_value='test-encoder'), \
+                patch('remontevoice.windows_screen.capture_primary_image') as capture:
             encoder = create_encoder(lambda: True)
         self.assertIn('rawvideo', encoder.command)
         self.assertIn('pipe:0', encoder.command)
@@ -162,7 +162,7 @@ class RawCaptureTests(unittest.TestCase):
         capture.assert_not_called()
 
     def test_synthetic_image_is_letterboxed_without_stretching(self):
-        with patch('remotevoice.windows_screen.capture_primary_image',
+        with patch('remontevoice.windows_screen.capture_primary_image',
                    return_value=Image.new('RGB', (1280, 720), (0, 255, 0))) as capture:
             payload = _capture_rgb(lambda: True)
         self.assertEqual(len(payload), 1280 * 800 * 3)
@@ -174,12 +174,12 @@ class RawCaptureTests(unittest.TestCase):
             self.assertEqual(image.getpixel((640, 799)), (0, 0, 0))
 
     def test_denied_or_revoked_capture_never_returns_pixels_and_releases_shared_owner(self):
-        with patch('remotevoice.windows_screen.capture_primary_image') as capture:
+        with patch('remontevoice.windows_screen.capture_primary_image') as capture:
             with self.assertRaisesRegex(StreamError, 'unavailable'):
                 _capture_rgb(lambda: False)
             capture.assert_not_called()
         answers = iter([True, False])
-        with patch('remotevoice.windows_screen.capture_primary_image', return_value=Image.new('RGB', (16, 16))):
+        with patch('remontevoice.windows_screen.capture_primary_image', return_value=Image.new('RGB', (16, 16))):
             with self.assertRaisesRegex(StreamError, 'unavailable'):
                 _capture_rgb(lambda: next(answers))
         self.assertTrue(_NATIVE_CAPTURE_LOCK.acquire(blocking=False))
@@ -188,7 +188,7 @@ class RawCaptureTests(unittest.TestCase):
     def test_pending_jpeg_native_capture_prevents_parallel_video_grab(self):
         self.assertTrue(_NATIVE_CAPTURE_LOCK.acquire(blocking=False))
         try:
-            with patch('remotevoice.windows_screen.capture_primary_image') as capture:
+            with patch('remontevoice.windows_screen.capture_primary_image') as capture:
                 with self.assertRaisesRegex(StreamError, 'busy'):
                     _capture_rgb(lambda: True)
                 capture.assert_not_called()

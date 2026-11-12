@@ -22,7 +22,7 @@ New-Item -ItemType Directory -Path $rvOutput -Force | Out-Null
 try {
     $env:INCLUDE=@((Join-Path $rvTools.FullName 'include'),(Join-Path $rvSdk.FullName 'ucrt'),(Join-Path $rvSdk.FullName 'shared'),(Join-Path $rvSdk.FullName 'um')) -join ';'
     $env:LIB=@((Join-Path $rvTools.FullName 'lib/x64'),(Join-Path $rvSdkRoot "Lib/$($rvSdk.Name)/ucrt/x64"),(Join-Path $rvSdkRoot "Lib/$($rvSdk.Name)/um/x64")) -join ';'
-    & $rvCompiler /nologo /std:c++17 /W4 /WX /O2 /EHsc /LD /MT (Join-Path $PSScriptRoot 'duplex_buffer.cpp') "/Fo$rvOutput/duplex_buffer.obj" /link "/OUT:$rvOutput/remotevoice_audio_buffer.dll" "/IMPLIB:$rvOutput/remotevoice_audio_buffer.lib"
+    & $rvCompiler /nologo /std:c++17 /W4 /WX /O2 /EHsc /LD /MT (Join-Path $PSScriptRoot 'duplex_buffer.cpp') "/Fo$rvOutput/duplex_buffer.obj" /link "/OUT:$rvOutput/remontevoice_audio_buffer.dll" "/IMPLIB:$rvOutput/remontevoice_audio_buffer.lib"
     if($LASTEXITCODE -ne 0) { throw 'Native audio prototype build failed.' }
-    Write-Output (Join-Path $rvOutput 'remotevoice_audio_buffer.dll')
+    Write-Output (Join-Path $rvOutput 'remontevoice_audio_buffer.dll')
 } finally { $env:INCLUDE=$rvOldInclude; $env:LIB=$rvOldLib }

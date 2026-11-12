@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 import unittest
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, build_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, build_manifest
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC=importlib.util.spec_from_file_location('prepare_broker_admission',ROOT/'host/prepare_broker_admission.py')
@@ -22,7 +22,7 @@ class AdmissionPreparationTests(unittest.TestCase):
         self.root=Path(temporary.name)
         self.package,self.output=self.root/'package with spaces',self.root/'prepared'
         self.package.mkdir()
-        for name in ('RemoteVoice.exe','RemoteVoiceBroker.exe','_internal/base_library.zip','_internal/python314.dll'):
+        for name in ('RemonteVoice.exe','RemonteVoiceBroker.exe','_internal/base_library.zip','_internal/python314.dll'):
             path=self.package/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(name.encode())
         (self.package/MANIFEST_NAME).write_bytes(build_manifest(self.package,r'ROOT\MEDIA\0000'))
 
@@ -33,7 +33,7 @@ class AdmissionPreparationTests(unittest.TestCase):
     def test_preparation_binds_full_package_and_inert_fixed_commands(self):
         path=self.prepare();plan=json.loads(path.read_text('utf-8'))
         receipt=json.loads((self.output/'prepared.json').read_text('utf-8'))
-        self.assertEqual(plan['target'],r'C:\Program Files\RemoteVoice-AdmissionLab-012')
+        self.assertEqual(plan['target'],r'C:\Program Files\RemonteVoice-AdmissionLab-012')
         self.assertEqual(plan['broker_args'],['--lab-muted-only'])
         self.assertEqual(plan['client_args'],['--broker-lab-probe'])
         self.assertFalse(plan['driver_install'] or plan['microphone_enable'] or plan['audio_route_changes'])
@@ -46,7 +46,7 @@ class AdmissionPreparationTests(unittest.TestCase):
     def test_tampered_or_extra_package_file_rejected_before_preparation(self):
         for extra in (False,True):
             with self.subTest(extra=extra):
-                target=self.package/('extra.bin' if extra else 'RemoteVoice.exe')
+                target=self.package/('extra.bin' if extra else 'RemonteVoice.exe')
                 original=target.read_bytes() if target.exists() else None
                 target.write_bytes(b'changed')
                 with self.assertRaises(ValueError):self.prepare()

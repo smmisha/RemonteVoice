@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import patch
 
-from remotevoice.windows_broker_bundle import WindowsProtectedBundle, ProtectedBundleError
-from remotevoice.windows_broker_identity import _Ace, _FileInfo, _Security
+from remontevoice.windows_broker_bundle import WindowsProtectedBundle, ProtectedBundleError
+from remontevoice.windows_broker_identity import _Ace, _FileInfo, _Security
 
-ROOT = r'C:\Program Files\RemoteVoice'
-EXE = ROOT + r'\RemoteVoiceBroker.exe'
+ROOT = r'C:\Program Files\RemonteVoice'
+EXE = ROOT + r'\RemonteVoiceBroker.exe'
 DLL = ROOT + r'\_internal\python314.dll'
 PINS = {EXE: 'a' * 64, DLL: 'b' * 64}
 TRUSTED = _Security('S-1-5-18', True, (_Ace(0, 0, 0x10000000, 'S-1-5-32-544'),))
@@ -45,7 +45,7 @@ class Api:
 
 class ProtectedBundleTests(unittest.TestCase):
     def test_inert_validation_requires_explicit_unique_canonical_pins(self):
-        with patch('remotevoice.windows_broker_bundle._WindowsApi') as native:
+        with patch('remontevoice.windows_broker_bundle._WindowsApi') as native:
             bundle = WindowsProtectedBundle(PINS)
             self.assertFalse(bundle.is_verified)
             self.assertTrue(bundle.cleanup_confirmed)

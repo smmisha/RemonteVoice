@@ -21,19 +21,19 @@ from unittest.mock import patch
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed
 
-from remotevoice.broker_host import BrokerHost
-from remotevoice.broker_mic_sink import BrokerMicSink
-from remotevoice.broker_pipe_client import BrokerPipeClient
-from remotevoice.driver_audio_bridge import DriverAudioBridge
-from remotevoice.driver_backend_runtime import DriverBackendRuntime
-from remotevoice.driver_mic import MicWriterState
-from remotevoice.mic_broker import BrokerPolicy, PeerIdentity
-from remotevoice.pairing import PairingManager
-from remotevoice.protocol import MIC_FRAME, SYSTEM_FRAME, encode_audio_frame, encode_control
-from remotevoice.server import RemoteVoiceServer
-from remotevoice.windows_broker_identity import read_current_process_token
-from remotevoice.windows_broker_pipe import NativePipeClient, NativePipeServer
-from remotevoice.windows_driver_endpoints import DriverEndpointPair
+from remontevoice.broker_host import BrokerHost
+from remontevoice.broker_mic_sink import BrokerMicSink
+from remontevoice.broker_pipe_client import BrokerPipeClient
+from remontevoice.driver_audio_bridge import DriverAudioBridge
+from remontevoice.driver_backend_runtime import DriverBackendRuntime
+from remontevoice.driver_mic import MicWriterState
+from remontevoice.mic_broker import BrokerPolicy, PeerIdentity
+from remontevoice.pairing import PairingManager
+from remontevoice.protocol import MIC_FRAME, SYSTEM_FRAME, encode_audio_frame, encode_control
+from remontevoice.server import RemonteVoiceServer
+from remontevoice.windows_broker_identity import read_current_process_token
+from remontevoice.windows_broker_pipe import NativePipeClient, NativePipeServer
+from remontevoice.windows_driver_endpoints import DriverEndpointPair
 
 
 PHONE_PCM = struct.pack('<480f', *([0.125] * 480))
@@ -93,7 +93,7 @@ class DriverSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
         self.statuses, self.restorations, self.broker_errors = [], [], []
         self.server_task = self.broker_thread = self.runtime = self.broker = None
         self.broker_stop = threading.Event()
-        temporary = tempfile.TemporaryDirectory(prefix='remotevoice-lifecycle-')
+        temporary = tempfile.TemporaryDirectory(prefix='remontevoice-lifecycle-')
         self.addCleanup(temporary.cleanup)
         self.addAsyncCleanup(self.shutdown)
         root = Path(temporary.name)
@@ -122,7 +122,7 @@ class DriverSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
             def observe(self):
                 return PAIR
 
-        name = 'RemoteVoice-session-test-' + secrets.token_hex(6)
+        name = 'RemonteVoice-session-test-' + secrets.token_hex(6)
 
         def writer_factory():
             writer = SyntheticWriter()
@@ -175,11 +175,11 @@ class DriverSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
             port = reservation.getsockname()[1]
         self.pairing = PairingManager(root / 'paired.json')
         self.credential = self.pairing.pairing_pin
-        self.server = RemoteVoiceServer('127.0.0.1', port, PAIR.capture_endpoint_id,
+        self.server = RemonteVoiceServer('127.0.0.1', port, PAIR.capture_endpoint_id,
             PAIR.microphone_endpoint_id, root / 'identity', self.pairing, status,
             on_session_start=self.runtime.backend.is_available, audio_factory=audio_factory)
-        capture = patch('remotevoice.driver_audio_bridge.sc.get_microphone',
-            return_value=SimpleNamespace(id=PAIR.capture_endpoint_id, name='RemoteVoice Render'))
+        capture = patch('remontevoice.driver_audio_bridge.sc.get_microphone',
+            return_value=SimpleNamespace(id=PAIR.capture_endpoint_id, name='RemonteVoice Render'))
         capture.start()
         self.addCleanup(capture.stop)
         self.client_ssl = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -275,7 +275,7 @@ class DriverSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
     async def test_broker_loss_closes_phone_and_restores_without_readmitting_audio(self):
         phone = await self.phone()
         await self.enable_synthetic_mic(phone)
-        with self.assertLogs('remotevoice.server', level='ERROR') as logged:
+        with self.assertLogs('remontevoice.server', level='ERROR') as logged:
             self.broker_stop.set()
             async with asyncio.timeout(4):
                 try:

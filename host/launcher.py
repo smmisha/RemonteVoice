@@ -1,6 +1,6 @@
-"""PyInstaller entry point for the RemoteVoice Windows host."""
+"""PyInstaller entry point for the RemonteVoice Windows host."""
 
-from remotevoice.host_app import main
+from remontevoice.host_app import main
 
 
 if __name__ == "__main__":

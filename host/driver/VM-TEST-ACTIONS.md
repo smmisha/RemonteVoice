@@ -2,7 +2,7 @@
 
 Target: the running `Delo-Win10-22H2` guest, Windows 10 Home 22H2 x64 build
 19045.6456. Its pre-test state is preserved in
-`RemoteVoice-before-main-tests-20261025`. The separate `-test` VM did not boot
+`RemonteVoice-before-main-tests-20261025`. The separate `-test` VM did not boot
 Windows and is powered off. No new Windows installation/download is planned.
 
 The current unsigned lab package is
@@ -25,8 +25,8 @@ This is preparation for an experimental Windows 10 test, not release acceptance.
    enable test-signed-driver loading, then restart the guest. The target uses
    BIOS firmware; no host Secure Boot, HVCI, antivirus or firewall changes are
    included. If an additional security change proves necessary, stop that step.
-4. Register the root test device `ROOT\RemoteVoiceAudio` and install the signed
-   package/service `RemoteVoiceAudio` in the guest. Use a lab SetupAPI helper;
+4. Register the root test device `ROOT\RemonteVoiceAudio` and install the signed
+   package/service `RemonteVoiceAudio` in the guest. Use a lab SetupAPI helper;
    do not distribute Microsoft's non-redistributable DevGen in the app/bundle.
 5. Check actual endpoint identity, format negotiation, shared WASAPI loopback,
    synthetic PCM capture, BEGIN/WRITE/END/lease/underflow behavior and user-mode
@@ -36,7 +36,7 @@ This is preparation for an experimental Windows 10 test, not release acceptance.
    test is finished unless the user asks to keep the lab state; retain the
    bounded technical results outside the guest first.
 
-The current working RemoteVoice Host still uses its existing mixer. Selecting
+The current working RemonteVoice Host still uses its existing mixer. Selecting
 this driver in the real app, production broker authentication, real host route
 guard integration and Windows 11/public-release acceptance remain later gates.
 

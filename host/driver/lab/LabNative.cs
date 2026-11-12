@@ -3,11 +3,11 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace RemoteVoice.DriverLab
+namespace RemonteVoice.DriverLab
 {
     static class Native
     {
-        const string HardwareId = @"ROOT\RemoteVoiceAudio";
+        const string HardwareId = @"ROOT\RemonteVoiceAudio";
         static readonly Guid MediaClass = new Guid("4d36e96c-e325-11ce-bfc1-08002be10318");
         [StructLayout(LayoutKind.Sequential)] struct CodeIntegrity { public uint Length, Options; }
         [DllImport("ntdll.dll")] static extern int NtQuerySystemInformation(uint kind, ref CodeIntegrity data, uint length, out uint returned);
@@ -94,10 +94,10 @@ namespace RemoteVoice.DriverLab
                     foreach (string id in ids.Split('\0'))
                         if (String.Equals(id, HardwareId, StringComparison.OrdinalIgnoreCase)) { matches++; selected = info; break; }
                 }
-                if (matches > 1) throw new InvalidOperationException("Ambiguous RemoteVoice root devices; no installation attempted");
+                if (matches > 1) throw new InvalidOperationException("Ambiguous RemonteVoice root devices; no installation attempted");
                 if (matches == 0)
                 {
-                    Check(SetupDiCreateDeviceInfoW(set, "MEDIA", ref type, "RemoteVoice development audio", owner, 1, ref selected));
+                    Check(SetupDiCreateDeviceInfoW(set, "MEDIA", ref type, "RemonteVoice development audio", owner, 1, ref selected));
                     byte[] hardware = Encoding.Unicode.GetBytes(HardwareId + "\0\0");
                     Check(SetupDiSetDeviceRegistryPropertyW(set, ref selected, 1, hardware, (uint)hardware.Length));
                     Check(SetupDiCallClassInstaller(0x19, set, ref selected)); registeredHere = true;

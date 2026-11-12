@@ -7,7 +7,7 @@ import sys
 import threading
 import unittest
 
-from remotevoice.broker_process import (
+from remontevoice.broker_process import (
     BrokerProcessTerminationRequired, run_broker_process,
 )
 
@@ -94,7 +94,7 @@ class BrokerProcessTests(unittest.TestCase):
     def test_real_child_exits_on_fatal_without_continuing_or_running_finalizers(self):
         code = '''
 import threading
-from remotevoice.broker_process import run_broker_process
+from remontevoice.broker_process import run_broker_process
 class Fatal(BaseException): pass
 class Host:
     def serve(self, stop): raise Fatal()

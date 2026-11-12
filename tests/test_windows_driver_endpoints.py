@@ -5,7 +5,7 @@ import uuid
 from dataclasses import FrozenInstanceError
 from unittest.mock import Mock, patch
 
-from remotevoice import windows_driver_endpoints as endpoints
+from remontevoice import windows_driver_endpoints as endpoints
 
 ROOT = "ROOT\\MEDIA\\0000"
 RENDER = "{0.0.0.00000000}.{11111111-2222-3333-4444-555555555555}"
@@ -21,8 +21,8 @@ class Api:
         self.instances = {"render": "SWD\\MMDEVAPI\\" + RENDER, "mic": "SWD\\MMDEVAPI\\" + MIC}
         self.ids = {1: self.instances["render"], 2: self.instances["mic"], 3: ROOT, 4: "HTREE\\ROOT\\0"}
         self.parents = {1: 3, 2: 3, 3: 4}
-        self.hardware = ("ROOT\\RemoteVoiceAudio",)
-        self.service_name = "RemoteVoiceAudio"
+        self.hardware = ("ROOT\\RemonteVoiceAudio",)
+        self.service_name = "RemonteVoiceAudio"
         self.states = {"render": 1, "mic": 1}
         self.enumerated = []
         self.released = []
@@ -127,7 +127,7 @@ class DriverEndpointInventoryTests(unittest.TestCase):
         api.instances = {"render": None, "mic": None}
         self.assertEqual(inventory.observe(), endpoints.DriverEndpointPair(RENDER, MIC))
         self.assertEqual(set(api.located), {"SWD\\MMDEVAPI\\" + RENDER, "SWD\\MMDEVAPI\\" + MIC})
-        api.identifiers["render"] = "friendly RemoteVoice Speakers"
+        api.identifiers["render"] = "friendly RemonteVoice Speakers"
         with self.assertRaises(endpoints.DriverEndpointInventoryError):
             inventory.observe()
         # A nonempty wrong property never falls back to the otherwise valid ID.
@@ -148,12 +148,12 @@ class DriverEndpointInventoryTests(unittest.TestCase):
         self.assertEqual(api.state_calls["physical"], 1)
 
     def test_hardware_and_service_must_both_match_configured_root(self):
-        for hardware, service in ((("ROOT\\OtherAudio",), "RemoteVoiceAudio"),
-                                  (("ROOT\\RemoteVoiceAudioX",), "RemoteVoiceAudio"),
-                                  (("ROOT\\RemoteVoiceAudio",), "OtherAudio"),
-                                  (("ROOT\\RemoteVoiceAudio",), "RemoteVoiceAudio\0bad"),
-                                  (("ROOT\\RemoteVoiceAudio", "root\\remotevoiceaudio"), "RemoteVoiceAudio"),
-                                  ((), "RemoteVoiceAudio"), (["ROOT\\RemoteVoiceAudio"], "RemoteVoiceAudio")):
+        for hardware, service in ((("ROOT\\OtherAudio",), "RemonteVoiceAudio"),
+                                  (("ROOT\\RemonteVoiceAudioX",), "RemonteVoiceAudio"),
+                                  (("ROOT\\RemonteVoiceAudio",), "OtherAudio"),
+                                  (("ROOT\\RemonteVoiceAudio",), "RemonteVoiceAudio\0bad"),
+                                  (("ROOT\\RemonteVoiceAudio", "root\\remontevoiceaudio"), "RemonteVoiceAudio"),
+                                  ((), "RemonteVoiceAudio"), (["ROOT\\RemonteVoiceAudio"], "RemonteVoiceAudio")):
             with self.subTest(hardware=hardware, service=service):
                 inventory, api = self.make()
                 api.hardware, api.service_name = hardware, service

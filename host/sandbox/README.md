@@ -7,12 +7,12 @@ audio endpoints, start a service, or prove the real driver path.
 Prepare with the existing project interpreter:
 
 ```powershell
-.\.venv\Scripts\python.exe host\prepare_windows_sandbox.py --package host\build\driver-pair-004\dist\RemoteVoicePair --output host\build\sandbox-smoke-001
+.\.venv\Scripts\python.exe host\prepare_windows_sandbox.py --package host\build\driver-pair-004\dist\RemonteVoicePair --output host\build\sandbox-smoke-001
 ```
 
 The command only verifies the complete package inventory and creates a new
 configuration/control/report directory. It never launches Sandbox or replaces an
-earlier output. Inspect the generated `RemoteVoice-Smoke.wsb` before use.
+earlier output. Inspect the generated `RemonteVoice-Smoke.wsb` before use.
 
 The configuration uses 2048 MB, disables network, microphone, camera, clipboard,
 printers and vGPU, and maps only the package/control as read-only plus a fresh
@@ -57,7 +57,7 @@ driver files:
 
 This configuration has no logon command. Its owner can use `wsb exec` in the
 explicit guest `System` context without `wsb connect` or an interactive desktop.
-Run only `C:\RemoteVoice-Control\inspect_environment.ps1`. The report contains
+Run only `C:\RemonteVoice-Control\inspect_environment.ps1`. The report contains
 scalar observations of the live Code Integrity options, UAC setting, BCD read
 result and audio services. Code Integrity is queried directly through the
 documented `SystemCodeIntegrityInformation` structure; a registry or BCD value

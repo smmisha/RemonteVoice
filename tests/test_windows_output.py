@@ -3,7 +3,7 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, call, patch
 
-from remotevoice import windows_output
+from remontevoice import windows_output
 
 
 class WindowsOutputTests(unittest.TestCase):

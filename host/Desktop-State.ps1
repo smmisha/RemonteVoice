@@ -1,8 +1,8 @@
 param([Parameter(Mandatory=$true)][string]$ReportPath,[switch]$AllowStopped)
 $ErrorActionPreference = 'Stop'
 # Run by the desktop shell, so MSIX app-data redirection of the calling editor
-# cannot substitute the editor's private RemoteVoice profile.
-$rvData = Join-Path $env:APPDATA 'RemoteVoice'
+# cannot substitute the editor's private RemonteVoice profile.
+$rvData = Join-Path $env:APPDATA 'RemonteVoice'
 $rvDeadline = [DateTime]::UtcNow.AddSeconds(20)
 do {
     $rvRuntime = Get-Content -LiteralPath (Join-Path $rvData 'runtime.json') -Raw | ConvertFrom-Json
@@ -14,7 +14,7 @@ if (!$AllowStopped -and !$rvProcess) {throw 'No active desktop Host receipt'}
 $rvState = @{runtime=$rvRuntime;data_directory=$rvData;observed_utc=[DateTime]::UtcNow.ToString('o')}
 $rvWsh = New-Object -ComObject WScript.Shell
 $rvDesktopPath = [string]$rvWsh.SpecialFolders.Item('Desktop')
-$rvShortcutPath = Join-Path $rvDesktopPath 'RemoteVoice.lnk'
+$rvShortcutPath = Join-Path $rvDesktopPath 'RemonteVoice.lnk'
 if (Test-Path -LiteralPath $rvShortcutPath) {
     $rvLink = $rvWsh.CreateShortcut($rvShortcutPath)
     $rvState.desktop_shortcut = @{path=$rvShortcutPath;target=$rvLink.TargetPath;arguments=$rvLink.Arguments}

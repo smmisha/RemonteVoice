@@ -7,7 +7,7 @@ import threading
 import unittest
 from unittest.mock import Mock, patch
 
-from remotevoice.audio_timing import SystemAudioTiming
+from remontevoice.audio_timing import SystemAudioTiming
 
 
 class CaptureNativeTimingTests(unittest.TestCase):
@@ -86,7 +86,7 @@ class CaptureNativeTimingTests(unittest.TestCase):
             now.value+=300_000_000;now.cpu+=2_000_000
             timing.mark('read_end')
             for phase in ('send_enter','send_lock','send_done'):now.value+=1;timing.mark(phase)
-            with patch('remotevoice.audio_timing.LOGGER.info'):timing.finish()
+            with patch('remontevoice.audio_timing.LOGGER.info'):timing.finish()
             self.assertEqual(list(Path(directory).iterdir()),[])
             trace=json.loads(timing.flush_trace().read_text('utf-8'))
             columns=trace['capture_native_columns'];row=dict(zip(columns,trace['capture_native_rows'][0]))
@@ -118,7 +118,7 @@ class CaptureNativeTimingTests(unittest.TestCase):
             def wait_for_native():now.value+=250_000_000;return 480
             recorder._capture_available_frames.side_effect=wait_for_native
             self.observe(timing,recorder)
-            with patch('remotevoice.audio_timing.LOGGER.info'):
+            with patch('remontevoice.audio_timing.LOGGER.info'):
                 for start in (0,300_000_000,600_000_000):
                     now.value=start;timing.mark('read_start');recorder._capture_available_frames();timing.mark('read_end')
                     for phase in ('send_enter','send_lock','send_done'):timing.mark(phase)

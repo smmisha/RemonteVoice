@@ -1,4 +1,4 @@
-// Original RemoteVoice development bridge; not yet accepted on a real driver target.
+// Original RemonteVoice development bridge; not yet accepted on a real driver target.
 #include <ntifs.h>
 #include "rv_pcm_bridge.h"
 

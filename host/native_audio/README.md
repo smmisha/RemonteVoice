@@ -9,7 +9,7 @@ Build with the already installed x64 Visual C++ tools and Windows SDK:
 
 ```powershell
 ./host/native_audio/build.ps1
-./.venv/Scripts/python.exe host/native_audio/test_duplex.py host/build/native-audio-prototype/remotevoice_audio_buffer.dll -v
+./.venv/Scripts/python.exe host/native_audio/test_duplex.py host/build/native-audio-prototype/remontevoice_audio_buffer.dll -v
 ```
 
 The build script does not install tools. Output must stay inside this project.

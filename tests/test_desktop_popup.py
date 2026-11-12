@@ -2,7 +2,7 @@
 import unittest
 from tkinter import TclError
 
-from remotevoice.desktop_widgets import RoundedSelect
+from remontevoice.desktop_widgets import RoundedSelect
 
 
 class FakeOwner:

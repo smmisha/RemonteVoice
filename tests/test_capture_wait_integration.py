@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from remotevoice.audio_timing import SystemAudioTiming
+from remontevoice.audio_timing import SystemAudioTiming
 from test_capture_wait_timing import FakeRecorder, MONITORING_AVAILABLE
 
 
@@ -60,7 +60,7 @@ class CaptureWaitIntegrationTests(unittest.TestCase):
             recorder._test_available = recorder._capture_available_frames
             recorder._capture_buffer = Mock(return_value=object())
             recorder._capture_release = Mock()
-        with patch('remotevoice.capture_wait_timing.CaptureWaitTiming', return_value=observer) as factory:
+        with patch('remontevoice.capture_wait_timing.CaptureWaitTiming', return_value=observer) as factory:
             self.assertIs(timing.observe_capture(recorder), recorder)
         factory.assert_called_once_with(recorder, clock=timing.clock)
         self.addCleanup(timing.close_capture_observation)
@@ -78,7 +78,7 @@ class CaptureWaitIntegrationTests(unittest.TestCase):
         for phase in ('send_enter', 'send_lock', 'send_done'):
             now.value += 1
             timing.mark(phase)
-        with patch('remotevoice.audio_timing.LOGGER.info'):
+        with patch('remontevoice.audio_timing.LOGGER.info'):
             timing.finish()
 
     def export(self, timing):
@@ -129,7 +129,7 @@ class CaptureWaitIntegrationTests(unittest.TestCase):
             for phase in ('send_enter', 'send_lock', 'send_done'):
                 now.value += 1
                 timing.mark(phase)
-            with patch('remotevoice.audio_timing.LOGGER.info'):
+            with patch('remontevoice.audio_timing.LOGGER.info'):
                 timing.finish()
             self.assertEqual(list(Path(directory).iterdir()), [])
             report = self.export(timing)
@@ -242,7 +242,7 @@ class CaptureWaitIntegrationTests(unittest.TestCase):
             timing = SystemAudioTiming(trace_directory=directory)
             recorder = SimpleNamespace(_capture_available_frames=Mock(return_value=480),
                 _capture_buffer=Mock(return_value=object()), _capture_release=Mock())
-            with patch('remotevoice.capture_wait_timing.CaptureWaitTiming', side_effect=OSError('PRIVATE SETUP DETAIL')):
+            with patch('remontevoice.capture_wait_timing.CaptureWaitTiming', side_effect=OSError('PRIVATE SETUP DETAIL')):
                 self.assertIs(timing.observe_capture(recorder), recorder)
             timing.mark('read_start')
             self.assertEqual(recorder._capture_available_frames(), 480)
@@ -325,8 +325,8 @@ class CaptureWaitIntegrationTests(unittest.TestCase):
 class CaptureOwnerFinallyTests(unittest.TestCase):
     def test_real_capture_method_closes_observation_before_recorder_context_exit_on_each_failure_path(self):
         # Execute only the actual Python function body with inert dependencies;
-        # do not import remotevoice.audio or SoundCard to reach its lifecycle.
-        path = Path(__file__).resolve().parents[1] / 'host/remotevoice/audio.py'
+        # do not import remontevoice.audio or SoundCard to reach its lifecycle.
+        path = Path(__file__).resolve().parents[1] / 'host/remontevoice/audio.py'
         module = ast.parse(path.read_text('utf-8'))
         cls = next(node for node in module.body if isinstance(node, ast.ClassDef) and node.name == 'AudioBridge')
         method = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == '_capture_system_audio')

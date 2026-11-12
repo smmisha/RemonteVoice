@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "ios" / "RemoteVoice"
+SOURCE = ROOT / "ios" / "RemonteVoice"
 NAMES = ("PairingInfo", "BridgeClient", "BridgeModel", "PhoneAudioEngine")
 sources = {name: (SOURCE / f"{name}.swift").read_text(encoding="utf-8") for name in NAMES}
 

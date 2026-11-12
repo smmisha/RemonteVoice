@@ -1,4 +1,4 @@
-# Срочный аудит RemoteVoice
+# Срочный аудит RemonteVoice
 
 Исторический срез до исправлений. Текущий статус и результаты последующей работы — в [STABILITY.md](STABILITY.md); формулировка «открыто» ниже относится к моменту аудита.
 
@@ -33,15 +33,15 @@ P1 — приоритет до расширения соответствующе
 | A15 | P2 | Deployment / identity | Рабочий Host запускается диагностическим wrapper без build manifest | Наблюдаемая конфигурация |
 | A16 | P2 | Delivery / baseline | Текущее локальное дерево не имеет Git baseline | Наблюдаемая конфигурация |
 | A17 | P2 | Harness / scope | Активные разрешения и решения противоречат новым фактам | Наблюдаемая конфигурация |
-| A18 | P2 | LocalSign / artifact identity | Проверка hash не связывает байты, которые будут подписаны | Путь подтверждён кодом |
-| A19 | P2 | LocalSign / operation recovery | Нет общей политики дедлайнов и восстановления неизвестной установки | Путь подтверждён кодом |
+| A18 | P2 | iReSign / artifact identity | Проверка hash не связывает байты, которые будут подписаны | Путь подтверждён кодом |
+| A19 | P2 | iReSign / operation recovery | Нет общей политики дедлайнов и восстановления неизвестной установки | Путь подтверждён кодом |
 
 ## Порядок исправления и общая причина
 
 1. **Владелец сеанса:** A01/A02/A03/A08. Блокировка процесса до любых восстановлений, атомарное резервирование слота/токена, транзакция всех устройств и подтверждённая остановка работников. Это первый срез для текущего Windows/Android сценария.
 2. **Клиенты и протокол:** iPhone A04/A05/A06/A07/A12 — до установки на iPhone; Android preview A09 и входные данные A10/A11 — отдельными ограниченными патчами с негативными сценариями.
 3. **Поставка и проверяемость:** A13/A14/A15/A16/A17. Стабильная подпись APK, полный input manifest, одна точка запуска, build/deployment identity и восстанавливаемый исходный baseline.
-4. **LocalSign:** A18/A19 — неизменяемый входной IPA и журнал внешнего эффекта. Реальная подпись/Anisette/автопродление остаются отдельной приёмкой.
+4. **iReSign:** A18/A19 — неизменяемый входной IPA и журнал внешнего эффекта. Реальная подпись/Anisette/автопродление остаются отдельной приёмкой.
 
 Повторяющийся архитектурный дефект — ответственность за один сеанс распределена между UI, сокетом, работниками и адаптерами устройств без общего владельца и общей транзакции. Целевая схема: UI → SessionCoordinator → RouteTransaction + WorkerSupervisor + Transport/Preview. Первые исправления возможны в существующих файлах без массового переименования или переписывания приложения.
 
@@ -49,7 +49,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A01 — Второй Host отбирает маршруты действующей сессии
 
-**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/host_app.py` (`HostLease` захватывается до TLS, сопряжения и recovery). Тесты: `tests/test_host_lease.py` (`test_second_constructor_cannot_enter_initializer_or_recover_routes`, `test_no_lease_means_no_recovery_mutations`). Исходная находка: HOST-01.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remontevoice/host_app.py` (`HostLease` захватывается до TLS, сопряжения и recovery). Тесты: `tests/test_host_lease.py` (`test_second_constructor_cannot_enter_initializer_or_recover_routes`, `test_no_lease_means_no_recovery_mutations`). Исходная находка: HOST-01.
 
 Открытие второго окна вызывает recovery до блокировки владельца. В безопасной пробе все роли живого первого Host были переключены в физические устройства второго.
 
@@ -61,7 +61,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A02 — Остановка теряет ссылки на ещё живые аудиопотоки
 
-**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/audio.py` (`stop` сохраняет живые потоки и бросает `AudioStopError`). Тест: `tests/test_audio.py::test_incomplete_stop_retains_workers_and_repeated_stop_confirms_exit`. Исходная находка: HOST-03.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remontevoice/audio.py` (`stop` сохраняет живые потоки и бросает `AudioStopError`). Тест: `tests/test_audio.py::test_incomplete_stop_retains_workers_and_repeated_stop_confirms_exit`. Исходная находка: HOST-03.
 
 После join(timeout=1) список работников очищается без is_alive. Инертный поток продолжал работать после возврата stop; сервер может начать новый движок на тех же endpoints.
 
@@ -73,7 +73,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A03 — Отказ busy потребляет PIN и заменяет токен без передачи клиенту
 
-**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/server.py` (слот занимается до чтения credential, `authenticate` только после подготовки маршрутов). Тест: `tests/test_server.py::test_busy_slot_does_not_read_or_consume_pin`. Исходная находка: PROTO-01.
+**P1 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remontevoice/server.py` (слот занимается до чтения credential, `authenticate` только после подготовки маршрутов). Тест: `tests/test_server.py::test_busy_slot_does_not_read_or_consume_pin`. Исходная находка: PROTO-01.
 
 При занятом слоте authenticate выполняется раньше проверки lock на строке 164. Новый PIN заменяет сохранённый токен, затем клиент закрывается с кодом 4002 до auth_ok. Старый токен и PIN уже недействительны, новый токен клиент не получил.
 
@@ -85,7 +85,7 @@ P1 — приоритет до расширения соответствующе
 
 ### A04 — Проверка IPv4 пропускает внешний DNS-адрес
 
-**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemoteVoice/PairingInfo.swift:46`. Исходная находка: CL-01.
+**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemonteVoice/PairingInfo.swift:46`. Исходная находка: CL-01.
 
 compactMap удаляет нечисловые части. Значение 10.0.0.1.attacker.com превращается в четыре приватных октета для проверки, но исходный hostname используется URLSession. Pin из того же QR не ограничивает адрес локальной сетью. Реальная iOS-передача не выполнялась.
 
@@ -97,7 +97,7 @@ compactMap удаляет нечисловые части. Значение 10.0
 
 ### A05 — Микрофон отправляет кадры без ограниченной очереди и ожидания ACK
 
-**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemoteVoice/BridgeClient.swift:62`. Исходная находка: CL-02.
+**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemonteVoice/BridgeClient.swift:62`. Исходная находка: CL-02.
 
 Запись начинается до mic_state, кадры помещаются в DispatchQueue/async socket.send без лимита возраста/числа. Mute может идти после старого голоса в том же сокете; UI считает изменение завершённым до ACK. Медленная сеть на iPhone не воспроизводилась.
 
@@ -109,7 +109,7 @@ compactMap удаляет нечисловые части. Значение 10.0
 
 ### A06 — Ошибка включения микрофона не откатывает аудиодвижок
 
-**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemoteVoice/PhoneAudioEngine.swift:34`. Исходная находка: CL-03.
+**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemonteVoice/PhoneAudioEngine.swift:34`. Исходная находка: CL-03.
 
 Playback остановлен до throwing конфигурации; tap устанавливается до engine.start. Ошибка оставляет tap/остановленное воспроизведение, внешний catch лишь показывает false/error. Повторный enable может повторно установить tap.
 
@@ -121,7 +121,7 @@ Playback остановлен до throwing конфигурации; tap уст
 
 ### A07 — Поздние Task и permission callbacks меняют новый сеанс
 
-**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemoteVoice/BridgeModel.swift:41`. Исходная находка: CL-04.
+**P1 · Путь подтверждён кодом · открыто.** Место: `ios/RemonteVoice/BridgeModel.swift:41`. Исходная находка: CL-04.
 
 Callbacks и Task не проверяют identity текущего client. После await разрешения старый клиент способен перенастроить глобальную AVAudioSession, а его completion — состояние переподключённого клиента.
 
@@ -133,7 +133,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A08 — Ошибка вывода оставляет частично активированный сеанс
 
-**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/host_app.py` (результат `_activate_output_route` проверяется, при отказе `_stop_host` с сохранением первичной ошибки). Тесты: `tests/test_host_lease.py::test_partial_activation_restores_all_and_preserves_primary_error`, `tests/test_host_output_routing.py`. Исходная находка: HOST-02.
+**P2 · Воспроизведено · исправлено в коде, сверено 2026-11-08.** Место: `host/remontevoice/host_app.py` (результат `_activate_output_route` проверяется, при отказе `_stop_host` с сохранением первичной ошибки). Тесты: `tests/test_host_lease.py::test_partial_activation_restores_all_and_preserves_primary_error`, `tests/test_host_output_routing.py`. Исходная находка: HOST-02.
 
 Физический mic заглушён, виртуальный вход выбран; _activate_output_route возвращает false, но результат игнорируется. Проба оставила server_running=true и ноль вызовов остановки.
 
@@ -157,7 +157,7 @@ Callbacks и Task не проверяют identity текущего client. По
 
 ### A10 — Unicode credential вызывает необработанный TypeError
 
-**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remotevoice/pairing.py` (`_valid_credential`), `server.py` (отказ учитывается в `PairingAttemptLimiter`). Приёмка: `tests/test_pairing.py::test_malformed_credentials_cannot_change_pairing`. Исходная находка: PROTO-02.
+**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remontevoice/pairing.py` (`_valid_credential`), `server.py` (отказ учитывается в `PairingAttemptLimiter`). Приёмка: `tests/test_pairing.py::test_malformed_credentials_cannot_change_pairing`. Исходная находка: PROTO-02.
 
 hmac.compare_digest двух str не поддерживает не-ASCII. Проба credential=тест получила TypeError вместо нормального отказа; auth handler не перехватывает этот тип и не отмечает такой отказ в limiter.
 
@@ -169,7 +169,7 @@ hmac.compare_digest двух str не поддерживает не-ASCII. Пр�
 
 ### A11 — NaN проходит протокол и достигает аудиоадаптера
 
-**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remotevoice/protocol.py` (`validate_audio_payload` отклоняет NaN/Inf в обоих направлениях: `submit_phone_audio` и `encode_system_frame`). Приёмка: `tests/test_audio.py::test_nonfinite_microphone_frames_never_reach_queue_or_player`. Исходная находка: PROTO-03.
+**P2 · Воспроизведено · закрыто 2026-11-08.** Место: `host/remontevoice/protocol.py` (`validate_audio_payload` отклоняет NaN/Inf в обоих направлениях: `submit_phone_audio` и `encode_system_frame`). Приёмка: `tests/test_audio.py::test_nonfinite_microphone_frames_never_reach_queue_or_player`. Исходная находка: PROTO-03.
 
 decode_audio_frame проверяет размер, но не числа. Синтетический кадр из 480 NaN прошёл submit_phone_audio и был передан fake player.play. Реальное устройство и опасный сигнал не использовались.
 
@@ -181,7 +181,7 @@ decode_audio_frame проверяет размер, но не числа. Син
 
 ### A12 — Ошибка соединения не инвалидирует URLSession
 
-**P2 · Путь подтверждён кодом · открыто.** Место: `ios/RemoteVoice/BridgeClient.swift:147`. Исходная находка: CL-05.
+**P2 · Путь подтверждён кодом · открыто.** Место: `ios/RemonteVoice/BridgeClient.swift:147`. Исходная находка: CL-05.
 
 connectionFailed отменяет socket, но не вызывает invalidateAndCancel и не очищает session/socket; URLSession удерживает delegate=self, self удерживает session. Профилирование iOS не выполнялось.
 
@@ -193,7 +193,7 @@ connectionFailed отменяет socket, но не вызывает invalidateA
 
 ### A13 — Чистые CI-сборки не сохраняют подпись обновления APK
 
-**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08; требует настройки владельцем.** Место: `android/app/build.gradle` (подпись из `REMOTEVOICE_RELEASE_*` с проверкой сертификата), `.github/workflows/android.yml` (PR и форки собирают только unsigned; job `signed-release-candidate` включается переменной `REMOTEVOICE_ANDROID_RELEASE_ENABLED` и environment `android-release` с секретами ключа). Исходная находка: D03.
+**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08; требует настройки владельцем.** Место: `android/app/build.gradle` (подпись из `REMONTEVOICE_RELEASE_*` с проверкой сертификата), `.github/workflows/android.yml` (PR и форки собирают только unsigned; job `signed-release-candidate` включается переменной `REMONTEVOICE_ANDROID_RELEASE_ENABLED` и environment `android-release` с секретами ключа). Исходная находка: D03.
 
 Hosted runner собирает debug APK без provisioning стабильного ключа; build.gradle не задаёт проектную signing identity. Новая чистая сборка может не обновиться поверх установленного локального APK. Текущая установленная 0.1.3 этим не объявляется сломанной.
 
@@ -217,7 +217,7 @@ CHK-022 содержит Python-тесты конфигурации, но не i
 
 ### A15 — Рабочий Host запускается диагностическим wrapper без build manifest
 
-**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08.** Место: `host/remotevoice/deployment.py` (`write_receipt` пишет `runtime.json` с PID, версией и SHA-256 exe или снимка исходников сразу после захвата lease), `host/launcher.py` — единственная точка входа. Тесты: `tests/test_deployment.py`. Исходная находка: D02.
+**P2 · Наблюдаемая конфигурация · исправлено в коде, сверено 2026-11-08.** Место: `host/remontevoice/deployment.py` (`write_receipt` пишет `runtime.json` с PID, версией и SHA-256 exe или снимка исходников сразу после захвата lease), `host/launcher.py` — единственная точка входа. Тесты: `tests/test_deployment.py`. Исходная находка: D02.
 
 Wrapper подменяет _set_status и автоматически запускает Host; обычный launcher отличается. Текущий процесс/порт прочитаны, но startup receipt не связывает загруженный Python snapshot с artifact hash. Хеш текущего диска не доказывает загруженные ранее байты.
 
@@ -245,9 +245,9 @@ git ls-files дал0, коммитов нет, все исходники untrack
 
 PERM-002/DEC-004 и часть blockers всё ещё описывают отсутствие авторизации/аудиопар рядом с PERM-012 и реальными установленными каналами; старые пути AltServer/iloader/account остаются активными. README и root SPEC расходятся с текущими срезами. Новая архитектура объединяет карту требований, но ledger/документы ещё требуют согласования.
 
-**Исправление:** Один актуальный ledger решений с superseded/history, отдельные срезы Audio/Screen/Transport/LocalSign и карта всех25требований.
+**Исправление:** Один актуальный ledger решений с superseded/history, отдельные срезы Audio/Screen/Transport/iReSign и карта всех25требований.
 
-**Приёмка:** Для текущего этапа нет противоречащих setup/permission/blocker; прогресс Android не закрывает iPhone/LocalSign.
+**Приёмка:** Для текущего этапа нет противоречащих setup/permission/blocker; прогресс Android не закрывает iPhone/iReSign.
 
 Доказательства: [.harness/evidence/audit/agents/audit-delivery.md](.harness/evidence/audit/agents/audit-delivery.md).
 
@@ -281,7 +281,7 @@ busy lock удерживается через device/install await без общ
 - 43 JVM-теста и Android lint (0 ошибок, 8 предупреждений) принудительно повторены с `--rerun-tasks`; итоговый лог и XML сохранены в evidence. JVM-проверки не заменяют Android media/FGS/UI и настоящий BitmapFactory.
 - Три Host-пробы, три протокольные пробы и одна Java-проба preview воспроизвели описанные ошибки. Подставной поток освобождён и завершён. Swift сценарии проверены по коду; Swift/iPhone runtime не выполнялся.
 - Только чтением установлены текущие Host PID/entry point/владелец порта и Android versionCode 4 / versionName 0.1.3. PID 62884 слушает 10.20.30.2:8765; launcher 52736. Это наблюдение процесса, не доказательство fingerprint загруженного кода.
-- Попытка `cargo test --locked --offline` завершилась до тестов: build script num-traits/autocfg сообщил `output path is not a writable directory`. Этот сбой сборочной среды не выдан за падение тестов LocalSign или за доказанную ошибку его исходников. Старые Rust-результаты не повышены до текущих.
+- Попытка `cargo test --locked --offline` завершилась до тестов: build script num-traits/autocfg сообщил `output path is not a writable directory`. Этот сбой сборочной среды не выдан за падение тестов iReSign или за доказанную ошибку его исходников. Старые Rust-результаты не повышены до текущих.
 
 ## Границы приёмки
 
@@ -302,13 +302,13 @@ busy lock удерживается через device/install await без общ
 | REQ-005 | Windows + iPhone audio/install | iPhone не принят; Android/native наблюдения не закрывают исходную iPhone-приёмку |
 | REQ-006 | Windows + iPhone audio/install | iPhone не принят; Android/native наблюдения не закрывают исходную iPhone-приёмку |
 | REQ-007 | Windows + iPhone audio/install | iPhone не принят; Android/native наблюдения не закрывают исходную iPhone-приёмку |
-| REQ-008 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-009 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-010 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-011 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-012 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-013 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
-| REQ-014 | LocalSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-008 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-009 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-010 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-011 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-012 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-013 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
+| REQ-014 | iReSign | Прототип/исходники; реальная подпись, Anisette, renewal и Store открыты |
 | REQ-015 | Android audio/install | APK установлен; частичные реальные сценарии; длительная речь и фон открыты |
 | REQ-016 | Android audio/install | APK установлен; частичные реальные сценарии; длительная речь и фон открыты |
 | REQ-017 | Android audio/install | APK установлен; частичные реальные сценарии; длительная речь и фон открыты |

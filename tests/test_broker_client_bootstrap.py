@@ -2,11 +2,11 @@ import threading
 import unittest
 from unittest.mock import Mock, patch
 
-from remotevoice.broker_client_bootstrap import (
+from remontevoice.broker_client_bootstrap import (
     BootstrapBrokerClient, BrokerClientBootstrapError, open_installed_broker_client,
 )
-from remotevoice.broker_mic_sink import BrokerMicSink, BrokerSinkStopError
-from remotevoice.broker_pipe_client import BrokerClientOpenError, BrokerObservation
+from remontevoice.broker_mic_sink import BrokerMicSink, BrokerSinkStopError
+from remontevoice.broker_pipe_client import BrokerClientOpenError, BrokerObservation
 
 STATUS = BrokerObservation(True, False, False, False, 10.0)
 
@@ -26,8 +26,8 @@ class BootstrapClientTests(unittest.TestCase):
         self.client.open.side_effect = lambda **kwargs: self.client
         self.client.close.side_effect = self.close_client
         self.client.observe.return_value = STATUS
-        self.manifest_type = patch("remotevoice.broker_client_bootstrap.PinnedInstalledManifest", return_value=self.manifest)
-        self.client_type = patch("remotevoice.broker_client_bootstrap.InstalledBrokerClient", return_value=self.client)
+        self.manifest_type = patch("remontevoice.broker_client_bootstrap.PinnedInstalledManifest", return_value=self.manifest)
+        self.client_type = patch("remontevoice.broker_client_bootstrap.InstalledBrokerClient", return_value=self.client)
         self.make_manifest, self.make_client = self.manifest_type.start(), self.client_type.start()
         self.addCleanup(self.manifest_type.stop)
         self.addCleanup(self.client_type.stop)

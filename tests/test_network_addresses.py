@@ -3,7 +3,7 @@ import ipaddress
 import unittest
 from unittest.mock import patch
 
-from remotevoice import network_addresses
+from remontevoice import network_addresses
 
 
 def adapter(description='Realtek Ethernet', type=6, gateway='10.20.30.1',

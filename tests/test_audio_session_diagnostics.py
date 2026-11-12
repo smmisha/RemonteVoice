@@ -7,7 +7,7 @@ from unittest.mock import Mock
 from websockets.asyncio.server import serve
 from websockets.frames import Close
 
-from remotevoice.audio_session_diagnostics import close_summary, log_session_end, log_session_error, log_worker_failure
+from remontevoice.audio_session_diagnostics import close_summary, log_session_end, log_session_error, log_worker_failure
 
 
 SESSION = "a" * 32

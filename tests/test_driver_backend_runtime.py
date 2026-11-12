@@ -5,10 +5,10 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from remotevoice.broker_mic_sink import BrokerSinkSnapshot
-from remotevoice.driver_backend_runtime import DriverBackendRuntime, DriverRuntimeError, DriverRuntimeStopError
-from remotevoice.driver_audio_bridge import DriverAudioBridge
-from remotevoice.windows_driver_endpoints import DriverEndpointPair
+from remontevoice.broker_mic_sink import BrokerSinkSnapshot
+from remontevoice.driver_backend_runtime import DriverBackendRuntime, DriverRuntimeError, DriverRuntimeStopError
+from remontevoice.driver_audio_bridge import DriverAudioBridge
+from remontevoice.windows_driver_endpoints import DriverEndpointPair
 
 
 PAIR = DriverEndpointPair('render-id', 'microphone-id')
@@ -151,8 +151,8 @@ class DriverBackendRuntimeTests(unittest.TestCase):
                 SimpleNamespace(close=AsyncMock(), send=AsyncMock()),
                 MagicMock(spec=asyncio.Lock), Mock(),
                 driver_backend=self.runtime.backend, sink_factory=self.runtime.acquire_sink)
-            with patch('remotevoice.driver_audio_bridge.sc.get_microphone', return_value=SimpleNamespace(
-                    id='render-id', name='RemoteVoice System Audio', isloopback=True)), patch.object(bridge, '_launch_audio_workers'):
+            with patch('remontevoice.driver_audio_bridge.sc.get_microphone', return_value=SimpleNamespace(
+                    id='render-id', name='RemonteVoice System Audio', isloopback=True)), patch.object(bridge, '_launch_audio_workers'):
                 bridge.start()
             self.assertFalse(bridge.microphone_enabled)
             bridge.set_microphone_enabled(True)

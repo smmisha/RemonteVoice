@@ -1,5 +1,5 @@
 // Standalone Foundation probe. Not part of the app target.
-// swiftc ios/RemoteVoice/PairingInfo.swift ios/tests/PairingInfoProbe.swift -o <temporary executable>
+// swiftc ios/RemonteVoice/PairingInfo.swift ios/tests/PairingInfoProbe.swift -o <temporary executable>
 import Foundation
 
 @main
@@ -20,7 +20,7 @@ struct PairingInfoProbe {
         ]
         for (host, accepted) in cases {
             var components = URLComponents()
-            components.scheme = "remotevoice"
+            components.scheme = "remontevoice"
             components.host = "pair"
             components.queryItems = [
                 URLQueryItem(name: "host", value: host),

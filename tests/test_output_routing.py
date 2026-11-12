@@ -1,6 +1,6 @@
 import unittest
 
-from remotevoice.output_routing import OutputRoute, OutputRoutingError
+from remontevoice.output_routing import OutputRoute, OutputRoutingError
 
 
 class OutputRoutingTests(unittest.TestCase):

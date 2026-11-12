@@ -2,7 +2,7 @@ import struct
 import unittest
 from unittest.mock import Mock
 
-from remotevoice.broker_protocol import BrokerConnection, BrokerProtocolError, control_body_size
+from remontevoice.broker_protocol import BrokerConnection, BrokerProtocolError, control_body_size
 
 
 def frame(command, body=b'', magic=b'RVMB', version=1):

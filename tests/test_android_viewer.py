@@ -5,7 +5,7 @@ import re
 import unittest
 
 
-SOURCE = Path(__file__).resolve().parents[1] / 'android/app/src/main/java/dev/remotevoice/android/MainActivity.java'
+SOURCE = Path(__file__).resolve().parents[1] / 'android/app/src/main/java/dev/remontevoice/android/MainActivity.java'
 
 
 class AndroidViewerDiagnosticsTests(unittest.TestCase):

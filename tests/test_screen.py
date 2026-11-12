@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import Image
 
-from remotevoice import screen
+from remontevoice import screen
 
 
 def synthetic_frame():
@@ -46,17 +46,17 @@ class ScreenEncodingTests(unittest.TestCase):
                 screen.encode_screen_jpeg(image)
 
     def test_primary_grab_is_mocked_and_capture_errors_are_fixed_codes(self):
-        with patch("remotevoice.screen.capture_primary_image", return_value=Image.new("RGB", (32, 18))) as grab:
+        with patch("remontevoice.screen.capture_primary_image", return_value=Image.new("RGB", (32, 18))) as grab:
             self.assertTrue(screen.capture_primary_jpeg().startswith(b"\xff\xd8"))
             grab.assert_called_once_with(screen.SCREEN_SIZE)
-        with patch("remotevoice.screen.capture_primary_image", side_effect=RuntimeError("PRIVATE WINDOW CONTENT")):
+        with patch("remontevoice.screen.capture_primary_image", side_effect=RuntimeError("PRIVATE WINDOW CONTENT")):
             with self.assertRaises(screen.ScreenError) as raised:
                 screen.capture_primary_jpeg()
             self.assertEqual(str(raised.exception), "capture_failed")
 
 
     def test_detail_capture_uses_bounded_native_surface_and_never_pillow_grab(self):
-        with patch("remotevoice.screen.capture_primary_image", return_value=Image.new("RGB",(1920,1200))) as grab:
+        with patch("remontevoice.screen.capture_primary_image", return_value=Image.new("RGB",(1920,1200))) as grab:
             frame=screen.capture_primary_jpeg(detail=True)
             grab.assert_called_once_with(screen.DETAIL_SCREEN_SIZE)
             with Image.open(io.BytesIO(frame)) as image:
@@ -82,13 +82,13 @@ class ScreenTicketTests(unittest.TestCase):
     def test_ticket_expires_at_fifteen_seconds_and_replacement_revokes_previous(self):
         store = screen.ScreenTicketStore()
         session = object()
-        with patch("remotevoice.screen.time.monotonic", return_value=10):
+        with patch("remontevoice.screen.time.monotonic", return_value=10):
             old_ticket = store.issue(session, "10.0.0.1")
             ticket = store.issue(session, "10.0.0.1")
         self.assertNotEqual(old_ticket, ticket)
-        with patch("remotevoice.screen.time.monotonic", return_value=24.99):
+        with patch("remontevoice.screen.time.monotonic", return_value=24.99):
             self.assertFalse(store.consume(old_ticket, session, "10.0.0.1"))
-        with patch("remotevoice.screen.time.monotonic", return_value=25):
+        with patch("remontevoice.screen.time.monotonic", return_value=25):
             self.assertFalse(store.consume(ticket, session, "10.0.0.1"))
         ticket = store.issue(session, "10.0.0.1")
         store.revoke()
@@ -208,7 +208,7 @@ class DetailScreenTests(unittest.IsolatedAsyncioTestCase):
         with Image.new("RGB", (1920,1200), "white") as image:
             draw=ImageDraw.Draw(image)
             for y in range(0,1200,24):
-                draw.text((20,y), "RemoteVoice source code readable at native resolution 0123456789", fill="navy")
+                draw.text((20,y), "RemonteVoice source code readable at native resolution 0123456789", fill="navy")
             encoded=screen.encode_screen_jpeg(image, detail=True)
         self.assertLessEqual(len(encoded),256*1024)
         with Image.open(io.BytesIO(encoded)) as decoded:

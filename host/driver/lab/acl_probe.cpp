@@ -1,4 +1,4 @@
-// Private guest probe. Opens only the exact RemoteVoice lab KS filter.
+// Private guest probe. Opens only the exact RemonteVoice lab KS filter.
 // cl /nologo /std:c++17 /EHsc /W3 /WX /MT acl_probe.cpp /link setupapi.lib advapi32.lib
 #define NOMINMAX
 #include <windows.h>
@@ -16,7 +16,7 @@
 
 namespace {
 constexpr wchar_t kRoot[] = L"ROOT\\MEDIA\\0000";
-constexpr wchar_t kHardware[] = L"ROOT\\RemoteVoiceAudio";
+constexpr wchar_t kHardware[] = L"ROOT\\RemonteVoiceAudio";
 constexpr ULONG kBegin = 1, kWrite = 2, kEnd = 3, kKeepalive = 4;
 
 class Report {
@@ -24,11 +24,11 @@ class Report {
     size_t remaining_ = 32768;
 public:
     Report() {
-        const wchar_t* directory = L"C:\\Windows\\Temp\\RemoteVoiceLab-20261025";
+        const wchar_t* directory = L"C:\\Windows\\Temp\\RemonteVoiceLab-20261025";
         if (!CreateDirectoryW(directory, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) return;
         const DWORD attributes = GetFileAttributesW(directory);
         if (attributes == INVALID_FILE_ATTRIBUTES || !(attributes & FILE_ATTRIBUTE_DIRECTORY)) return;
-        _wfopen_s(&file_, L"C:\\Windows\\Temp\\RemoteVoiceLab-20261025\\acl-probe.txt", L"w");
+        _wfopen_s(&file_, L"C:\\Windows\\Temp\\RemonteVoiceLab-20261025\\acl-probe.txt", L"w");
     }
     ~Report() { if (file_) fclose(file_); }
     explicit operator bool() const { return file_ != nullptr; }
@@ -278,7 +278,7 @@ void run(Context& context) {
 int main() {
     Report report;
     if (!report) return 1;
-    report.log("RemoteVoice private KS per-request ACL probe; report capped at 32768 bytes.\n");
+    report.log("RemonteVoice private KS per-request ACL probe; report capped at 32768 bytes.\n");
     Context context(report);
     bool passed = false;
     try { run(context); passed = true; }

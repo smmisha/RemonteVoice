@@ -23,7 +23,7 @@ if(@($plan.broker_args).Count -ne 1 -or $plan.broker_args[0] -cne '--lab-muted-o
 [void][guid]::Parse($plan.operation_id)
 if((Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLower() -cne $plan.script_sha256){throw 'Worker changed'}
 $programFiles=[Environment]::GetFolderPath('ProgramFiles')
-$target=[IO.Path]::GetFullPath((Join-Path $programFiles ('RemoteVoice-AdmissionLab-'+$plan.label)))
+$target=[IO.Path]::GetFullPath((Join-Path $programFiles ('RemonteVoice-AdmissionLab-'+$plan.label)))
 if($plan.target -cne $target -or [IO.Path]::GetDirectoryName($target) -cne $programFiles){throw 'Unexpected target'}
 $source=[IO.Path]::GetFullPath($plan.source)
 $package=Join-Path $target 'package'
@@ -82,7 +82,7 @@ function Assert-Administrator {
 }
 function Get-OwnedProcesses {
     $result=@()
-    foreach($process in @(Get-CimInstance Win32_Process -Filter "Name='RemoteVoice.exe' OR Name='RemoteVoiceBroker.exe'")){
+    foreach($process in @(Get-CimInstance Win32_Process -Filter "Name='RemonteVoice.exe' OR Name='RemonteVoiceBroker.exe'")){
         if([string]::IsNullOrEmpty($process.ExecutablePath)){throw 'Process image ownership unavailable'}
         if($process.ExecutablePath.StartsWith($target+'\',[StringComparison]::OrdinalIgnoreCase)){$result += $process}
     }
@@ -151,7 +151,7 @@ try{
         Set-Acl -LiteralPath $item.FullName -AclObject $childAcl
     }
     Assert-Package $package
-    $broker=Start-Process -FilePath (Join-Path $package 'RemoteVoiceBroker.exe') -ArgumentList '--lab-muted-only' -WorkingDirectory $package -WindowStyle Hidden -PassThru
+    $broker=Start-Process -FilePath (Join-Path $package 'RemonteVoiceBroker.exe') -ArgumentList '--lab-muted-only' -WorkingDirectory $package -WindowStyle Hidden -PassThru
     [void]$broker.Handle
     $report.broker_pid=$broker.Id;$report.status='broker_started';Save-Receipt
     # The model runs the limited, muted client separately while this worker waits.

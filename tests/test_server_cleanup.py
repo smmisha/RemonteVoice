@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from remotevoice.server import RemoteVoiceServer
+from remontevoice.server import RemonteVoiceServer
 
 
 _CLOSED = object()
@@ -74,7 +74,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
                 self.state_on_restore.append((self.server._client_active, self.server._audio_session))
                 self.restored.set()
 
-        self.server = RemoteVoiceServer(
+        self.server = RemonteVoiceServer(
             "127.0.0.1", 8765, "fake-capture", "fake-playback", Path("."), pairing, status
         )
         self.server._loop = asyncio.get_running_loop()
@@ -90,7 +90,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.gather(self.task, return_exceptions=True)
 
     async def start(self, audio):
-        with patch("remotevoice.server.AudioBridge", return_value=audio):
+        with patch("remontevoice.server.AudioBridge", return_value=audio):
             self.task = asyncio.create_task(self.server._handle_client(self.socket))
             await asyncio.wait_for(self.connected.wait(), 1)
 
@@ -132,7 +132,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio.diagnostic_id = 'b' * 32
         audio.stop = MagicMock()
         await self.start(audio)
-        with self.assertLogs('remotevoice.server', level='INFO') as records:
+        with self.assertLogs('remontevoice.server', level='INFO') as records:
             await self.socket.close()
             await asyncio.wait_for(self.task, 1)
         summary = [r for r in records.output if 'audio_session_end ' in r]
@@ -166,7 +166,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio = CleanupAudio()
         audio.stop = MagicMock()
         await self.start(audio)
-        with patch('remotevoice.server.LOGGER.info', side_effect=RuntimeError('failed log sink')):
+        with patch('remontevoice.server.LOGGER.info', side_effect=RuntimeError('failed log sink')):
             await self.socket.close()
             await asyncio.wait_for(self.task, 1)
         audio.stop.assert_called_once()
@@ -177,7 +177,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio = CleanupAudio()
         audio.diagnostic_id = 'c' * 32
         audio.assert_progress = MagicMock(side_effect=RuntimeError('private endpoint'))
-        with self.assertLogs('remotevoice.server', level='INFO') as records:
+        with self.assertLogs('remontevoice.server', level='INFO') as records:
             await self.start(audio)
             await asyncio.wait_for(self.task, 1)
         event = [r for r in records.output if 'audio_session_failure stage=audio_progress' in r]
@@ -192,9 +192,9 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio.start = lambda: release.wait(2)
         self.server.on_session_start = lambda: True
         try:
-            with patch('remotevoice.server._AUDIO_START_TIMEOUT', 0.02), patch(
-                'remotevoice.server.AudioBridge', return_value=audio
-            ), self.assertLogs('remotevoice.server', level='ERROR'):
+            with patch('remontevoice.server._AUDIO_START_TIMEOUT', 0.02), patch(
+                'remontevoice.server.AudioBridge', return_value=audio
+            ), self.assertLogs('remontevoice.server', level='ERROR'):
                 await asyncio.wait_for(self.server._handle_client(self.socket), 1)
             self.assertTrue(self.restored.is_set())
             self.assertTrue(self.server._stop_requested.is_set())
@@ -205,7 +205,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio = CleanupAudio()
         audio.stop = MagicMock(side_effect=RuntimeError("synthetic cleanup failure"))
         await self.start(audio)
-        with self.assertLogs("remotevoice.server", level="ERROR"):
+        with self.assertLogs("remontevoice.server", level="ERROR"):
             await self.socket.close()
             await asyncio.wait_for(self.task, 1)
 
@@ -218,7 +218,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.server._client_lock.locked())
         replacement = CleanupSocket()
         self.server.pairing.authenticate.reset_mock()
-        with patch("remotevoice.server.AudioBridge") as replacement_audio:
+        with patch("remontevoice.server.AudioBridge") as replacement_audio:
             await self.server._handle_client(replacement)
         self.assertEqual(replacement.close_code, 1012)
         self.server.pairing.authenticate.assert_not_called()
@@ -240,8 +240,8 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
         audio.stop = stop
         await self.start(audio)
         try:
-            with patch("remotevoice.server._AUDIO_STOP_TIMEOUT", 0.05):
-                with self.assertLogs("remotevoice.server", level="ERROR"):
+            with patch("remontevoice.server._AUDIO_STOP_TIMEOUT", 0.05):
+                with self.assertLogs("remontevoice.server", level="ERROR"):
                     await self.socket.close()
                     await asyncio.wait_for(self.restored.wait(), 0.5)
                     self.assertTrue(await asyncio.to_thread(entered.wait, 0.5))
@@ -250,7 +250,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
                     self.assertTrue(self.server._client_lock.locked())
                     replacement = CleanupSocket()
                     self.server.pairing.authenticate.reset_mock()
-                    with patch("remotevoice.server.AudioBridge") as replacement_audio:
+                    with patch("remontevoice.server.AudioBridge") as replacement_audio:
                         await asyncio.wait_for(self.server._handle_client(replacement), 0.2)
                     self.assertEqual(replacement.close_code, 4002)
                     self.assertEqual(replacement.recv_calls, 0)
@@ -268,7 +268,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_stop_request_rejects_replacement_before_audio_starts(self):
         self.server.stop()
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             await asyncio.wait_for(self.server._handle_client(self.socket), 1)
         audio.assert_not_called()
         self.server.pairing.authenticate.assert_not_called()
@@ -333,8 +333,8 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(prepare=prepare):
                 self.server.on_session_start = prepare
                 self.socket = CleanupSocket()
-                with patch("remotevoice.server.AudioBridge") as audio:
-                    with self.assertLogs("remotevoice.server", level="ERROR"):
+                with patch("remontevoice.server.AudioBridge") as audio:
+                    with self.assertLogs("remontevoice.server", level="ERROR"):
                         await asyncio.wait_for(self.server._handle_client(self.socket), 1)
                 audio.assert_not_called()
                 self.assertEqual(self.socket.close_code, 1011)
@@ -348,7 +348,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
             return True
 
         self.server.on_session_start = prepare
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             await asyncio.wait_for(self.server._handle_client(self.socket), 1)
         audio.assert_not_called()
         self.assertEqual(self.socket.close_code, 1012)
@@ -370,9 +370,9 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
 
         self.server.on_session_start = prepare
         try:
-            with patch("remotevoice.server._SESSION_START_TIMEOUT", 0.05):
-                with patch("remotevoice.server.AudioBridge") as audio:
-                    with self.assertLogs("remotevoice.server", level="ERROR"):
+            with patch("remontevoice.server._SESSION_START_TIMEOUT", 0.05):
+                with patch("remontevoice.server.AudioBridge") as audio:
+                    with self.assertLogs("remontevoice.server", level="ERROR"):
                         await asyncio.wait_for(self.server._handle_client(self.socket), 1)
             audio.assert_not_called()
             self.assertTrue(entered.is_set())
@@ -400,7 +400,7 @@ class ServerCleanupTests(unittest.IsolatedAsyncioTestCase):
 
         self.server.on_session_start = prepare
         try:
-            with patch("remotevoice.server.AudioBridge") as audio:
+            with patch("remontevoice.server.AudioBridge") as audio:
                 self.task = asyncio.create_task(self.server._handle_client(self.socket))
                 self.assertTrue(await asyncio.to_thread(entered.wait, 1))
                 self.task.cancel()

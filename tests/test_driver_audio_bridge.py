@@ -7,9 +7,9 @@ from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from remotevoice.audio import AudioBridge, AudioStopError
-from remotevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot
-from remotevoice.driver_audio_bridge import DriverAudioBridge
+from remontevoice.audio import AudioBridge, AudioStopError
+from remontevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot
+from remontevoice.driver_audio_bridge import DriverAudioBridge
 
 
 FRAME = struct.pack("<480f", *([0.25] * 480))
@@ -97,8 +97,8 @@ class DriverAudioBridgeTests(unittest.TestCase):
         return bridge
 
     def validate(self, bridge):
-        with patch("remotevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
-                id="exact-render-id", name="RemoteVoice Render", isloopback=True)):
+        with patch("remontevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
+                id="exact-render-id", name="RemonteVoice Render", isloopback=True)):
             bridge._validate_audio_devices()
 
     def event(self):
@@ -107,14 +107,14 @@ class DriverAudioBridgeTests(unittest.TestCase):
         return event
 
     def test_constructor_is_inert_and_startup_confirms_muted_sink_without_speaker(self):
-        with patch("remotevoice.driver_audio_bridge.sc.get_microphone") as capture, patch(
-                "remotevoice.driver_audio_bridge.sc.get_speaker") as speaker:
+        with patch("remontevoice.driver_audio_bridge.sc.get_microphone") as capture, patch(
+                "remontevoice.driver_audio_bridge.sc.get_speaker") as speaker:
             bridge = self.bridge()
             self.factory.assert_not_called()
             self.observe.assert_not_called()
             capture.assert_not_called()
             speaker.assert_not_called()
-            capture.return_value = SimpleNamespace(id="exact-render-id", name="RemoteVoice Render")
+            capture.return_value = SimpleNamespace(id="exact-render-id", name="RemonteVoice Render")
             with patch.object(bridge, "_launch_audio_workers") as launch:
                 bridge.start()
             launch.assert_called_once()
@@ -135,8 +135,8 @@ class DriverAudioBridgeTests(unittest.TestCase):
             with self.subTest(status=status, ids=ids):
                 self.status = status
                 bridge = self.bridge(*ids)
-                with patch("remotevoice.driver_audio_bridge.sc.get_microphone") as capture, patch(
-                        "remotevoice.driver_audio_bridge.sc.get_speaker") as speaker:
+                with patch("remontevoice.driver_audio_bridge.sc.get_microphone") as capture, patch(
+                        "remontevoice.driver_audio_bridge.sc.get_speaker") as speaker:
                     with self.assertRaises(RuntimeError):
                         bridge._validate_audio_devices()
                     capture.assert_not_called()
@@ -145,9 +145,9 @@ class DriverAudioBridgeTests(unittest.TestCase):
 
     def test_friendly_virtual_name_cannot_substitute_for_exact_returned_capture_id(self):
         bridge = self.bridge()
-        with patch("remotevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
-                id="physical-id", name="RemoteVoice Render")), patch(
-                "remotevoice.driver_audio_bridge.sc.get_speaker") as speaker:
+        with patch("remontevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
+                id="physical-id", name="RemonteVoice Render")), patch(
+                "remontevoice.driver_audio_bridge.sc.get_speaker") as speaker:
             with self.assertRaises(RuntimeError):
                 bridge._validate_audio_devices()
             speaker.assert_not_called()
@@ -196,7 +196,7 @@ class DriverAudioBridgeTests(unittest.TestCase):
         self.assertTrue(bridge._phone_frames.empty())
         bridge.submit_phone_audio(FRAME)
         self.sink.on_submit = bridge._stop.set
-        with patch("remotevoice.driver_audio_bridge.sc.get_speaker") as speaker:
+        with patch("remontevoice.driver_audio_bridge.sc.get_speaker") as speaker:
             bridge._play_phone_audio()
         speaker.assert_not_called()
         self.assertEqual(self.sink.payloads, [FRAME])
@@ -262,7 +262,7 @@ class DriverAudioBridgeTests(unittest.TestCase):
             except StopIteration:
                 pass
             return Mock()
-        with patch("remotevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch):
+        with patch("remontevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch):
             bridge._play_phone_audio()
         self.assertTrue(bridge._stop.is_set())
         self.assertFalse(bridge.microphone_enabled)
@@ -299,8 +299,8 @@ class DriverAudioBridgeTests(unittest.TestCase):
         bridge = self.bridge()
         self.sink.control_result = False
         self.sink.stop_fails = True
-        with patch("remotevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
-                id="exact-render-id", name="RemoteVoice Render")):
+        with patch("remontevoice.driver_audio_bridge.sc.get_microphone", return_value=SimpleNamespace(
+                id="exact-render-id", name="RemonteVoice Render")):
             with self.assertRaises(AudioStopError):
                 bridge._validate_audio_devices()
         self.assertIs(bridge._sink, self.sink)

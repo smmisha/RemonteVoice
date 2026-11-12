@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from websockets.exceptions import ConnectionClosedOK
 
-from remotevoice.server import RemoteVoiceServer
+from remontevoice.server import RemonteVoiceServer
 
 
 class ReadySocket:
@@ -103,7 +103,7 @@ class ClientAudioReadyTests(unittest.IsolatedAsyncioTestCase):
             def submit_phone_audio(self, payload):
                 events.append("microphone_frame")
 
-        self.audio_patch = patch("remotevoice.server.AudioBridge", FakeAudio)
+        self.audio_patch = patch("remontevoice.server.AudioBridge", FakeAudio)
         self.audio_patch.start()
         self.addCleanup(self.audio_patch.stop)
 
@@ -112,7 +112,7 @@ class ClientAudioReadyTests(unittest.IsolatedAsyncioTestCase):
             self.events.append("prepare")
             return True
 
-        server = RemoteVoiceServer(
+        server = RemonteVoiceServer(
             "127.0.0.1", 8765, "fake-capture", "fake-playback", Path("unused"),
             self.pairing, self.events.append, on_session_start=MagicMock(side_effect=prepare),
         )
@@ -168,7 +168,7 @@ class ClientAudioReadyTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_readiness_timeout_restores_routes_before_audio_cleanup(self):
         websocket = ReadySocket(self.auth(audio_ready=True), self.events)
-        with patch("remotevoice.server._AUDIO_READY_TIMEOUT", 0.02, create=True):
+        with patch("remontevoice.server._AUDIO_READY_TIMEOUT", 0.02, create=True):
             await asyncio.wait_for(self.server._handle_client(websocket), 1)
         self.assertEqual(websocket.close_code, 4004)
         self.assertNotIn("start", self.events)

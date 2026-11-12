@@ -17,7 +17,7 @@ existing authenticated Guest API succeeded; machine execution policy was not cha
 ## Initial package — historical result
 
 Observed on 2026-10-25: Windows 10 build 19045 guest rebooted with kernel test
-signing active. Signed RemoteVoice driver installed as ROOT\MEDIA\0000 with
+signing active. Signed RemonteVoice driver installed as ROOT\MEDIA\0000 with
 CMResult=0, problem=0 and DN_STARTED set; no restart required. These observations
 do not establish Windows 11 compatibility, production acceptance or PCM quality.
 
@@ -25,7 +25,7 @@ do not establish Windows 11 compatibility, production acceptance or PCM quality.
 `run-guest-probe.ps1` checks the exact guest and binary SHA256 before bounded
 execution through the already configured, read-only test-input share.
 
-`pcm_probe.cpp` selects the exact RemoteVoice hardware/filter and PnP ancestry,
+`pcm_probe.cpp` selects the exact RemonteVoice hardware/filter and PnP ancestry,
 tests a 900 Hz signal, underflow/resume, END and lease expiry. `loopback_probe.cpp`
 checks synthetic render/loopback and zero-render silence. Neither opens physical
 microphones nor changes default audio routes. Both compile with `/W3 /WX`.
@@ -40,7 +40,7 @@ activation. The exact cause of the earlier transient copy failures is unknown.
 
 The guest subsequently stopped answering Tools RPC and ordinary shutdown. The
 saved pre-test snapshot was restored. The follow-up guest report confirms zero
-RemoteVoice drivers/devices, zero matching test certificates in guest machine
+RemonteVoice drivers/devices, zero matching test certificates in guest machine
 Root/TrustedPublisher, and no TESTSIGNING BCD entry. The guest clock reverted to
 the snapshot's earlier date; the host observation is dated 2026-10-25. Final
 VMware listing confirms zero running VMs and no configured temporary shares.
@@ -70,7 +70,7 @@ The corrected package passed actual guest tests:
   Returning to the administrator token allowed KEEPALIVE/END on the original
   lease. Token and handle cleanup passed.
 - Exact published INF identity was verified before removal. PnP device and
-  package removal returned exit0; no present RemoteVoice devices, driver service
+  package removal returned exit0; no present RemonteVoice devices, driver service
   or published INF remained.
 
 The earlier access failure is retained as historical evidence, not a current

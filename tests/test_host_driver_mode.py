@@ -3,13 +3,13 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from remotevoice.audio_backend import DriverBackendSnapshot
-from remotevoice.host_app import HostWindow
-from remotevoice.driver_route_recovery import DriverRouteRecovery, DriverRecoveryError
-from remotevoice.installed_driver_host import InstalledDriverHost
+from remontevoice.audio_backend import DriverBackendSnapshot
+from remontevoice.host_app import HostWindow
+from remontevoice.driver_route_recovery import DriverRouteRecovery, DriverRecoveryError
+from remontevoice.installed_driver_host import InstalledDriverHost
 import test_host_output_routing as fixtures
 import test_driver_backend_runtime as runtime_fixtures
-from remotevoice.driver_backend_runtime import DriverBackendRuntime
+from remontevoice.driver_backend_runtime import DriverBackendRuntime
 
 headless_window = fixtures.headless_window
 
@@ -32,10 +32,10 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
         owner=controller();window._driver_runtime_factory=Mock();window._driver_runtime=owner
         window._driver_ready=True
         window.config_data={'playback_device_id':'legacy-aux','capture_device_id':'legacy-b1'}
-        with patch('remotevoice.host_app.OutputRoute') as output, \
-             patch('remotevoice.host_app.RemoteVoiceServer') as server, \
-             patch('remotevoice.host_app.save_driver_recovery') as save, \
-             patch('remotevoice.host_app.threading.Thread'):
+        with patch('remontevoice.host_app.OutputRoute') as output, \
+             patch('remontevoice.host_app.RemonteVoiceServer') as server, \
+             patch('remontevoice.host_app.save_driver_recovery') as save, \
+             patch('remontevoice.host_app.threading.Thread'):
             window._start_host()
         self.mixer_configure.assert_not_called()
         output.assert_called_once_with('own-render','laptop')
@@ -97,9 +97,9 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
         runtime=Mock(snapshot=SimpleNamespace(cleanup_confirmed=False))
         runtime.stop.side_effect=lambda **_:setattr(runtime.snapshot,'cleanup_confirmed',True)
         runtime.observe.return_value=DriverBackendSnapshot(1,True,True,'render','mic',0.0)
-        with patch('remotevoice.installed_driver_host.PinnedInstalledManifest',return_value=manifest), \
-             patch('remotevoice.installed_driver_host.WindowsDriverEndpointInventory') as inventory, \
-             patch('remotevoice.installed_driver_host.DriverBackendRuntime',return_value=runtime) as make_runtime:
+        with patch('remontevoice.installed_driver_host.PinnedInstalledManifest',return_value=manifest), \
+             patch('remontevoice.installed_driver_host.WindowsDriverEndpointInventory') as inventory, \
+             patch('remontevoice.installed_driver_host.DriverBackendRuntime',return_value=runtime) as make_runtime:
             try:
                 window._prepare_driver_runtime()
                 self.assertTrue(entered.wait(1))
@@ -131,7 +131,7 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
         window._driver_runtime_factory=Mock(return_value=controller())
         window._driver_ready=True;window._driver_cancelled=False
         server=SimpleNamespace(run=lambda:object())
-        with patch('remotevoice.host_app.asyncio.run'):
+        with patch('remontevoice.host_app.asyncio.run'):
             HostWindow._run_server(window,server,0)
         owner.stop.assert_called_once_with(timeout=1.0)
         self.assertFalse(window._driver_ready);self.assertTrue(window._driver_cancelled)
@@ -217,9 +217,9 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
     def test_cold_recovery_uses_saved_own_routes_even_with_broker_unavailable(self):
         window=headless_window();window.server_running=False
         plan=DriverRouteRecovery('own-render','laptop','own-mic','physical-mic')
-        with patch('remotevoice.host_app.load_driver_recovery',return_value=plan), \
-             patch('remotevoice.host_app.OutputRoute') as output, \
-             patch('remotevoice.host_app.InputRoute') as input_route:
+        with patch('remontevoice.host_app.load_driver_recovery',return_value=plan), \
+             patch('remontevoice.host_app.OutputRoute') as output, \
+             patch('remontevoice.host_app.InputRoute') as input_route:
             self.assertTrue(window._recover_waiting_routes())
         output.assert_called_once_with('own-render','laptop')
         input_route.assert_called_once_with('own-mic','physical-mic')
@@ -229,9 +229,9 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
     def test_recovery_failure_still_attempts_other_routes_and_blocks_listener(self):
         window=headless_window();window.server_running=False
         plan=DriverRouteRecovery('own-render','laptop','own-mic','physical-mic')
-        with patch('remotevoice.host_app.load_driver_recovery',return_value=plan), \
-             patch('remotevoice.host_app.OutputRoute') as output, \
-             patch('remotevoice.host_app.InputRoute') as input_route:
+        with patch('remontevoice.host_app.load_driver_recovery',return_value=plan), \
+             patch('remontevoice.host_app.OutputRoute') as output, \
+             patch('remontevoice.host_app.InputRoute') as input_route:
             output.return_value.restore.side_effect=RuntimeError('device missing')
             self.assertFalse(window._recover_waiting_routes())
         input_route.return_value.restore.assert_called_once()
@@ -242,9 +242,9 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
         window=fixtures.HostOutputRoutingTests.configured_window(self)
         owner=controller();window._driver_runtime_factory=Mock();window._driver_runtime=owner
         window._driver_ready=True
-        with patch('remotevoice.host_app.OutputRoute'), \
-             patch('remotevoice.host_app.save_driver_recovery',side_effect=DriverRecoveryError()), \
-             patch('remotevoice.host_app.RemoteVoiceServer') as server:
+        with patch('remontevoice.host_app.OutputRoute'), \
+             patch('remontevoice.host_app.save_driver_recovery',side_effect=DriverRecoveryError()), \
+             patch('remontevoice.host_app.RemonteVoiceServer') as server:
             window._start_host()
         server.assert_not_called();self.safety_class.start.assert_not_called()
         self.assertFalse(window.server_running)
@@ -261,7 +261,7 @@ class HostDriverModeTests(fixtures.HeadlessHostTests):
     def test_invalid_user_inputs_do_not_boot_driver_or_leave_stop_inaccessible(self):
         window=fixtures.HostOutputRoutingTests.configured_window(self)
         window._driver_runtime_factory=Mock();window.ip_var.set('')
-        with patch('remotevoice.host_app.messagebox.showerror'):
+        with patch('remontevoice.host_app.messagebox.showerror'):
             window._start_host()
         window._driver_runtime_factory.assert_not_called()
         owner=controller();window._driver_runtime=owner;window._driver_ready=True

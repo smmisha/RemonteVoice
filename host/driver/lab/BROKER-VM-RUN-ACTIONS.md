@@ -9,14 +9,14 @@ Earlier PERM-026/027 cover the signed lab
 driver and its kernel tests. No additional authority comes from this document.
 
 The original, now unavailable target was the Delo-Win10-22H2 guest and its
-RemoteVoice-before-main-tests-20261025 snapshot. No other VM/OS download, physical
+RemonteVoice-before-main-tests-20261025 snapshot. No other VM/OS download, physical
 host installation or Windows host protection change is included.
 
 ## Bounded effects
 
 1. Check VM identity, current memory, snapshot and power state before starting.
-   Copy only the explicit, hash-bound RemoteVoicePair build into
-   `C:\Program Files\RemoteVoice-Lab` in the guest. Preserve the exact source and
+   Copy only the explicit, hash-bound RemonteVoicePair build into
+   `C:\Program Files\RemonteVoice-Lab` in the guest. Preserve the exact source and
    build manifest; a repaired build may be substituted only with a fresh manifest
    and unchanged test scope. No private signing key, account password or unrelated
    source/configuration is transferred.

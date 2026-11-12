@@ -25,6 +25,6 @@ try {
     & $gradle --no-daemon --console=plain @tasks
     if ($LASTEXITCODE -ne 0) { throw "Gradle failed ($LASTEXITCODE)" }
     New-Item -ItemType Directory -Path 'preview' -Force | Out-Null
-    Copy-Item -LiteralPath 'app/build/outputs/apk/debug/app-debug.apk' -Destination 'preview/RemoteVoice-Android-debug.apk' -Force
-    Get-FileHash -LiteralPath 'preview/RemoteVoice-Android-debug.apk' -Algorithm SHA256
+    Copy-Item -LiteralPath 'app/build/outputs/apk/debug/app-debug.apk' -Destination 'preview/RemonteVoice-Android-debug.apk' -Force
+    Get-FileHash -LiteralPath 'preview/RemonteVoice-Android-debug.apk' -Algorithm SHA256
 } finally { Pop-Location }

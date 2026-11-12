@@ -1,4 +1,4 @@
-name: Build Android RemoteVoice
+name: Build Android RemonteVoice
 
 on:
   push:
@@ -33,13 +33,13 @@ jobs:
         run: ./android/scripts/signing-manifest.ps1 -ApkPath android/app/build/outputs/apk/release/app-release-unsigned.apk -OutputDirectory android/build/unsigned-release-artifact -Unsigned
       - uses: actions/upload-artifact@v7
         with:
-          name: RemoteVoice-Android-unsigned-release-not-installable
+          name: RemonteVoice-Android-unsigned-release-not-installable
           path: android/build/unsigned-release-artifact/
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: RemoteVoice-Android-checks
+          name: RemonteVoice-Android-checks
           path: |
             android/app/build/reports/tests/testDebugUnitTest/
             android/app/build/reports/lint-results-debug.*
@@ -52,7 +52,7 @@ jobs:
       github.event_name != 'pull_request' &&
       github.event.repository.fork == false &&
       github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
-      vars.REMOTEVOICE_ANDROID_RELEASE_ENABLED == 'true'
+      vars.REMONTEVOICE_ANDROID_RELEASE_ENABLED == 'true'
     environment: android-release
     runs-on: ubuntu-latest
     steps:
@@ -71,11 +71,11 @@ jobs:
       - name: Stage explicitly configured signing material
         id: signing
         env:
-          RELEASE_KEYSTORE_B64: ${{ secrets.REMOTEVOICE_ANDROID_KEYSTORE_B64 }}
-          RELEASE_STORE_PASSWORD: ${{ secrets.REMOTEVOICE_ANDROID_STORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.REMOTEVOICE_ANDROID_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.REMOTEVOICE_ANDROID_KEY_PASSWORD }}
-          EXPECTED_CERTIFICATE_SHA256: ${{ vars.REMOTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
+          RELEASE_KEYSTORE_B64: ${{ secrets.REMONTEVOICE_ANDROID_KEYSTORE_B64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.REMONTEVOICE_ANDROID_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.REMONTEVOICE_ANDROID_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.REMONTEVOICE_ANDROID_KEY_PASSWORD }}
+          EXPECTED_CERTIFICATE_SHA256: ${{ vars.REMONTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
         shell: python
         run: |
           import base64, os, pathlib, re
@@ -94,32 +94,32 @@ jobs:
               material = base64.b64decode(os.environ['RELEASE_KEYSTORE_B64'], validate=True)
           except Exception:
               raise SystemExit('Invalid release keystore encoding.') from None
-          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'remotevoice-release-keystore'
+          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'remontevoice-release-keystore'
           with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'wb') as stream:
               stream.write(material)
           with pathlib.Path(os.environ['GITHUB_ENV']).open('a', encoding='utf-8') as stream:
-              stream.write('REMOTEVOICE_RELEASE_STORE_FILE=' + str(path) + '\n')
+              stream.write('REMONTEVOICE_RELEASE_STORE_FILE=' + str(path) + '\n')
           with output.open('a', encoding='utf-8') as stream:
               stream.write('configured=true\n')
       - name: Build with the configured stable release identity
         if: steps.signing.outputs.configured == 'true'
         working-directory: android
         env:
-          REMOTEVOICE_RELEASE_STORE_PASSWORD: ${{ secrets.REMOTEVOICE_ANDROID_STORE_PASSWORD }}
-          REMOTEVOICE_RELEASE_KEY_ALIAS: ${{ secrets.REMOTEVOICE_ANDROID_KEY_ALIAS }}
-          REMOTEVOICE_RELEASE_KEY_PASSWORD: ${{ secrets.REMOTEVOICE_ANDROID_KEY_PASSWORD }}
-          REMOTEVOICE_RELEASE_CERT_SHA256: ${{ vars.REMOTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
+          REMONTEVOICE_RELEASE_STORE_PASSWORD: ${{ secrets.REMONTEVOICE_ANDROID_STORE_PASSWORD }}
+          REMONTEVOICE_RELEASE_KEY_ALIAS: ${{ secrets.REMONTEVOICE_ANDROID_KEY_ALIAS }}
+          REMONTEVOICE_RELEASE_KEY_PASSWORD: ${{ secrets.REMONTEVOICE_ANDROID_KEY_PASSWORD }}
+          REMONTEVOICE_RELEASE_CERT_SHA256: ${{ vars.REMONTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
         run: gradle --no-daemon --no-configuration-cache --console=plain :app:assembleRelease
       - name: Verify actual APK signature and write public identity manifest
         if: steps.signing.outputs.configured == 'true'
         shell: pwsh
         env:
-          REMOTEVOICE_RELEASE_CERT_SHA256: ${{ vars.REMOTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
+          REMONTEVOICE_RELEASE_CERT_SHA256: ${{ vars.REMONTEVOICE_ANDROID_RELEASE_CERT_SHA256 }}
         run: ./android/scripts/signing-manifest.ps1 -ApkPath android/app/build/outputs/apk/release/app-release.apk -OutputDirectory android/build/signed-release-artifact
       - uses: actions/upload-artifact@v7
         if: steps.signing.outputs.configured == 'true'
         with:
-          name: RemoteVoice-Android-signed-release-candidate
+          name: RemonteVoice-Android-signed-release-candidate
           path: android/build/signed-release-artifact/
           if-no-files-found: error
       - name: Remove ephemeral release keystore
@@ -127,5 +127,5 @@ jobs:
         shell: python
         run: |
           import os, pathlib
-          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'remotevoice-release-keystore'
+          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'remontevoice-release-keystore'
           path.unlink(missing_ok=True)

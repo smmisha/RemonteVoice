@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from remotevoice.certificates import load_or_create_identity
+from remontevoice.certificates import load_or_create_identity
 
 
 class CertificateTests(unittest.TestCase):

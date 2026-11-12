@@ -10,8 +10,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import numpy as np
 
-from remotevoice.audio import AudioBridge
-from remotevoice.protocol import FRAME_SAMPLES, SYSTEM_CHANNELS
+from remontevoice.audio import AudioBridge
+from remontevoice.protocol import FRAME_SAMPLES, SYSTEM_CHANNELS
 
 
 class AudioBackpressureTests(unittest.IsolatedAsyncioTestCase):
@@ -43,7 +43,7 @@ class AudioBackpressureTests(unittest.IsolatedAsyncioTestCase):
         worker = threading.Thread(target=capture, name='rv-test-blocked-capture', daemon=True)
         bridge._threads.append(worker)
         try:
-            with patch('remotevoice.audio.sc.get_microphone') as source:
+            with patch('remontevoice.audio.sc.get_microphone') as source:
                 recorder = source.return_value.recorder.return_value.__enter__.return_value
                 recorder.record.return_value = np.zeros((FRAME_SAMPLES, SYSTEM_CHANNELS), dtype='<f4')
                 worker.start()

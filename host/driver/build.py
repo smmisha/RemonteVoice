@@ -59,15 +59,15 @@ def main() -> None:
                     *map(str, sources)])
     libs = wdk / f"Lib/{KIT_VERSION}/km/x64"
     wdf = wdk / "Lib/wdf/kmdf/x64/1.15"
-    binary = OUT / "RemoteVoiceAudio.sys"
+    binary = OUT / "RemonteVoiceAudio.sys"
     run("link", [str(linker), "/nologo", "/driver", "/subsystem:native,10.00", "/machine:x64",
                  "/entry:FxDriverEntry", "/nodefaultlib", "/integritycheck", "/debug", "/opt:ref", "/opt:icf",
-                 f"/out:{binary}", f"/pdb:{OUT}/RemoteVoiceAudio.pdb",
+                 f"/out:{binary}", f"/pdb:{OUT}/RemonteVoiceAudio.pdb",
                  *(str(OUT / (p.stem + ".obj")) for p in sources),
                  *(str(libs / (name + ".lib")) for name in
                    ("ntoskrnl", "hal", "wmilib", "portcls", "stdunk", "libcntpr", "ksguid", "BufferOverflowK")),
                  *(str(wdf / (name + ".lib")) for name in ("WdfDriverEntry", "WdfLdr"))])
-    inf = OUT / "RemoteVoiceAudio.inf"
+    inf = OUT / "RemonteVoiceAudio.inf"
     inf.write_bytes((HERE / inf.name).read_bytes())
     run("infverif", [str(verifier), "/u", str(inf)])
     run("imports", [str(compiler.with_name("dumpbin.exe")), "/imports", str(binary)])

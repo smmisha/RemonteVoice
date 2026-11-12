@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from test_host_output_routing import headless_window
-from remotevoice.audio_backend import AudioBackend
-from remotevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot
+from remontevoice.audio_backend import AudioBackend
+from remontevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot
 
 
 class MixerHealthTests(unittest.TestCase):
@@ -32,7 +32,7 @@ class MixerHealthTests(unittest.TestCase):
         window.microphone_guard = MagicMock()
         old = DriverBackendSnapshot(1, True, True, 'render', 'capture', 1.0)
         window._audio_backend = DriverAudioBackend(lambda: old, clock=lambda: 2.0)
-        with patch('remotevoice.audio_backend.standard_mixer_running') as mixer:
+        with patch('remontevoice.audio_backend.standard_mixer_running') as mixer:
             window._check_safety_guard(0)
         mixer.assert_not_called()
         window.server.stop.assert_called_once()
@@ -56,7 +56,7 @@ class MixerHealthTests(unittest.TestCase):
         window._audio_backend = AudioBackend(True)
         window.input_route = MagicMock()
         window.microphone_guard = MagicMock()
-        with patch('remotevoice.audio_backend.standard_mixer_running', return_value=False):
+        with patch('remontevoice.audio_backend.standard_mixer_running', return_value=False):
             window._check_safety_guard(window._server_generation)
         window.server.stop.assert_called_once()
         window.output_route.restore.assert_called_once()
@@ -69,7 +69,7 @@ class MixerHealthTests(unittest.TestCase):
     def test_healthy_mixer_keeps_session_and_schedules_next_read_only_poll(self):
         window = headless_window()
         window._audio_backend = AudioBackend(True)
-        with patch('remotevoice.audio_backend.standard_mixer_running', return_value=True):
+        with patch('remontevoice.audio_backend.standard_mixer_running', return_value=True):
             window._check_safety_guard(0)
         window.server.stop.assert_not_called()
         window.output_route.restore.assert_not_called()
@@ -79,7 +79,7 @@ class MixerHealthTests(unittest.TestCase):
         for generation, standard in ((1, True), (0, False)):
             window = headless_window()
             window._audio_backend = AudioBackend(standard)
-            with patch('remotevoice.audio_backend.standard_mixer_running') as poll:
+            with patch('remontevoice.audio_backend.standard_mixer_running') as poll:
                 window._check_safety_guard(generation)
             poll.assert_not_called()
             window.server.stop.assert_not_called()

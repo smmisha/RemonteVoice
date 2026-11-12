@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 
 
-SOURCE = Path(__file__).resolve().parents[1] / 'android/app/src/main/java/dev/remotevoice/android/PhoneAudioEngine.java'
+SOURCE = Path(__file__).resolve().parents[1] / 'android/app/src/main/java/dev/remontevoice/android/PhoneAudioEngine.java'
 
 
 class AndroidMicrophoneDiagnosticsTests(unittest.TestCase):
@@ -57,7 +57,7 @@ class AndroidMicrophoneDiagnosticsTests(unittest.TestCase):
         report = self.recording.split('void reportMicrophoneDiagnostics()', 1)[1].split('public void run()', 1)[0]
         for name in ('microphone_stats captured_packets=', 'capture_rms=', 'capture_peak=', 'clipped_samples=', 'diagnostic_log_ms='):
             self.assertIn(name, report)
-        self.assertIn('android.util.Log.i("RemoteVoiceSession", message)', report)
+        self.assertIn('android.util.Log.i("RemonteVoiceSession", message)', report)
         self.assertIn('microphoneLogNanos = System.nanoTime()-logStarted;', report)
         for value in ('pcm', 'frame', 'exception.', 'credential', 'getRoutedDevice', 'record.', 'progress.advanced()'):
             self.assertNotIn(value, report)

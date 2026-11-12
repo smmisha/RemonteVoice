@@ -4,8 +4,8 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from remotevoice.audio_backend import DriverBackendSnapshot
-from remotevoice.installed_driver_host import (
+from remontevoice.audio_backend import DriverBackendSnapshot
+from remontevoice.installed_driver_host import (
     InstalledDriverHost, InstalledDriverHostError, InstalledDriverHostStopError,
 )
 
@@ -96,11 +96,11 @@ class InstalledDriverHostTests(unittest.TestCase):
         self.runtime = Runtime(self.events)
         self.inventory = object()
         self.patches = [
-            patch("remotevoice.installed_driver_host.PinnedInstalledManifest", return_value=self.manifest),
-            patch("remotevoice.installed_driver_host.WindowsDriverEndpointInventory", return_value=self.inventory),
-            patch("remotevoice.installed_driver_host.DriverBackendRuntime", return_value=self.runtime),
-            patch("remotevoice.installed_driver_host.BrokerMicSink"),
-            patch("remotevoice.installed_driver_host.open_installed_broker_client"),
+            patch("remontevoice.installed_driver_host.PinnedInstalledManifest", return_value=self.manifest),
+            patch("remontevoice.installed_driver_host.WindowsDriverEndpointInventory", return_value=self.inventory),
+            patch("remontevoice.installed_driver_host.DriverBackendRuntime", return_value=self.runtime),
+            patch("remontevoice.installed_driver_host.BrokerMicSink"),
+            patch("remontevoice.installed_driver_host.open_installed_broker_client"),
         ]
         self.make_manifest, self.make_inventory, self.make_runtime, self.make_sink, self.open_client = [
             patcher.start() for patcher in self.patches]

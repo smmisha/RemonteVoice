@@ -9,10 +9,10 @@ VM disks, tools and user files were retained. The original `Downloads/Windows.is
 is referenced by existing configurations but no longer exists on disk; the
 already installed guest Windows does not need that ISO for ordinary startup.
 
-`Delo-Win10-22H2-test` has the snapshot `RemoteVoice-before-tests-20261025`, but
+`Delo-Win10-22H2-test` has the snapshot `RemonteVoice-before-tests-20261025`, but
 resumed to an "operating system wasn't found" error and was powered off. The
 user then explicitly selected the primary `Delo-Win10-22H2` with a snapshot.
-`RemoteVoice-before-main-tests-20261025` was confirmed before resuming it; the
+`RemonteVoice-before-main-tests-20261025` was confirmed before resuming it; the
 primary Windows desktop and running VMware Tools were observed. Tools metadata
 identifies Windows 10 Home 22H2 x64 build 19045.6456. Both disk chains passed
 read-only consistency checks. The initial automatic approval rejection due to
@@ -45,7 +45,7 @@ These observations are time-dependent, not reservations or proof of VM readiness
 ### Authorized preparation, resumed 25 October 2026
 
 The user approved preparing VM files and the official ISO on C:, without boot.
-The actual destination is `C:/Users/User/RemoteVoice-TestVM`. Its resolved
+The actual destination is `C:/Users/User/RemonteVoice-TestVM`. Its resolved
 drive is checked before writing. The partial download on M: was copied with hash
 verification and retained, then resumed on actual C:. Full ISO acceptance requires
 the published Microsoft SHA-256 match; the download receipt records its outcome.

@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from remotevoice.host_app import matching_virtual_microphone
-from remotevoice.input_routing import InputRoutingError
-from remotevoice.audio_backend import AudioBackendError
+from remontevoice.host_app import matching_virtual_microphone
+from remontevoice.input_routing import InputRoutingError
+from remontevoice.audio_backend import AudioBackendError
 import test_host_output_routing as fixtures
 
 
@@ -46,7 +46,7 @@ class HostInputRoutingTests(fixtures.HeadlessHostTests):
         window.output_route = None
         window.ip_var.set("")
         window.mute_local_microphone_var.set(False)
-        with patch("remotevoice.host_app.OutputRoute") as output:
+        with patch("remontevoice.host_app.OutputRoute") as output:
             self.assertTrue(window._recover_waiting_routes())
         output.return_value.restore.assert_called_once()
         self.input_class.return_value.restore.assert_called_once()
@@ -59,9 +59,9 @@ class HostInputRoutingTests(fixtures.HeadlessHostTests):
 
     def test_start_prevents_the_vm_feedback_route_before_accepting_phone(self):
         window = fixtures.HostOutputRoutingTests.configured_window(self)
-        with patch("remotevoice.host_app.OutputRoute"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ), patch("remotevoice.host_app.threading.Thread"):
+        with patch("remontevoice.host_app.OutputRoute"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ), patch("remontevoice.host_app.threading.Thread"):
             window._start_host()
         self.mixer_configure.assert_called_once_with("Voicemeeter Out B1", "Voicemeeter AUX Input")
         self.assertTrue(window.server_running)
@@ -69,9 +69,9 @@ class HostInputRoutingTests(fixtures.HeadlessHostTests):
     def test_mixer_failure_does_not_open_listener(self):
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         self.mixer_configure.side_effect = AudioBackendError("failed")
-        with patch("remotevoice.host_app.OutputRoute"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ) as server, patch("remotevoice.host_app.messagebox.showerror") as error:
+        with patch("remontevoice.host_app.OutputRoute"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ) as server, patch("remontevoice.host_app.messagebox.showerror") as error:
             window._start_host()
         server.assert_not_called()
         error.assert_called_once_with("Не удалось разделить аудиоканалы", "failed", parent=window)

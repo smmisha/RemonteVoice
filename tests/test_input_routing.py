@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from remotevoice.input_routing import InputRoute, InputRoutingError
+from remontevoice.input_routing import InputRoute, InputRoutingError
 
 
 class InputRoutingTests(unittest.TestCase):
@@ -84,8 +84,8 @@ class InputRoutingTests(unittest.TestCase):
             route.restore()
 
     def test_default_dependencies_are_microphone_specific(self):
-        with patch("remotevoice.input_routing.get_default_microphone") as getter, patch(
-            "remotevoice.input_routing.set_default_microphone"
+        with patch("remontevoice.input_routing.get_default_microphone") as getter, patch(
+            "remontevoice.input_routing.set_default_microphone"
         ) as setter:
             route = InputRoute("phone-mic", "laptop-mic")
             self.assertIs(route._get, getter)

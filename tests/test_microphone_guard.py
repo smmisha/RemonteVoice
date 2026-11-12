@@ -4,7 +4,7 @@ import uuid
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice.microphone_guard import MicrophoneGuardError, MicrophoneMuteGuard, _Journal
+from remontevoice.microphone_guard import MicrophoneGuardError, MicrophoneMuteGuard, _Journal
 
 
 class MemoryJournal:
@@ -33,7 +33,7 @@ class MemoryJournal:
 class MicrophoneGuardTests(unittest.TestCase):
     def setUp(self):
         self.journal = MemoryJournal()
-        factory = patch("remotevoice.microphone_guard._Journal", return_value=self.journal)
+        factory = patch("remontevoice.microphone_guard._Journal", return_value=self.journal)
         self.addCleanup(factory.stop)
         factory.start()
         self.muted = False
@@ -180,7 +180,7 @@ class MicrophoneGuardTests(unittest.TestCase):
         guard = self.guard()
         guard.activate()
         with self.assertRaises(MicrophoneGuardError), patch(
-            "remotevoice.microphone_guard.set_microphone_mute"
+            "remontevoice.microphone_guard.set_microphone_mute"
         ) as native_set:
             MicrophoneMuteGuard.recover(Path("unused.json"))
         native_set.assert_not_called()
@@ -189,8 +189,8 @@ class MicrophoneGuardTests(unittest.TestCase):
     def test_recovery_after_simulated_process_exit_restores_journal(self):
         self.journal.saved = ("physical-mic", False)
         self.muted = True
-        with patch("remotevoice.microphone_guard.get_microphone_mute", self.get_mute), patch(
-            "remotevoice.microphone_guard.set_microphone_mute", self.set_mute
+        with patch("remontevoice.microphone_guard.get_microphone_mute", self.get_mute), patch(
+            "remontevoice.microphone_guard.set_microphone_mute", self.set_mute
         ):
             MicrophoneMuteGuard.recover(Path("unused.json"))
         self.assertFalse(self.muted)
@@ -199,7 +199,7 @@ class MicrophoneGuardTests(unittest.TestCase):
 
     def test_recovery_failure_retains_journal_and_releases_lock(self):
         self.journal.saved = ("physical-mic", False)
-        with patch("remotevoice.microphone_guard.get_microphone_mute", side_effect=OSError("gone")):
+        with patch("remontevoice.microphone_guard.get_microphone_mute", side_effect=OSError("gone")):
             with self.assertRaises(MicrophoneGuardError):
                 MicrophoneMuteGuard.recover(Path("unused.json"))
         self.assertEqual(self.journal.saved, ("physical-mic", False))

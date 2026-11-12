@@ -8,9 +8,9 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 import numpy as np
 
-from remotevoice.audio_compression import encode_system_frame
-from remotevoice.audio import AudioBridge
-from remotevoice.protocol import ProtocolError
+from remontevoice.audio_compression import encode_system_frame
+from remontevoice.audio import AudioBridge
+from remontevoice.protocol import ProtocolError
 
 
 class LosslessAudioTests(unittest.TestCase):
@@ -50,8 +50,8 @@ class LosslessAudioTests(unittest.TestCase):
         completed.result.side_effect=lambda timeout:bridge._stop.set()
         def dispatch(coroutine,loop):
             asyncio.run(coroutine);return completed
-        with patch('remotevoice.audio.sc.get_microphone') as source, patch(
-                'remotevoice.audio.asyncio.run_coroutine_threadsafe',side_effect=dispatch):
+        with patch('remontevoice.audio.sc.get_microphone') as source, patch(
+                'remontevoice.audio.asyncio.run_coroutine_threadsafe',side_effect=dispatch):
             source.return_value.recorder.return_value.__enter__.return_value.record.return_value=np.zeros((480,2),dtype='<f4')
             bridge._capture_system_audio()
         packet=socket.send.await_args.args[0]

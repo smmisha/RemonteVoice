@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from remotevoice.host_app import HostWindow
+from remontevoice.host_app import HostWindow
 from test_host_output_routing import headless_window
 
 

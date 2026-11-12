@@ -4,19 +4,19 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from remotevoice import host_app
+from remontevoice import host_app
 
 
 class WindowIconPathTests(unittest.TestCase):
     def test_source_tree_icon_is_available(self):
         icon = host_app.window_icon_path()
         self.assertIsNotNone(icon)
-        self.assertEqual(icon.name, "RemoteVoice.ico")
+        self.assertEqual(icon.name, "RemonteVoice.ico")
         self.assertTrue(icon.is_file())
 
     def test_bundled_icon_wins_over_source_tree(self):
         with tempfile.TemporaryDirectory() as temporary:
-            bundled = Path(temporary) / "RemoteVoice.ico"
+            bundled = Path(temporary) / "RemonteVoice.ico"
             bundled.write_bytes(b"ico")
             with patch.object(host_app.sys, "_MEIPASS", temporary, create=True):
                 self.assertEqual(host_app.window_icon_path(), bundled)
@@ -26,7 +26,7 @@ class WindowIconPathTests(unittest.TestCase):
             with patch.object(host_app.sys, "_MEIPASS", temporary, create=True):
                 icon = host_app.window_icon_path()
         self.assertIsNotNone(icon)
-        self.assertEqual(icon.name, "RemoteVoice.ico")
+        self.assertEqual(icon.name, "RemonteVoice.ico")
         self.assertTrue(icon.is_file())
 
 

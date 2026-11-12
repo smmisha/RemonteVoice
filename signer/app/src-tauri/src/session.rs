@@ -13,7 +13,7 @@ use tauri::Emitter;
 
 const META_KEY: &str = "session.meta";
 const BANKS: [&str; 2] = ["a", "b"];
-const SELFTEST_SERVICE: &str = "dev.remotevoice.iresign.v1.selftest";
+const SELFTEST_SERVICE: &str = "dev.remontevoice.iresign.v1.selftest";
 const MAX_CHUNKS: usize = 24;
 const CHUNK_DATA_BYTES: usize = 1400;
 const MAX_RECORD_BYTES: usize = MAX_CHUNKS * CHUNK_DATA_BYTES;

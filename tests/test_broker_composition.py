@@ -3,15 +3,15 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from remotevoice.broker_composition import (
+from remontevoice.broker_composition import (
     BrokerInstallation, InstalledBrokerApplication, BrokerCompositionError, broker_pipe_name,
     InstalledBrokerClient,
 )
-from remotevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
+from remontevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
 
-BROKER = r'C:\Program Files\RemoteVoice\RemoteVoiceBroker.exe'
-CLIENT = r'C:\Program Files\RemoteVoice\RemoteVoice.exe'
-RUNTIME = r'C:\Program Files\RemoteVoice\_internal\python314.dll'
+BROKER = r'C:\Program Files\RemonteVoice\RemonteVoiceBroker.exe'
+CLIENT = r'C:\Program Files\RemonteVoice\RemonteVoice.exe'
+RUNTIME = r'C:\Program Files\RemonteVoice\_internal\python314.dll'
 PINS = {BROKER:'a'*64, CLIENT:'b'*64, RUNTIME:'c'*64}
 def installation(): return BrokerInstallation(BROKER, CLIENT, PINS, r'ROOT\MEDIA\0000')
 def accounts(elevated=True):
@@ -27,8 +27,8 @@ class CompositionTests(unittest.TestCase):
         owner=InstalledBrokerApplication(installation(),lab_muted_only=True)
         broker=MicBroker(authenticate=lambda:peer,policy=BrokerPolicy(peer,lambda _:True),
                          writer_factory=owner._make_writer)
-        with patch('remotevoice.broker_composition.DriverMicWriter') as writer, \
-             patch('remotevoice.broker_composition.WindowsDriverMicTransport') as driver:
+        with patch('remontevoice.broker_composition.DriverMicWriter') as writer, \
+             patch('remontevoice.broker_composition.WindowsDriverMicTransport') as driver:
             capability=broker.connect()
             self.assertTrue(broker.is_available())
             self.assertTrue(broker.set_microphone_enabled(capability,True))
@@ -39,8 +39,8 @@ class CompositionTests(unittest.TestCase):
             writer.assert_not_called();driver.assert_not_called()
 
     def test_normal_writer_factory_remains_inert_and_lab_flag_is_strict(self):
-        with patch('remotevoice.broker_composition.DriverMicWriter') as writer, \
-             patch('remotevoice.broker_composition.WindowsDriverMicTransport') as driver:
+        with patch('remontevoice.broker_composition.DriverMicWriter') as writer, \
+             patch('remontevoice.broker_composition.WindowsDriverMicTransport') as driver:
             owner=InstalledBrokerApplication(installation())
             self.assertIs(owner._make_writer(),writer.return_value)
             writer.assert_called_once();driver.assert_not_called()
@@ -71,12 +71,12 @@ class CompositionTests(unittest.TestCase):
         bundle.verify.side_effect=lambda:events.append('pin')
         host.serve.side_effect=lambda _:events.append('serve')
         bundle.close.side_effect=lambda:events.append('unpin')
-        with patch('remotevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
-             patch('remotevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
-             patch('remotevoice.broker_composition.WindowsPeerVerifier',return_value=verifier) as verify, \
-             patch('remotevoice.broker_composition.NativePipeServer',return_value=listener) as listen, \
-             patch('remotevoice.broker_composition.BrokerHost',return_value=host) as make_host, \
-             patch('remotevoice.broker_composition.DriverMicWriter') as writer:
+        with patch('remontevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
+             patch('remontevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
+             patch('remontevoice.broker_composition.WindowsPeerVerifier',return_value=verifier) as verify, \
+             patch('remontevoice.broker_composition.NativePipeServer',return_value=listener) as listen, \
+             patch('remontevoice.broker_composition.BrokerHost',return_value=host) as make_host, \
+             patch('remontevoice.broker_composition.DriverMicWriter') as writer:
             owner=InstalledBrokerApplication(installation()); owner.serve(threading.Event())
             verify.assert_called_once_with('S-1-5-21-1000','S-1-5-5-1-21',1,{CLIENT.lower():'b'*64})
             self.assertEqual(listen.call_args.args[1],'S-1-5-5-1-21')
@@ -87,9 +87,9 @@ class CompositionTests(unittest.TestCase):
         listener.close.assert_not_called();verifier.close.assert_not_called()
 
     def test_non_elevated_does_not_create_pipe_or_open_driver(self):
-        with patch('remotevoice.broker_composition.observe_broker_accounts',return_value=accounts(False)), \
-             patch('remotevoice.broker_composition.NativePipeServer') as listener, \
-             patch('remotevoice.broker_composition.WindowsProtectedBundle') as bundle:
+        with patch('remontevoice.broker_composition.observe_broker_accounts',return_value=accounts(False)), \
+             patch('remontevoice.broker_composition.NativePipeServer') as listener, \
+             patch('remontevoice.broker_composition.WindowsProtectedBundle') as bundle:
             owner=InstalledBrokerApplication(installation())
             with self.assertRaises(BrokerCompositionError): owner.serve(threading.Event())
             listener.assert_not_called();bundle.assert_not_called()
@@ -100,9 +100,9 @@ class CompositionTests(unittest.TestCase):
         bundle.verify.side_effect=RuntimeError('bad pin')
         bundle.close.side_effect=RuntimeError('still open')
         bundle.cleanup_confirmed=False
-        with patch('remotevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
-             patch('remotevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
-             patch('remotevoice.broker_composition.NativePipeServer') as listener:
+        with patch('remontevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
+             patch('remontevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
+             patch('remontevoice.broker_composition.NativePipeServer') as listener:
             owner=InstalledBrokerApplication(installation())
             with self.assertRaises(RuntimeError): owner.serve(threading.Event())
             listener.assert_not_called()
@@ -114,11 +114,11 @@ class CompositionTests(unittest.TestCase):
         for error in (Fatal(),RuntimeError('unknown session')):
             bundle,host,verifier,listener=self.mocks()
             host.serve.side_effect=error;host.cleanup_confirmed=False
-            with patch('remotevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
-                 patch('remotevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
-                 patch('remotevoice.broker_composition.WindowsPeerVerifier',return_value=verifier), \
-                 patch('remotevoice.broker_composition.NativePipeServer',return_value=listener), \
-                 patch('remotevoice.broker_composition.BrokerHost',return_value=host):
+            with patch('remontevoice.broker_composition.observe_broker_accounts',return_value=accounts()), \
+                 patch('remontevoice.broker_composition.WindowsProtectedBundle',return_value=bundle), \
+                 patch('remontevoice.broker_composition.WindowsPeerVerifier',return_value=verifier), \
+                 patch('remontevoice.broker_composition.NativePipeServer',return_value=listener), \
+                 patch('remontevoice.broker_composition.BrokerHost',return_value=host):
                 owner=InstalledBrokerApplication(installation())
                 with self.assertRaises(type(error)) as raised: owner.serve(threading.Event())
             self.assertIs(raised.exception,error)
@@ -127,7 +127,7 @@ class CompositionTests(unittest.TestCase):
 
     def test_pipe_name_uses_client_observation_from_both_link_directions(self):
         self.assertEqual(broker_pipe_name(accounts(True)),broker_pipe_name(accounts(False)))
-        self.assertTrue(broker_pipe_name(accounts()).startswith('RemoteVoice-Mic-'))
+        self.assertTrue(broker_pipe_name(accounts()).startswith('RemonteVoice-Mic-'))
 
 
 class ClientCompositionTests(unittest.TestCase):
@@ -136,11 +136,11 @@ class ClientCompositionTests(unittest.TestCase):
         self.verifier=Mock();self.pipe=Mock(cleanup_confirmed=True)
         self.client=Mock(cleanup_confirmed=True)
         self.patches=[
-            patch('remotevoice.broker_composition.observe_broker_accounts',return_value=accounts(False)),
-            patch('remotevoice.broker_composition.WindowsProtectedBundle',return_value=self.bundle),
-            patch('remotevoice.broker_composition.WindowsPeerVerifier',return_value=self.verifier),
-            patch('remotevoice.broker_composition.NativePipeClient.connect',return_value=self.pipe),
-            patch('remotevoice.broker_composition.BrokerPipeClient',return_value=self.client)]
+            patch('remontevoice.broker_composition.observe_broker_accounts',return_value=accounts(False)),
+            patch('remontevoice.broker_composition.WindowsProtectedBundle',return_value=self.bundle),
+            patch('remontevoice.broker_composition.WindowsPeerVerifier',return_value=self.verifier),
+            patch('remontevoice.broker_composition.NativePipeClient.connect',return_value=self.pipe),
+            patch('remontevoice.broker_composition.BrokerPipeClient',return_value=self.client)]
         self.mocks=[p.start() for p in self.patches]
         for p in self.patches:self.addCleanup(p.stop)
 
@@ -156,7 +156,7 @@ class ClientCompositionTests(unittest.TestCase):
         for resource in (self.client,self.pipe,self.verifier,self.bundle):resource.close.assert_called_once()
 
     def test_failed_handshake_retains_partial_client_until_retry_confirmed(self):
-        from remotevoice.broker_pipe_client import BrokerClientOpenError
+        from remontevoice.broker_pipe_client import BrokerClientOpenError
         partial=Mock(cleanup_confirmed=False)
         partial.close.side_effect=RuntimeError('pending')
         self.mocks[4].side_effect=BrokerClientOpenError(partial)

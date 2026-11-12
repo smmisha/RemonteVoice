@@ -4,7 +4,7 @@ import unittest
 from dataclasses import FrozenInstanceError, replace
 from unittest.mock import patch
 
-from remotevoice.windows_broker_accounts import (
+from remontevoice.windows_broker_accounts import (
     AccountIdentity, BrokerAccountPair, BrokerAccountError, observe_broker_accounts, _AccountApi,
 )
 
@@ -148,7 +148,7 @@ class BrokerAccountTests(unittest.TestCase):
                 replace(FULL, **changes)
 
     def test_native_library_loading_is_lazy(self):
-        with patch("remotevoice.windows_broker_accounts._AccountApi") as native:
+        with patch("remontevoice.windows_broker_accounts._AccountApi") as native:
             observe_broker_accounts(api=Api())
         native.assert_not_called()
 

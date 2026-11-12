@@ -10,11 +10,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, parse_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, parse_manifest
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = ROOT / "host"
-SPEC = HOST / "RemoteVoicePair.spec"
+SPEC = HOST / "RemonteVoicePair.spec"
 MODULE_SPEC = importlib.util.spec_from_file_location("build_windows_pair", HOST / "build_windows_pair.py")
 builder = importlib.util.module_from_spec(MODULE_SPEC)
 MODULE_SPEC.loader.exec_module(builder)
@@ -56,7 +56,7 @@ class PairSpecTests(unittest.TestCase):
         executables = [call for call in calls if call[0] == "exe"]
         self.assertEqual(len(executables), 2)
         for call, entry, name, console in zip(executables, ("broker_launcher", "launcher"),
-                                            ("RemoteVoiceBroker", "RemoteVoice"), (True, False)):
+                                            ("RemonteVoiceBroker", "RemonteVoice"), (True, False)):
             self.assertEqual([script[0] for script in call[1][1]], ["pyi_rth_inspect", entry])
             self.assertEqual(call[2]["name"], name)
             self.assertIs(call[2]["console"], console)
@@ -94,8 +94,8 @@ class PairBuilderTests(unittest.TestCase):
         for name in ("config", "cache", "work", "dist"):
             self.assertTrue((output / name).is_dir())
         self.assertEqual(options["env"]["PYINSTALLER_CONFIG_DIR"], str(output / "config"))
-        package = output / "dist" / "RemoteVoicePair"
-        for name, value in (("RemoteVoiceBroker.exe", b"broker"), ("RemoteVoice.exe", b"client"),
+        package = output / "dist" / "RemonteVoicePair"
+        for name, value in (("RemonteVoiceBroker.exe", b"broker"), ("RemonteVoice.exe", b"client"),
                             ("_internal/base_library.zip", b"base"), ("_internal/python314.dll", b"runtime")):
             path = package / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,11 +111,11 @@ class PairBuilderTests(unittest.TestCase):
             manifest = parse_manifest((package / MANIFEST_NAME).read_bytes())
             report = json.loads((output / "build-report.json").read_text("utf-8"))
             self.assertEqual(report["components"], {name: manifest.files[name] for name in
-                                                   ("RemoteVoiceBroker.exe", "RemoteVoice.exe")})
+                                                   ("RemonteVoiceBroker.exe", "RemonteVoice.exe")})
             self.assertEqual(report["runtime_files"]["_internal/python314.dll"],
                              hashlib.sha256(b"runtime").hexdigest())
-            self.assertIn("RemoteVoicePair.spec", report["source_sha256"])
-            self.assertIn("remotevoice/broker_entry.py", report["source_sha256"])
+            self.assertIn("RemonteVoicePair.spec", report["source_sha256"])
+            self.assertIn("remontevoice/broker_entry.py", report["source_sha256"])
             self.assertTrue((output / "pyinstaller.log").is_file())
             self.assertFalse((package / "build-report.json").exists())
             with self.assertRaises(FileExistsError):
@@ -141,7 +141,7 @@ class PairBuilderTests(unittest.TestCase):
             with patch.object(builder, "_sources", side_effect=[{"source": "a"}, {"source": "b"}]):
                 with self.assertRaisesRegex(RuntimeError, "sources changed"):
                     builder.build_pair(output, runner=self.fake_bundler)
-            self.assertFalse((output / "dist" / "RemoteVoicePair" / MANIFEST_NAME).exists())
+            self.assertFalse((output / "dist" / "RemonteVoicePair" / MANIFEST_NAME).exists())
 
     def test_cli_requires_output_and_does_not_run_without_it(self):
         with patch.object(builder, "build_pair") as build, patch("sys.stderr"):

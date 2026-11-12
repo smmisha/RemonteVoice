@@ -6,9 +6,9 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from remotevoice import broker_lab_probe as probe
-from remotevoice.broker_pipe_client import BrokerClientOpenError, BrokerObservation
-from remotevoice.windows_driver_endpoints import DriverEndpointPair
+from remontevoice import broker_lab_probe as probe
+from remontevoice.broker_pipe_client import BrokerClientOpenError, BrokerObservation
+from remontevoice.windows_driver_endpoints import DriverEndpointPair
 
 
 class Client:

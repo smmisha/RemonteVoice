@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import numpy as np
 
-from remotevoice.windows_audio_capture import guard_capture_silence
+from remontevoice.windows_audio_capture import guard_capture_silence
 
 
 class CaptureSilenceGuardTests(unittest.TestCase):

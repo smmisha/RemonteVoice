@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from remotevoice.driver_mic import (
+from remontevoice.driver_mic import (
     DriverBufferFull, DriverMicError, DriverMicStopError, DriverMicWriter,
     MicCommand, MicWriterState, encode_command, float_mono_to_pcm16,
 )
@@ -314,16 +314,16 @@ class DriverMicWorkerTests(unittest.TestCase):
 
 class WindowsDriverTransportTests(unittest.TestCase):
     def test_no_device_or_ambiguous_metadata_never_opens_a_filter(self):
-        from remotevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
+        from remontevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
         for endpoints in ([], [DriverEndpoint("a"), DriverEndpoint("b")]):
             api = Mock(); api.discover.return_value = endpoints
-            with patch("remotevoice.windows_driver_transport._WindowsApi", return_value=api):
+            with patch("remontevoice.windows_driver_transport._WindowsApi", return_value=api):
                 with self.assertRaises(DriverMicError): WindowsDriverMicTransport()
             api.kernel.CreateFileW.assert_not_called()
 
     def test_real_ioctl_header_buffer_and_close_are_formed_correctly(self):
         import ctypes
-        from remotevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
+        from remontevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
         api = Mock(); api.discover.return_value = [DriverEndpoint("verified root filter")]
         api.kernel.CreateFileW.return_value = 123
         packet = encode_command(MicCommand.BEGIN, 1, b"n" * 16)
@@ -334,26 +334,26 @@ class WindowsDriverTransportTests(unittest.TestCase):
             self.assertEqual(ctypes.string_at(data, data_size), packet)
             return 1
         api.kernel.DeviceIoControl.side_effect = check
-        with patch("remotevoice.windows_driver_transport._WindowsApi", return_value=api):
+        with patch("remontevoice.windows_driver_transport._WindowsApi", return_value=api):
             transport = WindowsDriverMicTransport(); transport.send(packet); transport.close(); transport.close()
         api.kernel.CloseHandle.assert_called_once_with(123)
 
     def test_only_queue_busy_is_classified_as_packet_drop(self):
-        from remotevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
+        from remontevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
         api = Mock(); api.discover.return_value = [DriverEndpoint("verified root filter")]
         api.kernel.CreateFileW.return_value = 123; api.kernel.DeviceIoControl.return_value = 0
-        with patch("remotevoice.windows_driver_transport._WindowsApi", return_value=api):
+        with patch("remontevoice.windows_driver_transport._WindowsApi", return_value=api):
             transport = WindowsDriverMicTransport()
             for code, error in ((170, DriverBufferFull), (32, DriverMicError), (5, DriverMicError), (6, DriverMicError)):
-                with patch("remotevoice.windows_driver_transport.ct.get_last_error", return_value=code, create=True):
+                with patch("remontevoice.windows_driver_transport.ct.get_last_error", return_value=code, create=True):
                     with self.assertRaises(error): transport.send(encode_command(MicCommand.BEGIN, 1, b"n" * 16))
             transport.close()
 
     def test_wrong_thread_cannot_send_or_close_pending_handle(self):
-        from remotevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
+        from remontevoice.windows_driver_transport import DriverEndpoint, WindowsDriverMicTransport
         api = Mock(); api.discover.return_value = [DriverEndpoint("verified root filter")]
         api.kernel.CreateFileW.return_value = 123
-        with patch("remotevoice.windows_driver_transport._WindowsApi", return_value=api):
+        with patch("remontevoice.windows_driver_transport._WindowsApi", return_value=api):
             transport = WindowsDriverMicTransport()
         errors = []
         def wrong_thread():

@@ -2,8 +2,8 @@ import ctypes as ct
 import unittest
 from unittest.mock import patch
 
-from remotevoice.driver_mic import DriverMicError
-from remotevoice.windows_driver_transport import _WindowsApi
+from remontevoice.driver_mic import DriverMicError
+from remontevoice.windows_driver_transport import _WindowsApi
 
 
 class SetupApi:
@@ -53,22 +53,22 @@ class DriverIdentityTests(unittest.TestCase):
     def discover(self, setup):
         api = _WindowsApi.__new__(_WindowsApi)
         api.setup = setup
-        with patch("remotevoice.windows_driver_transport.ct.get_last_error", side_effect=lambda: setup.error, create=True):
+        with patch("remontevoice.windows_driver_transport.ct.get_last_error", side_effect=lambda: setup.error, create=True):
             return api.discover()
 
     def test_requires_exact_hardware_id_and_wave_filter_not_display_name(self):
         setup = SetupApi([
             (r"\\?\unrelated\WaveMicArray1", [r"ROOT\OtherVendor"]),
-            (r"\\?\root\RemoteVoice Microphone", [r"ROOT\RemoteVoiceAudio"]),
-            (r"\\?\root\TopologyMicArray1", [r"ROOT\RemoteVoiceAudio"]),
-            (r"\\?\root\WAVEMICARRAY1", [r"root\remotevoiceaudio"]),
+            (r"\\?\root\RemonteVoice Microphone", [r"ROOT\RemonteVoiceAudio"]),
+            (r"\\?\root\TopologyMicArray1", [r"ROOT\RemonteVoiceAudio"]),
+            (r"\\?\root\WAVEMICARRAY1", [r"root\remontevoiceaudio"]),
         ])
         endpoints = self.discover(setup)
         self.assertEqual([e.path for e in endpoints], [r"\\?\root\WAVEMICARRAY1"])
         self.assertEqual(setup.closed, 1)
 
     def test_mismatching_hardware_id_prefix_does_not_match(self):
-        setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemoteVoiceAudioSpoof"])])
+        setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemonteVoiceAudioSpoof"])])
         self.assertEqual(self.discover(setup), [])
         self.assertEqual(setup.closed, 1)
 
@@ -80,7 +80,7 @@ class DriverIdentityTests(unittest.TestCase):
     def test_malformed_hardware_metadata_or_path_fails_closed(self):
         for options in ({"kind": 1}, {"terminated": False}, {"bad_path": True}):
             with self.subTest(options=options):
-                setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemoteVoiceAudio"])], **options)
+                setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemonteVoiceAudio"])], **options)
                 with self.assertRaises(DriverMicError): self.discover(setup)
                 self.assertEqual(setup.closed, 1)
 
@@ -90,7 +90,7 @@ class DriverIdentityTests(unittest.TestCase):
             self.discover(setup)
 
     def test_property_size_is_bounded_before_allocating_or_reading(self):
-        setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemoteVoiceAudio"])])
+        setup = SetupApi([(r"\\?\root\WaveMicArray1", [r"ROOT\RemonteVoiceAudio"])])
         def oversized(info, interface, detail, size, required, device):
             required._obj.value = 65538; setup.error = 122; return 0
         setup.SetupDiGetDeviceInterfaceDetailW = oversized
@@ -98,8 +98,8 @@ class DriverIdentityTests(unittest.TestCase):
         self.assertEqual(setup.closed, 1)
 
     def test_configured_instance_excludes_another_device_with_same_hardware(self):
-        setup = SetupApi([(r'\\?\one\WaveMicArray1', [r'ROOT\RemoteVoiceAudio']),
-                          (r'\\?\two\WaveMicArray1', [r'ROOT\RemoteVoiceAudio'])])
+        setup = SetupApi([(r'\\?\one\WaveMicArray1', [r'ROOT\RemonteVoiceAudio']),
+                          (r'\\?\two\WaveMicArray1', [r'ROOT\RemonteVoiceAudio'])])
         def instance(info, device, data, capacity, required):
             text = [r'ROOT\MEDIA\0001', r'ROOT\MEDIA\0000'][device._obj.DevInst]
             data.value = text
@@ -107,16 +107,16 @@ class DriverIdentityTests(unittest.TestCase):
             return 1
         setup.SetupDiGetDeviceInstanceIdW = instance
         api = _WindowsApi.__new__(_WindowsApi); api.setup = setup
-        with patch('remotevoice.windows_driver_transport.ct.get_last_error', side_effect=lambda: setup.error, create=True):
+        with patch('remontevoice.windows_driver_transport.ct.get_last_error', side_effect=lambda: setup.error, create=True):
             matches = api.discover(r'ROOT\MEDIA\0000')
         self.assertEqual([e.path for e in matches], [r'\\?\two\WaveMicArray1'])
         self.assertEqual(setup.closed, 1)
 
     def test_instance_query_failure_rejects_before_opening_filter(self):
-        setup = SetupApi([(r'\\?\one\WaveMicArray1', [r'ROOT\RemoteVoiceAudio'])])
+        setup = SetupApi([(r'\\?\one\WaveMicArray1', [r'ROOT\RemonteVoiceAudio'])])
         setup.SetupDiGetDeviceInstanceIdW = lambda *_: 0
         api = _WindowsApi.__new__(_WindowsApi); api.setup = setup
-        with patch('remotevoice.windows_driver_transport.ct.get_last_error', side_effect=lambda: setup.error, create=True):
+        with patch('remontevoice.windows_driver_transport.ct.get_last_error', side_effect=lambda: setup.error, create=True):
             with self.assertRaises(DriverMicError): api.discover(r'ROOT\MEDIA\0000')
         self.assertEqual(setup.closed, 1)
 

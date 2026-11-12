@@ -1,7 +1,7 @@
 """Window supervision for the Voicemeeter Banana mixer (hide it, reveal on request)."""
 import unittest
 
-from remotevoice import voicemeeter_window as vm
+from remontevoice import voicemeeter_window as vm
 
 
 class SelectWindowTests(unittest.TestCase):

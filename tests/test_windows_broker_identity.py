@@ -6,8 +6,8 @@ import unittest
 from dataclasses import replace
 from unittest.mock import patch
 
-from remotevoice.mic_broker import PeerIdentity
-from remotevoice.windows_broker_identity import (
+from remontevoice.mic_broker import PeerIdentity
+from remontevoice.windows_broker_identity import (
     BrokerIdentityFatalError, PeerVerificationError, WindowsPeerVerifier,
     _Ace, _FileInfo, _Security, _TokenIdentity, _WindowsApi,
     _SidAndAttributes, _TokenGroups, _protected, read_current_process_token,
@@ -17,7 +17,7 @@ from remotevoice.windows_broker_identity import (
 USER = "S-1-5-21-1000"
 LOGON = "S-1-5-5-1-42"
 TOKEN = _TokenIdentity(USER, LOGON, 2)
-IMAGE = r"C:\Program Files\RemoteVoice\RemoteVoiceHost.exe"
+IMAGE = r"C:\Program Files\RemonteVoice\RemonteVoiceHost.exe"
 DIGEST = "a" * 64
 PIPE = 0x100000071
 TRUSTED = _Security("S-1-5-18", True, (_Ace(0, 0, 0x10000000, "S-1-5-32-544"),))
@@ -117,7 +117,7 @@ def verifier(api=None, **overrides):
 
 class PeerPolicyTests(unittest.TestCase):
     def test_constructor_is_inert_and_requires_explicit_valid_policy(self):
-        with patch("remotevoice.windows_broker_identity._WindowsApi") as native:
+        with patch("remontevoice.windows_broker_identity._WindowsApi") as native:
             value = verifier()
             value.close()
         native.assert_not_called()
@@ -213,7 +213,7 @@ class PeerPolicyTests(unittest.TestCase):
 
     def test_image_hash_path_installation_root_and_case_policy(self):
         for path, digest in ((IMAGE, "b" * 64), (r"C:\Program Files\Other\Host.exe", DIGEST),
-                             (r"C:\Users\User\Host.exe", DIGEST), (r"\\?\C:\Program Files\RemoteVoice\RemoteVoiceHost.exe", DIGEST)):
+                             (r"C:\Users\User\Host.exe", DIGEST), (r"\\?\C:\Program Files\RemonteVoice\RemonteVoiceHost.exe", DIGEST)):
             with self.subTest(path=path):
                 api = FakeApi()
                 api.image, api.digest = path, digest
@@ -228,7 +228,7 @@ class PeerPolicyTests(unittest.TestCase):
         value.close()
 
     def test_every_component_is_checked_for_reparse_wrong_canonical_path_and_acl(self):
-        paths = ("c:\\", r"c:\program files", r"c:\program files\remotevoice", IMAGE.casefold())
+        paths = ("c:\\", r"c:\program files", r"c:\program files\remontevoice", IMAGE.casefold())
         for path in paths:
             for problem in ("reparse", "path", "owner", "dacl"):
                 with self.subTest(path=path, problem=problem):
@@ -421,7 +421,7 @@ class WindowsNativeSmokeTests(unittest.TestCase):
             # Actual root policies vary. The exception may change the answer
             # only when non-trusted mutation grants contain add-subdirectory.
             if _protected(security, ancestor=True) and not _protected(security):
-                from remotevoice.windows_broker_identity import _MUTATION, _TRUSTED_OWNERS
+                from remontevoice.windows_broker_identity import _MUTATION, _TRUSTED_OWNERS
                 grants = [ace for ace in security.aces if ace.kind == 0 and not ace.flags & 8
                           and ace.sid not in _TRUSTED_OWNERS and ace.mask & _MUTATION]
                 self.assertTrue(grants)

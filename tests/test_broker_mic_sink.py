@@ -4,8 +4,8 @@ import time
 import unittest
 from unittest.mock import Mock
 
-from remotevoice.broker_mic_sink import BrokerMicSink, BrokerSinkError, BrokerSinkStopError
-from remotevoice.broker_pipe_client import BrokerObservation
+from remontevoice.broker_mic_sink import BrokerMicSink, BrokerSinkError, BrokerSinkStopError
+from remontevoice.broker_pipe_client import BrokerObservation
 
 
 def frame(value=0.125):

@@ -11,9 +11,9 @@ from unittest.mock import MagicMock, patch
 
 from websockets.asyncio.client import connect
 
-from remotevoice.pairing import PairingAttemptLimiter, PairingManager
-from remotevoice.protocol import encode_control
-from remotevoice.server import RemoteVoiceServer
+from remontevoice.pairing import PairingAttemptLimiter, PairingManager
+from remontevoice.protocol import encode_control
+from remontevoice.server import RemonteVoiceServer
 
 
 class FakeAudioBridge:
@@ -73,7 +73,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
         self.old_token = self.pairing.authenticate(self.pairing.pairing_pin)
         self.pin = self.pairing.begin_pairing()
         self.stored = (self.root / "paired.json").read_bytes()
-        self.server = RemoteVoiceServer("127.0.0.1", 8765, "fake-capture", "fake-playback", self.root, self.pairing, lambda status: None)
+        self.server = RemonteVoiceServer("127.0.0.1", 8765, "fake-capture", "fake-playback", self.root, self.pairing, lambda status: None)
         self.server._loop = asyncio.get_running_loop()
         self.server._client_lock = asyncio.Lock()
         self.server._stop_event = asyncio.Event()
@@ -98,7 +98,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
             def stop(self):
                 self.callback("audio_error: retired worker")
 
-        with patch("remotevoice.server.AudioBridge", LateErrorAudio):
+        with patch("remontevoice.server.AudioBridge", LateErrorAudio):
             await self.server._handle_client(AdmissionSocket(self.pin))
         self.assertIn("audio_active", statuses)
         self.assertIn("server_ready", statuses)
@@ -113,7 +113,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
             self.assertNotEqual(status, 'iphone_connected_muted', 'Startup waited for generic UI callback')
         self.server.on_audio_status = scoped
         self.server.on_status = generic
-        with patch('remotevoice.server.AudioBridge', FakeAudioBridge):
+        with patch('remontevoice.server.AudioBridge', FakeAudioBridge):
             await self.server._handle_client(AdmissionSocket(self.pin))
         self.assertEqual(observed, ['iphone_connected_muted'])
 
@@ -121,7 +121,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
         await self.server._client_lock.acquire()
         websocket = AdmissionSocket(self.pin)
         try:
-            with patch("remotevoice.server.AudioBridge") as audio:
+            with patch("remontevoice.server.AudioBridge") as audio:
                 await asyncio.wait_for(self.server._handle_client(websocket), 0.2)
             audio.assert_not_called()
             self.assertEqual(websocket.close_code, 4002)
@@ -133,7 +133,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_pending_auth_reserves_slot_without_queuing_another_client(self):
         first = AdmissionSocket(pending=True)
-        with patch("remotevoice.server.AudioBridge", FakeAudioBridge):
+        with patch("remontevoice.server.AudioBridge", FakeAudioBridge):
             task = asyncio.create_task(self.server._handle_client(first))
             try:
                 await asyncio.wait_for(first.receiving.wait(), 1)
@@ -157,7 +157,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_stop_during_pending_auth_does_not_consume_pin(self):
         websocket = AdmissionSocket(pending=True)
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             task = asyncio.create_task(self.server._handle_client(websocket))
             try:
                 await asyncio.wait_for(websocket.receiving.wait(), 1)
@@ -176,7 +176,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
         self.server._attempt_limiter = PairingAttemptLimiter(max_failures=5, window_seconds=60)
         self.server.on_session_start = MagicMock(return_value=True)
         malformed = ("тест", "a" * 129, 12345678, {}, None)
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             for credential in malformed:
                 with self.subTest(kind=type(credential).__name__):
                     websocket = AdmissionSocket(credential)
@@ -215,8 +215,8 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(prepare=prepare):
                 self.server.on_session_start = prepare
                 websocket = AdmissionSocket(self.pin)
-                with patch("remotevoice.server.AudioBridge") as audio:
-                    with self.assertLogs("remotevoice.server", level="ERROR"):
+                with patch("remontevoice.server.AudioBridge") as audio:
+                    with self.assertLogs("remontevoice.server", level="ERROR"):
                         await asyncio.wait_for(self.server._handle_client(websocket), 1)
                 audio.assert_not_called()
                 self.assertEqual(websocket.close_code, 1011)
@@ -237,9 +237,9 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
         self.server.on_session_start = prepare
         websocket = AdmissionSocket(self.pin)
         try:
-            with patch("remotevoice.server._SESSION_START_TIMEOUT", 0.05):
-                with patch("remotevoice.server.AudioBridge") as audio:
-                    with self.assertLogs("remotevoice.server", level="ERROR"):
+            with patch("remontevoice.server._SESSION_START_TIMEOUT", 0.05):
+                with patch("remontevoice.server.AudioBridge") as audio:
+                    with self.assertLogs("remontevoice.server", level="ERROR"):
                         await asyncio.wait_for(self.server._handle_client(websocket), 1)
             audio.assert_not_called()
             self.assertEqual(websocket.close_code, 1011)
@@ -256,7 +256,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
 
         self.server.on_session_start = prepare
         websocket = AdmissionSocket(self.pin)
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             await asyncio.wait_for(self.server._handle_client(websocket), 1)
         audio.assert_not_called()
         self.assertEqual(websocket.close_code, 1012)
@@ -275,7 +275,7 @@ class ServerAdmissionTests(unittest.IsolatedAsyncioTestCase):
 
         self.server.on_session_start = prepare
         websocket = AdmissionSocket(self.pin)
-        with patch("remotevoice.server.AudioBridge") as audio:
+        with patch("remontevoice.server.AudioBridge") as audio:
             await asyncio.wait_for(self.server._handle_client(websocket), 1)
         audio.assert_not_called()
         self.assertEqual(websocket.close_code, 4001)
@@ -300,7 +300,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
                 if value == "server_ready":
                     ready.set()
 
-            server = RemoteVoiceServer(
+            server = RemonteVoiceServer(
                 "127.0.0.1",
                 port,
                 "test-capture",
@@ -313,7 +313,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
             client_ssl.check_hostname = False
             client_ssl.verify_mode = ssl.CERT_NONE
 
-            with patch("remotevoice.server.AudioBridge", FakeAudioBridge):
+            with patch("remontevoice.server.AudioBridge", FakeAudioBridge):
                 server_task = asyncio.create_task(server.run())
                 try:
                     await asyncio.wait_for(ready.wait(), timeout=5)

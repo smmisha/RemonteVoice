@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice.host_app import HostWindow
-from remotevoice.host_lease import HostLease, HostLeaseError
+from remontevoice.host_app import HostWindow
+from remontevoice.host_lease import HostLease, HostLeaseError
 import test_host_output_routing as fixtures
 
 headless_window = fixtures.headless_window
@@ -38,7 +38,7 @@ class HostLeaseTests(unittest.TestCase):
             path = Path(directory) / 'host.lock'
             env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'host'))
             code = ('import os,sys; from pathlib import Path; '
-                    'from remotevoice.host_lease import HostLease; '
+                    'from remontevoice.host_lease import HostLease; '
                     'lease=HostLease(Path(sys.argv[1])); lease.acquire(); os._exit(0)')
             result = subprocess.run([sys.executable, '-c', code, str(path)], env=env,
                                     capture_output=True, timeout=10)
@@ -52,11 +52,11 @@ class HostLeaseTests(unittest.TestCase):
 
     def test_second_constructor_cannot_enter_initializer_or_recover_routes(self):
         with tempfile.TemporaryDirectory() as directory, patch(
-            'remotevoice.host_app.tk.Tk.__init__', return_value=None
-        ), patch('remotevoice.host_app.app_data_dir', return_value=Path(directory)), patch.object(
+            'remontevoice.host_app.tk.Tk.__init__', return_value=None
+        ), patch('remontevoice.host_app.app_data_dir', return_value=Path(directory)), patch.object(
             HostWindow, '_initialize'
         ) as initialize, patch.object(HostWindow, 'destroy'), patch(
-            'remotevoice.host_app.messagebox.showerror'
+            'remontevoice.host_app.messagebox.showerror'
         ):
             first = HostWindow()
             try:
@@ -89,7 +89,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         self.assertIn('возвращены', window.status_var.get())
 
     def test_manual_return_does_not_claim_success_if_journal_recovery_failed(self):
-        from remotevoice.microphone_guard import MicrophoneGuardError
+        from remontevoice.microphone_guard import MicrophoneGuardError
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         self.guard_class.recover.side_effect = MicrophoneGuardError('old mic remains muted')
         window._return_to_laptop()
@@ -100,9 +100,9 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window = headless_window()
         window.microphone_guard = MagicMock()
         window.input_route = MagicMock()
-        from remotevoice.output_routing import OutputRoutingError
+        from remontevoice.output_routing import OutputRoutingError
         window.output_route.activate.side_effect = OutputRoutingError('primary-output-failure')
-        with self.assertLogs('remotevoice.ui', level='WARNING'):
+        with self.assertLogs('remontevoice.ui', level='WARNING'):
             self.assertFalse(window._activate_session_routes())
         window.microphone_guard.restore.assert_called_once()
         window.input_route.restore.assert_called_once()
@@ -115,7 +115,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window.input_route = MagicMock()
         window.microphone_guard = MagicMock()
         window.output_route.restore.side_effect = RuntimeError('unexpected adapter failure')
-        with self.assertLogs('remotevoice.ui', level='ERROR'):
+        with self.assertLogs('remontevoice.ui', level='ERROR'):
             self.assertFalse(window._restore_session_routes())
         window.input_route.restore.assert_called_once()
         window.microphone_guard.restore.assert_called_once()
@@ -128,7 +128,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
                 window.microphone_guard = MagicMock()
                 guard = window._safety_guard
                 getattr(window, failed_route).restore.side_effect = [RuntimeError('adapter failed'), None]
-                with self.assertLogs('remotevoice.ui', level='ERROR'):
+                with self.assertLogs('remontevoice.ui', level='ERROR'):
                     window._set_status('server_ready')
                 failure = window._session_restore_failure
                 self.assertTrue(failure)
@@ -181,7 +181,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window = headless_window()
         queued = []
         window.after = lambda delay, callback: queued.append(callback)
-        with patch('remotevoice.host_app.threading.Event.wait', return_value=False):
+        with patch('remontevoice.host_app.threading.Event.wait', return_value=False):
             self.assertFalse(window._request_session_start(0))
         queued[0]()
         window.output_route.activate.assert_not_called()
@@ -193,7 +193,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
             now[0] = 6.0
             callback()
         window.after = delayed_after
-        with patch('remotevoice.host_app.time.monotonic', side_effect=lambda: now[0]):
+        with patch('remontevoice.host_app.time.monotonic', side_effect=lambda: now[0]):
             self.assertFalse(window._request_session_start(0))
         window.output_route.activate.assert_not_called()
 
@@ -216,12 +216,12 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
                 self.assertEqual(window._host_lease.release.call_count, 0 if failed else 1)
 
     def test_guard_must_confirm_readiness_before_listener_can_start(self):
-        from remotevoice.safety_guard import SafetyGuardError
+        from remontevoice.safety_guard import SafetyGuardError
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         self.safety_class.start.side_effect = SafetyGuardError('helper unavailable')
-        with patch('remotevoice.host_app.RemoteVoiceServer') as server, patch(
-            'remotevoice.host_app.OutputRoute'
-        ), patch('remotevoice.host_app.messagebox.showerror'):
+        with patch('remontevoice.host_app.RemonteVoiceServer') as server, patch(
+            'remontevoice.host_app.OutputRoute'
+        ), patch('remontevoice.host_app.messagebox.showerror'):
             window._start_host()
         server.assert_not_called()
         self.assertFalse(window.server_running)
@@ -246,10 +246,10 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
     def test_restarting_saved_configuration_rearms_exact_route_snapshot(self):
         window = fixtures.HostOutputRoutingTests.configured_window(self)
         old_guard = window._safety_guard
-        with patch('remotevoice.host_app.RemoteVoiceServer'), patch(
-            'remotevoice.host_app.OutputRoute'
-        ), patch('remotevoice.host_app.messagebox.showerror'), patch(
-            'remotevoice.host_app.threading.Thread'
+        with patch('remontevoice.host_app.RemonteVoiceServer'), patch(
+            'remontevoice.host_app.OutputRoute'
+        ), patch('remontevoice.host_app.messagebox.showerror'), patch(
+            'remontevoice.host_app.threading.Thread'
         ):
             window._start_host()
         old_guard.disarm.assert_called_once()

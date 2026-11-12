@@ -1,4 +1,4 @@
-# Ночная проверка RemoteVoice — 23 октября 2026
+# Ночная проверка RemonteVoice — 23 октября 2026
 
 Исторический ночной срез. Последующая перепроверка и новые сборки Windows 0.1.7 / Android 0.1.8 — [BACKEND-RECHECK.md](BACKEND-RECHECK.md).
 
@@ -34,7 +34,7 @@
 
 ## Локальные сборки
 
-- `host/build/RemoteVoice-Windows-0.1.6-local.zip`: распаковать целиком, запустить `RemoteVoice/RemoteVoice.exe`.
-- `android/preview/RemoteVoice-Android-debug.apk`: Android 0.1.7, SHA-256 `82aa39835b956f00ac7c8c83d11f77fb0336892ea091e0ae2b850654644238ef`.
+- `host/build/RemonteVoice-Windows-0.1.6-local.zip`: распаковать целиком, запустить `RemonteVoice/RemonteVoice.exe`.
+- `android/preview/RemonteVoice-Android-debug.apk`: Android 0.1.7, SHA-256 `82aa39835b956f00ac7c8c83d11f77fb0336892ea091e0ae2b850654644238ef`.
 
 Windows 0.1.6 уже запущен. В 09:35 по Киеву настроено однократное условное продолжение, если работа остановится из-за лимита. Порог остановки — 1%; автоматический сброс не разрешён.

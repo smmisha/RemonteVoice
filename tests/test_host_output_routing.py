@@ -4,10 +4,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice.host_app import HostWindow, matching_system_output
-from remotevoice.microphone_guard import MicrophoneGuardError
-from remotevoice.audio_backend import AudioBackendError
-from remotevoice.output_routing import OutputRoutingError
+from remontevoice.host_app import HostWindow, matching_system_output
+from remontevoice.microphone_guard import MicrophoneGuardError
+from remontevoice.audio_backend import AudioBackendError
+from remontevoice.output_routing import OutputRoutingError
 
 
 class Value:
@@ -146,25 +146,25 @@ class SystemOutputMatchingTests(unittest.TestCase):
 
 class HeadlessHostTests(unittest.TestCase):
     def setUp(self):
-        safety_patch = patch("remotevoice.host_app.SafetyGuard")
+        safety_patch = patch("remontevoice.host_app.SafetyGuard")
         self.safety_class = safety_patch.start()
         self.safety_class.start.return_value = MagicMock(armed=True)
         self.addCleanup(safety_patch.stop)
-        mixer_patch = patch("remotevoice.host_app.prepare_audio_backend", return_value=MagicMock(is_available=MagicMock(return_value=True)))
+        mixer_patch = patch("remontevoice.host_app.prepare_audio_backend", return_value=MagicMock(is_available=MagicMock(return_value=True)))
         self.mixer_configure = mixer_patch.start()
         self.addCleanup(mixer_patch.stop)
-        input_patch = patch("remotevoice.host_app.InputRoute")
+        input_patch = patch("remontevoice.host_app.InputRoute")
         self.input_class = input_patch.start()
         self.addCleanup(input_patch.stop)
-        guard_patch = patch("remotevoice.host_app.MicrophoneMuteGuard")
+        guard_patch = patch("remontevoice.host_app.MicrophoneMuteGuard")
         self.guard_class = guard_patch.start()
         self.addCleanup(guard_patch.stop)
-        microphones_patch = patch("remotevoice.host_app.sc.all_microphones", return_value=[])
+        microphones_patch = patch("remontevoice.host_app.sc.all_microphones", return_value=[])
         self.microphones = microphones_patch.start()
         self.addCleanup(microphones_patch.stop)
         # A real Tk message box blocks forever on a headless CI runner; tests
         # that assert a dialog still patch this child mock explicitly.
-        messagebox_patch = patch("remotevoice.host_app.messagebox")
+        messagebox_patch = patch("remontevoice.host_app.messagebox")
         self.messagebox = messagebox_patch.start()
         self.addCleanup(messagebox_patch.stop)
 
@@ -173,9 +173,9 @@ class HostOutputRoutingTests(HeadlessHostTests):
     def test_backend_preparation_failure_prevents_server_and_guard_start(self):
         window = self.configured_window()
         self.mixer_configure.side_effect = AudioBackendError('Known component unavailable')
-        with patch('remotevoice.host_app.OutputRoute'), patch(
-            'remotevoice.host_app.RemoteVoiceServer'
-        ) as server, patch('remotevoice.host_app.messagebox.showerror') as error:
+        with patch('remontevoice.host_app.OutputRoute'), patch(
+            'remontevoice.host_app.RemonteVoiceServer'
+        ) as server, patch('remontevoice.host_app.messagebox.showerror') as error:
             window._start_host()
         server.assert_not_called()
         self.safety_class.start.assert_not_called()
@@ -240,7 +240,7 @@ class HostOutputRoutingTests(HeadlessHostTests):
     def test_activation_error_rolls_back_stops_and_does_not_reactivate(self):
         window = headless_window()
         window.output_route.activate.side_effect = OutputRoutingError("unavailable")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("iphone_connected_muted")
         for status in ("iphone_microphone_on", "iphone_connected_muted"):
             window._set_status(status)
@@ -259,7 +259,7 @@ class HostOutputRoutingTests(HeadlessHostTests):
     def test_restore_error_remains_visible_instead_of_claiming_success(self):
         window = headless_window()
         window.output_route.restore.side_effect = OutputRoutingError("missing speakers")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("server_ready")
         self.assertIn("Не удалось вернуть звук", window.status_var.get())
         self.assertIn("Выберите их вручную", window.status_var.get())
@@ -268,7 +268,7 @@ class HostOutputRoutingTests(HeadlessHostTests):
         window = headless_window()
         window._set_status("iphone_connected_muted")
         window.output_route.restore.side_effect = OutputRoutingError("partial failure")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("server_ready")
         self.assertFalse(window._output_route_active)
         window._set_status("iphone_connected_muted")
@@ -279,7 +279,7 @@ class HostOutputRoutingTests(HeadlessHostTests):
 
     def test_stop_restores_output_without_manual_confirmation(self):
         window = headless_window()
-        with patch("remotevoice.host_app.messagebox.askyesno") as ask:
+        with patch("remontevoice.host_app.messagebox.askyesno") as ask:
             window._stop_host()
         ask.assert_not_called()
         window.output_route.restore.assert_called_once_with()
@@ -291,8 +291,8 @@ class HostOutputRoutingTests(HeadlessHostTests):
     def test_close_reports_restore_failure_and_closes(self):
         window = headless_window()
         window.output_route.restore.side_effect = OutputRoutingError("failed")
-        with self.assertLogs("remotevoice.ui", level="WARNING"), patch(
-            "remotevoice.host_app.messagebox.showerror"
+        with self.assertLogs("remontevoice.ui", level="WARNING"), patch(
+            "remontevoice.host_app.messagebox.showerror"
         ) as show_error:
             window._on_close()
         show_error.assert_called_once()
@@ -311,10 +311,10 @@ class HostOutputRoutingTests(HeadlessHostTests):
             types.SimpleNamespace(id="laptop", name="Speakers (Realtek Audio)"),
             types.SimpleNamespace(id="headset", name="Headphones"),
         ]
-        with patch("remotevoice.host_app.list_audio_devices", return_value=(
+        with patch("remontevoice.host_app.list_audio_devices", return_value=(
             virtual, [{"id": "b1", "name": "Voicemeeter Out B1", "loopback": "False"}]
-        )), patch("remotevoice.host_app.sc.all_speakers", return_value=speakers), patch(
-            "remotevoice.host_app.sc.default_speaker", return_value=speakers[1]
+        )), patch("remontevoice.host_app.sc.all_speakers", return_value=speakers), patch(
+            "remontevoice.host_app.sc.default_speaker", return_value=speakers[1]
         ):
             window._load_audio_devices()
         self.assertEqual(window.system_output_choices[window.system_output_var.get()], "vaio")
@@ -328,18 +328,18 @@ class HostOutputRoutingTests(HeadlessHostTests):
             types.SimpleNamespace(id="laptop", name="Speakers"),
             types.SimpleNamespace(id="headset", name="Headphones"),
         ]
-        with patch("remotevoice.host_app.list_audio_devices", return_value=([], [])), patch(
-            "remotevoice.host_app.sc.all_speakers", return_value=speakers
-        ), patch("remotevoice.host_app.sc.default_speaker", return_value=speakers[0]):
+        with patch("remontevoice.host_app.list_audio_devices", return_value=([], [])), patch(
+            "remontevoice.host_app.sc.all_speakers", return_value=speakers
+        ), patch("remontevoice.host_app.sc.default_speaker", return_value=speakers[0]):
             window._load_audio_devices()
         self.assertEqual(window.fallback_output_var.get(), "")
 
     def test_missing_windows_default_does_not_hide_available_outputs(self):
         window = headless_window()
-        with patch("remotevoice.host_app.list_audio_devices", return_value=([], [])), patch(
-            "remotevoice.host_app.sc.all_speakers",
+        with patch("remontevoice.host_app.list_audio_devices", return_value=([], [])), patch(
+            "remontevoice.host_app.sc.all_speakers",
             return_value=[types.SimpleNamespace(id="laptop", name="Speakers")],
-        ), patch("remotevoice.host_app.sc.default_speaker", side_effect=RuntimeError("no default")):
+        ), patch("remontevoice.host_app.sc.default_speaker", side_effect=RuntimeError("no default")):
             window._load_audio_devices()
         self.assertEqual(window.fallback_output_choices[window.fallback_output_var.get()], "laptop")
 
@@ -364,9 +364,9 @@ class HostOutputRoutingTests(HeadlessHostTests):
 
     def test_start_restores_waiting_output_and_does_not_activate_before_connection(self):
         window = self.configured_window()
-        with patch("remotevoice.host_app.OutputRoute") as route, patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ), patch("remotevoice.host_app.threading.Thread"):
+        with patch("remontevoice.host_app.OutputRoute") as route, patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ), patch("remontevoice.host_app.threading.Thread"):
             window._start_host()
         route.assert_called_once_with("vaio", "laptop")
         route.return_value.restore.assert_called_once_with()
@@ -381,9 +381,9 @@ class HostOutputRoutingTests(HeadlessHostTests):
                 window = self.configured_window()
                 if missing:
                     window.fallback_output_var.set("")
-                with patch("remotevoice.host_app.OutputRoute") as route, patch(
-                    "remotevoice.host_app.RemoteVoiceServer"
-                ) as server, patch("remotevoice.host_app.messagebox.showerror") as error:
+                with patch("remontevoice.host_app.OutputRoute") as route, patch(
+                    "remontevoice.host_app.RemonteVoiceServer"
+                ) as server, patch("remontevoice.host_app.messagebox.showerror") as error:
                     route.return_value.restore.side_effect = OutputRoutingError("failed")
                     window._start_host()
                 server.assert_not_called()
@@ -452,7 +452,7 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window = headless_window()
         window.microphone_guard = MagicMock()
         window.output_route.restore.side_effect = OutputRoutingError("output missing")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("server_ready")
         window.microphone_guard.restore.assert_called_once_with()
         self.assertIn("Не удалось вернуть звук", window.status_var.get())
@@ -461,7 +461,7 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window = headless_window()
         window.microphone_guard = MagicMock()
         window.microphone_guard.restore.side_effect = MicrophoneGuardError("mic missing")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("server_ready")
         window.output_route.restore.assert_called_once_with()
         self.assertIn("Не удалось вернуть прежнее состояние микрофона", window.status_var.get())
@@ -472,7 +472,7 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window.microphone_guard = MagicMock()
         window._set_status("iphone_connected_muted")
         window.microphone_guard.restore.side_effect = [MicrophoneGuardError("original failure"), None]
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("server_ready")
         window.server.stop.assert_called_once_with()
         self.assertTrue(window._stopping)
@@ -492,9 +492,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window = self.configured_window()
         window._session_restore_failure = "previous restoration failed"
         window._stopping = True
-        with patch("remotevoice.host_app.OutputRoute"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ), patch("remotevoice.host_app.threading.Thread"):
+        with patch("remontevoice.host_app.OutputRoute"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ), patch("remontevoice.host_app.threading.Thread"):
             window._start_host()
         self.assertEqual(window._session_restore_failure, "")
         self.assertFalse(window._stopping)
@@ -504,7 +504,7 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window = headless_window()
         window.microphone_guard = MagicMock()
         window.microphone_guard.activate.side_effect = MicrophoneGuardError("mute denied")
-        with self.assertLogs("remotevoice.ui", level="WARNING"):
+        with self.assertLogs("remontevoice.ui", level="WARNING"):
             window._set_status("iphone_connected_muted")
         window.server.stop.assert_called_once_with()
         window.output_route.activate.assert_not_called()
@@ -523,8 +523,8 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window.microphone_guard = MagicMock()
         window.microphone_guard.restore.side_effect = MicrophoneGuardError("mic failed")
         window.output_route.restore.side_effect = OutputRoutingError("output failed")
-        with self.assertLogs("remotevoice.ui", level="WARNING"), patch(
-            "remotevoice.host_app.messagebox.showerror"
+        with self.assertLogs("remontevoice.ui", level="WARNING"), patch(
+            "remontevoice.host_app.messagebox.showerror"
         ) as error:
             window._on_close()
         error.assert_called_once()
@@ -535,7 +535,7 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
     def test_old_activation_error_does_not_claim_close_restore_failed(self):
         window = headless_window()
         window._microphone_activation_error = "Не удалось выключить микрофон ноутбука"
-        with patch("remotevoice.host_app.messagebox.showerror") as error:
+        with patch("remontevoice.host_app.messagebox.showerror") as error:
             window._on_close()
         error.assert_not_called()
 
@@ -547,9 +547,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         old_guard.restore.side_effect = lambda: order.append("old restore")
         self.guard_class.recover.side_effect = lambda _path: order.append("recover")
         self.guard_class.side_effect = lambda *_args, **_kwargs: order.append("new") or MagicMock()
-        with patch("remotevoice.host_app.OutputRoute"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ), patch("remotevoice.host_app.threading.Thread"):
+        with patch("remontevoice.host_app.OutputRoute"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ), patch("remontevoice.host_app.threading.Thread"):
             window._start_host()
         self.assertEqual(order, ["old restore", "recover", "new"])
         self.guard_class.assert_called_once_with(
@@ -562,8 +562,8 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
     def test_journal_recovery_failure_prevents_new_session(self):
         window = self.configured_window()
         self.guard_class.recover.side_effect = MicrophoneGuardError("recovery denied")
-        with patch("remotevoice.host_app.RemoteVoiceServer") as server, patch(
-            "remotevoice.host_app.messagebox.showerror"
+        with patch("remontevoice.host_app.RemonteVoiceServer") as server, patch(
+            "remontevoice.host_app.messagebox.showerror"
         ) as error:
             window._start_host()
         server.assert_not_called()
@@ -575,9 +575,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
         window = self.configured_window()
         window.microphone_guard = MagicMock()
         window.microphone_guard.restore.side_effect = MicrophoneGuardError("old restore denied")
-        with self.assertLogs("remotevoice.ui", level="WARNING"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ) as server, patch("remotevoice.host_app.messagebox.showerror") as error:
+        with self.assertLogs("remontevoice.ui", level="WARNING"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ) as server, patch("remontevoice.host_app.messagebox.showerror") as error:
             window._start_host()
         server.assert_not_called()
         self.guard_class.recover.assert_called_once_with(window.data_dir / "microphone-restore.json")
@@ -587,9 +587,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
     def test_disabled_guard_still_recovers_old_journal_without_creating_new_guard(self):
         window = self.configured_window()
         window.mute_local_microphone_var.set(False)
-        with patch("remotevoice.host_app.OutputRoute"), patch(
-            "remotevoice.host_app.RemoteVoiceServer"
-        ), patch("remotevoice.host_app.threading.Thread"):
+        with patch("remontevoice.host_app.OutputRoute"), patch(
+            "remontevoice.host_app.RemonteVoiceServer"
+        ), patch("remontevoice.host_app.threading.Thread"):
             window._start_host()
         self.guard_class.recover.assert_called_once()
         self.guard_class.assert_not_called()
@@ -599,8 +599,8 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
     def test_enabled_guard_requires_selected_physical_microphone(self):
         window = self.configured_window()
         window.local_microphone_var.set("")
-        with patch("remotevoice.host_app.RemoteVoiceServer") as server, patch(
-            "remotevoice.host_app.messagebox.showerror"
+        with patch("remontevoice.host_app.RemonteVoiceServer") as server, patch(
+            "remontevoice.host_app.messagebox.showerror"
         ) as error:
             window._start_host()
         server.assert_not_called()
@@ -614,9 +614,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
             types.SimpleNamespace(id="loop", name="Speakers", isloopback=True),
             types.SimpleNamespace(id="mic", name="Microphone Array", isloopback=False),
         ]
-        with patch("remotevoice.host_app.list_audio_devices", return_value=([], [])), patch(
-            "remotevoice.host_app.sc.all_speakers", return_value=[]
-        ), patch("remotevoice.host_app.sc.default_speaker", return_value=None):
+        with patch("remontevoice.host_app.list_audio_devices", return_value=([], [])), patch(
+            "remontevoice.host_app.sc.all_speakers", return_value=[]
+        ), patch("remontevoice.host_app.sc.default_speaker", return_value=None):
             window._load_audio_devices()
         self.microphones.assert_called_once_with(include_loopback=False)
         self.assertEqual(list(window.local_microphone_choices.values()), ["mic"])
@@ -632,9 +632,9 @@ class HostMicrophoneGuardTests(HeadlessHostTests):
                 window = headless_window()
                 if saved is not None:
                     window.config_data["local_microphone_device_id"] = saved
-                with patch("remotevoice.host_app.list_audio_devices", return_value=([], [])), patch(
-                    "remotevoice.host_app.sc.all_speakers", return_value=[]
-                ), patch("remotevoice.host_app.sc.default_speaker", return_value=None):
+                with patch("remontevoice.host_app.list_audio_devices", return_value=([], [])), patch(
+                    "remontevoice.host_app.sc.all_speakers", return_value=[]
+                ), patch("remontevoice.host_app.sc.default_speaker", return_value=None):
                     window._load_audio_devices()
                 self.assertEqual(window.local_microphone_var.get(), expected)
                 if saved is not None:

@@ -33,7 +33,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="remotevoice" android:host="pair" />
+                <data android:scheme="remontevoice" android:host="pair" />
             </intent-filter>
         </activity>
         <activity android:name="com.journeyapps.barcodescanner.CaptureActivity"

@@ -5,7 +5,7 @@ import socket
 import unittest
 from unittest.mock import patch
 
-from remotevoice import windows_tcp_observer as observer
+from remontevoice import windows_tcp_observer as observer
 
 
 class TcpObserverTests(unittest.TestCase):

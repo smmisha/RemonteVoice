@@ -2,16 +2,16 @@ import unittest
 from dataclasses import replace
 from unittest.mock import patch
 
-from remotevoice.audio_backend import AudioBackend, AudioBackendError, prepare_audio_backend
-from remotevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot, prepare_driver_audio_backend
-from remotevoice import audio_backend
-from remotevoice.voicemeeter_routes import VoicemeeterRoutingError
+from remontevoice.audio_backend import AudioBackend, AudioBackendError, prepare_audio_backend
+from remontevoice.audio_backend import DriverAudioBackend, DriverBackendSnapshot, prepare_driver_audio_backend
+from remontevoice import audio_backend
+from remontevoice.voicemeeter_routes import VoicemeeterRoutingError
 
 
 class AudioBackendTests(unittest.TestCase):
     def test_final_close_delegates_without_reconfiguring_routes(self):
-        with patch('remotevoice.audio_backend.close_standard_mixer_session') as close, patch(
-            'remotevoice.audio_backend.configure_standard_routes',
+        with patch('remontevoice.audio_backend.close_standard_mixer_session') as close, patch(
+            'remontevoice.audio_backend.configure_standard_routes',
         ) as configure:
             audio_backend.close_audio_backend()
         close.assert_called_once_with()
@@ -19,7 +19,7 @@ class AudioBackendTests(unittest.TestCase):
 
     def test_final_close_preserves_sanitized_error_as_backend_error(self):
         original = VoicemeeterRoutingError('Known SDK close failure')
-        with patch('remotevoice.audio_backend.close_standard_mixer_session', side_effect=original):
+        with patch('remontevoice.audio_backend.close_standard_mixer_session', side_effect=original):
             with self.assertRaises(AudioBackendError) as raised:
                 audio_backend.close_audio_backend()
         self.assertIs(raised.exception.__cause__, original)
@@ -28,25 +28,25 @@ class AudioBackendTests(unittest.TestCase):
     def test_preparation_keeps_selected_pair_and_legacy_adapter_result(self):
         for external in (False, True):
             with self.subTest(external=external), patch(
-                'remotevoice.audio_backend.configure_standard_routes', return_value=external,
+                'remontevoice.audio_backend.configure_standard_routes', return_value=external,
             ) as prepare:
                 backend = prepare_audio_backend('selected capture', 'selected playback')
                 prepare.assert_called_once_with('selected capture', 'selected playback')
                 self.assertIs(backend.uses_external_mixer, external)
 
     def test_generic_pairs_never_query_or_start_mixer(self):
-        with patch('remotevoice.audio_backend.standard_mixer_running') as poll:
+        with patch('remontevoice.audio_backend.standard_mixer_running') as poll:
             self.assertTrue(AudioBackend(False).is_available())
         poll.assert_not_called()
 
     def test_failed_health_and_health_exception_are_unavailable(self):
         for options in ({'return_value': False}, {'side_effect': OSError('unavailable')}):
-            with patch('remotevoice.audio_backend.standard_mixer_running', **options):
+            with patch('remontevoice.audio_backend.standard_mixer_running', **options):
                 self.assertFalse(AudioBackend(True).is_available())
 
     def test_route_preparation_error_keeps_existing_explanation(self):
         original = VoicemeeterRoutingError('Known route could not be confirmed')
-        with patch('remotevoice.audio_backend.configure_standard_routes', side_effect=original):
+        with patch('remontevoice.audio_backend.configure_standard_routes', side_effect=original):
             with self.assertRaises(AudioBackendError) as raised:
                 prepare_audio_backend('capture', 'playback')
         self.assertIs(raised.exception.__cause__, original)
@@ -61,8 +61,8 @@ class DriverBackendHealthTests(unittest.TestCase):
         return DriverAudioBackend(lambda: replace(self.status, **changes), clock=lambda: 10.1)
 
     def test_idle_muted_driver_is_healthy_without_starting_mixer(self):
-        with patch('remotevoice.audio_backend.standard_mixer_running') as poll, patch(
-            'remotevoice.audio_backend.configure_standard_routes',
+        with patch('remontevoice.audio_backend.standard_mixer_running') as poll, patch(
+            'remontevoice.audio_backend.configure_standard_routes',
         ) as prepare:
             backend = prepare_driver_audio_backend(lambda: self.status, clock=lambda: 10.1)
             self.assertTrue(backend.is_available())

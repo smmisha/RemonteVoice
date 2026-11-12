@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 from unittest.mock import Mock, patch
-from remotevoice.audio_backend import AudioBackendError
+from remontevoice.audio_backend import AudioBackendError
 
 import test_host_output_routing as fixtures
 from test_host_driver_mode import controller
@@ -20,7 +20,7 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
         events = []
         window.output_route.restore.side_effect = lambda: events.append('restore')
         window.destroy.side_effect = lambda: events.append('destroy')
-        with patch('remotevoice.host_app.close_audio_backend', side_effect=lambda: events.append('sdk_close')) as close:
+        with patch('remontevoice.host_app.close_audio_backend', side_effect=lambda: events.append('sdk_close')) as close:
             window._on_close()
         close.assert_called_once_with()
         self.assertIn('restore', events)
@@ -36,8 +36,8 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
         def fail_close():
             events.append('sdk_close')
             raise AudioBackendError('PRIVATE NATIVE DETAIL')
-        with patch('remotevoice.host_app.close_audio_backend', side_effect=fail_close) as close, \
-             self.assertLogs('remotevoice.ui', level='WARNING') as logs:
+        with patch('remontevoice.host_app.close_audio_backend', side_effect=fail_close) as close, \
+             self.assertLogs('remontevoice.ui', level='WARNING') as logs:
             window._on_close()
         close.assert_called_once_with()
         self.assertEqual(events[events.index('sdk_close') + 1:], ['destroy'])
@@ -48,11 +48,11 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
     def test_stalled_server_close_is_bounded_and_keeps_guard_and_host_ownership(self):
         window = fixtures.headless_window()
         window.server_thread = Mock(is_alive=Mock(return_value=True))
-        with patch('remotevoice.host_app.time.monotonic', return_value=10):
+        with patch('remontevoice.host_app.time.monotonic', return_value=10):
             window._on_close()
         window.destroy.assert_not_called()
-        with patch('remotevoice.host_app.time.monotonic', return_value=30), \
-             patch('remotevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
+        with patch('remontevoice.host_app.time.monotonic', return_value=30), \
+             patch('remontevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
             with self.assertRaises(ForcedClose):window._close_when_stopped()
         native_exit.assert_called_once_with(70)
         window.destroy.assert_not_called()
@@ -69,12 +69,12 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
         window._driver_runtime_factory = Mock()
         window._driver_runtime = owner
         window._driver_startup_worker = Mock(is_alive=Mock(return_value=True))
-        with patch('remotevoice.host_app.time.monotonic', return_value=10):
+        with patch('remontevoice.host_app.time.monotonic', return_value=10):
             window._on_close()
         owner.request_stop.assert_called_once()
         window.destroy.assert_not_called()
-        with patch('remotevoice.host_app.time.monotonic', return_value=30), \
-             patch('remotevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
+        with patch('remontevoice.host_app.time.monotonic', return_value=30), \
+             patch('remontevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
             with self.assertRaises(ForcedClose):window._close_when_stopped()
         native_exit.assert_called_once_with(70)
         window.destroy.assert_not_called()
@@ -86,12 +86,12 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
     def test_repeated_close_requests_do_not_extend_waiting_forever(self):
         window = fixtures.headless_window()
         window.server_thread = Mock(is_alive=Mock(return_value=True))
-        with patch('remotevoice.host_app.time.monotonic', return_value=10):
+        with patch('remontevoice.host_app.time.monotonic', return_value=10):
             window._on_close()
-        with patch('remotevoice.host_app.time.monotonic', return_value=14):
+        with patch('remontevoice.host_app.time.monotonic', return_value=14):
             window._on_close()
-        with patch('remotevoice.host_app.time.monotonic', return_value=16), \
-             patch('remotevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
+        with patch('remontevoice.host_app.time.monotonic', return_value=16), \
+             patch('remontevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
             with self.assertRaises(ForcedClose):window._close_when_stopped()
         native_exit.assert_called_once_with(70)
         window.destroy.assert_not_called()
@@ -115,7 +115,7 @@ class HostCloseLifecycleTests(fixtures.HeadlessHostTests):
                     window._driver_runtime_factory = Mock()
                     window._driver_runtime = controller()
                     window._driver_cleanup_error = 'native cleanup unconfirmed'
-                with patch('remotevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
+                with patch('remontevoice.host_app.os._exit', side_effect=ForcedClose) as native_exit:
                     with self.assertRaises(ForcedClose):window._on_close()
                 native_exit.assert_called_once_with(70)
                 window.destroy.assert_not_called()
@@ -132,7 +132,7 @@ import tkinter as tk
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
-import remotevoice.host_app as app
+import remontevoice.host_app as app
 from test_host_output_routing import headless_window
 root=tk.Tk();root.withdraw()
 window=headless_window()

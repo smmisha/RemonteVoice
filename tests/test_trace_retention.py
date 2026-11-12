@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from remotevoice.audio_timing import SystemAudioTiming
+from remontevoice.audio_timing import SystemAudioTiming
 
 
 class ScalarObserver:
@@ -48,7 +48,7 @@ class TraceRetentionTests(unittest.TestCase):
         observer = ScalarObserver()
         recorder = SimpleNamespace(_capture_available_frames=lambda: 480,
                                    _capture_buffer=lambda: object(), _capture_release=lambda frames: None)
-        with patch('remotevoice.capture_wait_timing.CaptureWaitTiming', return_value=observer):
+        with patch('remontevoice.capture_wait_timing.CaptureWaitTiming', return_value=observer):
             self.assertIs(timing.observe_capture(recorder), recorder)
         self.addCleanup(timing.close_capture_observation)
         return timing, observer, clock
@@ -129,7 +129,7 @@ class TraceRetentionTests(unittest.TestCase):
         self.assertEqual(reports[90000]['version'], 1)
 
     def test_tiny_explicit_capacity_bounds_all_three_tails_without_reducing_slow_history(self):
-        with tempfile.TemporaryDirectory() as directory, patch('remotevoice.audio_timing.LOGGER.info'):
+        with tempfile.TemporaryDirectory() as directory, patch('remontevoice.audio_timing.LOGGER.info'):
             timing, observer, clock = self.make_timing(directory, 2)
             self.assertEqual(timing._capture_slow_rows.maxlen, 128)
             self.assertEqual(timing._capture_wait_slow_rows.maxlen, 128)
@@ -176,7 +176,7 @@ class TraceRetentionTests(unittest.TestCase):
         for limit in (90000, 'PRIVATE DISABLED VALUE', PrivateValue()):
             timing = SystemAudioTiming(trace_packet_limit=limit)
             recorder = SimpleNamespace()
-            with patch('remotevoice.capture_wait_timing.CaptureWaitTiming') as monitoring:
+            with patch('remontevoice.capture_wait_timing.CaptureWaitTiming') as monitoring:
                 self.assertIs(timing.observe_capture(recorder), recorder)
                 timing.close_capture_observation()
             self.assertIsNone(timing._trace)
@@ -189,7 +189,7 @@ class TraceRetentionTests(unittest.TestCase):
     def test_bridge_forwards_retention_environment_only_with_trace_directory(self):
         # Inspect and execute only the actual constructor expression; avoid
         # importing audio.py/SoundCard just to check opt-in configuration flow.
-        path = Path(__file__).resolve().parents[1] / 'host/remotevoice/audio.py'
+        path = Path(__file__).resolve().parents[1] / 'host/remontevoice/audio.py'
         tree = ast.parse(path.read_text('utf-8'))
         calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
                  and isinstance(node.func, ast.Name) and node.func.id == 'SystemAudioTiming']
@@ -202,7 +202,7 @@ class TraceRetentionTests(unittest.TestCase):
                 parameters.update(kwargs)
                 return object()
             namespace = dict(SystemAudioTiming=timing_factory, trace_directory=trace_directory,
-                os=SimpleNamespace(environ={'REMOTEVOICE_AUDIO_TRACE_PACKETS': '90000'}),
+                os=SimpleNamespace(environ={'REMONTEVOICE_AUDIO_TRACE_PACKETS': '90000'}),
                 self=SimpleNamespace(_tcp_observer=None), tcp_observer=None)
             eval(code, namespace)
             self.assertEqual(parameters['trace_packet_limit'], '90000' if trace_directory else None)

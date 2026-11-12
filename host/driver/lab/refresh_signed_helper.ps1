@@ -15,7 +15,7 @@ $rvTemporary=Join-Path $rvPrivate 'GuestDriverLab-api.exe'
 if(Test-Path -LiteralPath $rvTemporary){throw 'Inspect earlier refresh effects before retrying'}
 [IO.File]::WriteAllBytes($rvTemporary,[IO.File]::ReadAllBytes((Join-Path $rvHelper 'GuestDriverLab.exe')))
 $rvProtected=[IO.File]::ReadAllBytes((Join-Path $rvPrivate 'password.dpapi'))
-$rvEntropy=[Text.Encoding]::UTF8.GetBytes('RemoteVoice-private-lab-v1')
+$rvEntropy=[Text.Encoding]::UTF8.GetBytes('RemonteVoice-private-lab-v1')
 $rvPassword=[Text.Encoding]::UTF8.GetString([Security.Cryptography.ProtectedData]::Unprotect($rvProtected,$rvEntropy,[Security.Cryptography.DataProtectionScope]::CurrentUser))
 try{
     & $rvSignTool sign /fd SHA256 /f (Join-Path $rvPrivate 'development.pfx') /p $rvPassword $rvTemporary *> (Join-Path $rvPrivate 'helper-api.sign.log')

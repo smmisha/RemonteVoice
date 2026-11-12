@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-namespace RemoteVoice.DriverLab
+namespace RemonteVoice.DriverLab
 {
     static class Program
     {
@@ -77,7 +77,7 @@ namespace RemoteVoice.DriverLab
         readonly string initialAction;
         public LabForm(string directory, string action)
         {
-            Text = "RemoteVoice — development VM only"; Width = 940; Height = 620;
+            Text = "RemonteVoice — development VM only"; Width = 940; Height = 620;
             initialAction = action;
             output.Multiline = true; output.ReadOnly = true; output.ScrollBars = ScrollBars.Both;
             output.Dock = DockStyle.Fill; output.Font = new Font("Consolas", 10);
@@ -121,7 +121,7 @@ namespace RemoteVoice.DriverLab
                     else if (action == "install") ops.Install(owner);
                     else if (action == "reboot")
                     {
-                        if (MessageBox.Show("Перезагрузить только эту тестовую Windows?", "RemoteVoice VM",
+                        if (MessageBox.Show("Перезагрузить только эту тестовую Windows?", "RemonteVoice VM",
                             MessageBoxButtons.YesNo) == DialogResult.Yes) ops.Reboot();
                     }
                     else throw new InvalidOperationException("Unknown lab action");
@@ -189,7 +189,7 @@ namespace RemoteVoice.DriverLab
         public void VerifyPackage()
         {
             Dictionary<string, object> files = (Dictionary<string, object>)config["files"];
-            string[] required = { "RemoteVoiceAudio.sys", "RemoteVoiceAudio.inf", "RemoteVoiceAudio.cat", "RemoteVoiceLab.cer", "GuestDriverLab.exe" };
+            string[] required = { "RemonteVoiceAudio.sys", "RemonteVoiceAudio.inf", "RemonteVoiceAudio.cat", "RemonteVoiceLab.cer", "GuestDriverLab.exe" };
             if (files.Count != required.Length) throw new InvalidOperationException("Unexpected package file set");
             foreach (string name in required)
                 if (!files.ContainsKey(name)) throw new InvalidOperationException("Required package hash missing: " + name);
@@ -207,15 +207,15 @@ namespace RemoteVoice.DriverLab
                 if (!String.Equals(certificate.Thumbprint, Convert.ToString(config["certificate_thumbprint"]), StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Unexpected public test certificate");
         }
-        X509Certificate2 Certificate() { return new X509Certificate2(Path.Combine(DirectoryPath, "RemoteVoiceLab.cer")); }
+        X509Certificate2 Certificate() { return new X509Certificate2(Path.Combine(DirectoryPath, "RemonteVoiceLab.cer")); }
         public void Log(string text)
         {
             string line = DateTime.UtcNow.ToString("o") + " " + text;
             if (display != null) display(line);
             if (!targetVerified) return; // Never access VMware shares from the host guard probe.
-            string reports = headless ? Path.Combine(DirectoryPath, "reports") : @"\\vmware-host\Shared Folders\RemoteVoiceLabResults";
+            string reports = headless ? Path.Combine(DirectoryPath, "reports") : @"\\vmware-host\Shared Folders\RemonteVoiceLabResults";
             if (!headless && !System.IO.Directory.Exists(reports)) reports = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RemoteVoiceDriverLab");
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RemonteVoiceDriverLab");
             System.IO.Directory.CreateDirectory(reports);
             string path = Path.Combine(reports, "lab-report.txt");
             string previous = File.Exists(path) ? File.ReadAllText(path) : "";
@@ -300,12 +300,12 @@ namespace RemoteVoice.DriverLab
             RequireAdministrator(); VerifyPackage();
             if (!Native.TestSigningActive()) throw new InvalidOperationException("Guest kernel test-signing is not active; restart after setup");
             using (X509Certificate2 expected = Certificate())
-            using (X509Certificate2 signer = new X509Certificate2(X509Certificate.CreateFromSignedFile(Path.Combine(DirectoryPath, "RemoteVoiceAudio.sys"))))
+            using (X509Certificate2 signer = new X509Certificate2(X509Certificate.CreateFromSignedFile(Path.Combine(DirectoryPath, "RemonteVoiceAudio.sys"))))
                 if (expected.Thumbprint != signer.Thumbprint) throw new InvalidOperationException("Wrong driver signer");
-            Native.VerifySignature(Path.Combine(DirectoryPath, "RemoteVoiceAudio.sys"));
-            Native.VerifySignature(Path.Combine(DirectoryPath, "RemoteVoiceAudio.cat"));
+            Native.VerifySignature(Path.Combine(DirectoryPath, "RemonteVoiceAudio.sys"));
+            Native.VerifySignature(Path.Combine(DirectoryPath, "RemonteVoiceAudio.cat"));
             RequireTarget();
-            Native.InstallRootDevice(owner, Path.Combine(DirectoryPath, "RemoteVoiceAudio.inf"), Log);
+            Native.InstallRootDevice(owner, Path.Combine(DirectoryPath, "RemonteVoiceAudio.inf"), Log);
         }
         public void Reboot() { RequireAdministrator(); Log("User requested guest reboot."); Native.Reboot(); }
     }

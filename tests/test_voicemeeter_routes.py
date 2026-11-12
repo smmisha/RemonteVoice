@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice import voicemeeter_routes as routes
+from remontevoice import voicemeeter_routes as routes
 
 
 class FakeApi:

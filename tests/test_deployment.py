@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice.deployment import build_identity, write_receipt
-from remotevoice.host_app import main
+from remontevoice.deployment import build_identity, write_receipt
+from remontevoice.host_app import main
 
 
 class DeploymentTests(unittest.TestCase):
@@ -28,10 +28,10 @@ class DeploymentTests(unittest.TestCase):
 
     def test_packaged_receipt_hashes_executable(self):
         with tempfile.TemporaryDirectory() as directory:
-            executable = Path(directory) / 'RemoteVoice.exe'
+            executable = Path(directory) / 'RemonteVoice.exe'
             executable.write_bytes(b'fake test executable')
-            with patch('remotevoice.deployment.sys.frozen', True, create=True), patch(
-                'remotevoice.deployment.sys.executable', str(executable)
+            with patch('remontevoice.deployment.sys.frozen', True, create=True), patch(
+                'remontevoice.deployment.sys.executable', str(executable)
             ):
                 identity = build_identity()
             self.assertEqual(identity['kind'], 'executable')
@@ -39,8 +39,8 @@ class DeploymentTests(unittest.TestCase):
 
     def test_normal_launcher_has_opt_in_autostart_without_diagnostic_wrapper(self):
         app = MagicMock()
-        with patch('remotevoice.host_app.HostWindow', return_value=app), patch(
-            'remotevoice.host_app.logging.basicConfig'
+        with patch('remontevoice.host_app.HostWindow', return_value=app), patch(
+            'remontevoice.host_app.logging.basicConfig'
         ):
             main([])
             app.after.assert_not_called()

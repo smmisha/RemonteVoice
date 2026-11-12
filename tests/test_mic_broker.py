@@ -5,8 +5,8 @@ from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from remotevoice.driver_mic import DriverMicStopError, MicWriterState
-from remotevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
+from remontevoice.driver_mic import DriverMicStopError, MicWriterState
+from remontevoice.mic_broker import BrokerPolicy, MicBroker, PeerIdentity
 
 
 PEER = PeerIdentity("S-1-5-21-1000", "S-1-5-5-1-42", 2, "a" * 64)

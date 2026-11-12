@@ -1617,7 +1617,7 @@ Return Value:
     pWaveHelper->AddRef();
 
 
-    if (IsEqualGUIDAligned(*PropertyRequest->PropertyItem->Set, KSPROPSETID_RemoteVoiceMic))
+    if (IsEqualGUIDAligned(*PropertyRequest->PropertyItem->Set, KSPROPSETID_RemonteVoiceMic))
     {
         ntStatus = pWaveHelper->GetAdapterCommObj()->RvMicProperty(PropertyRequest);
     }

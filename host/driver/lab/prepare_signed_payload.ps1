@@ -38,7 +38,7 @@ New-Item -ItemType Directory -Path $rvOutput|Out-Null
 $rvRsa=[Security.Cryptography.RSA]::Create(3072)
 $rvCertificate=$null
 try{
-    $rvRequest=[Security.Cryptography.X509Certificates.CertificateRequest]::new('CN=RemoteVoice Private VM Development Only',$rvRsa,[Security.Cryptography.HashAlgorithmName]::SHA256,[Security.Cryptography.RSASignaturePadding]::Pkcs1)
+    $rvRequest=[Security.Cryptography.X509Certificates.CertificateRequest]::new('CN=RemonteVoice Private VM Development Only',$rvRsa,[Security.Cryptography.HashAlgorithmName]::SHA256,[Security.Cryptography.RSASignaturePadding]::Pkcs1)
     $rvRequest.CertificateExtensions.Add([Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]::new($false,$false,0,$true))
     $rvRequest.CertificateExtensions.Add([Security.Cryptography.X509Certificates.X509KeyUsageExtension]::new([Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature,$true))
     $rvUsage=[Security.Cryptography.OidCollection]::new()
@@ -48,26 +48,26 @@ try{
     $rvPassword=[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
     $rvPfx=Join-Path $rvPrivate 'development.pfx'
     [IO.File]::WriteAllBytes($rvPfx,$rvCertificate.Export([Security.Cryptography.X509Certificates.X509ContentType]::Pfx,$rvPassword))
-    $rvEntropy=[Text.Encoding]::UTF8.GetBytes('RemoteVoice-private-lab-v1')
+    $rvEntropy=[Text.Encoding]::UTF8.GetBytes('RemonteVoice-private-lab-v1')
     [IO.File]::WriteAllBytes((Join-Path $rvPrivate 'password.dpapi'),[Security.Cryptography.ProtectedData]::Protect([Text.Encoding]::UTF8.GetBytes($rvPassword),$rvEntropy,[Security.Cryptography.DataProtectionScope]::CurrentUser))
-    [IO.File]::WriteAllBytes((Join-Path $rvOutput 'RemoteVoiceLab.cer'),$rvCertificate.Export([Security.Cryptography.X509Certificates.X509ContentType]::Cert))
-    foreach($rvName in @('RemoteVoiceAudio.sys','RemoteVoiceAudio.inf')){[IO.File]::WriteAllBytes((Join-Path $rvOutput $rvName),[IO.File]::ReadAllBytes((Join-Path $rvSource $rvName)))}
+    [IO.File]::WriteAllBytes((Join-Path $rvOutput 'RemonteVoiceLab.cer'),$rvCertificate.Export([Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+    foreach($rvName in @('RemonteVoiceAudio.sys','RemonteVoiceAudio.inf')){[IO.File]::WriteAllBytes((Join-Path $rvOutput $rvName),[IO.File]::ReadAllBytes((Join-Path $rvSource $rvName)))}
     [IO.File]::WriteAllBytes((Join-Path $rvOutput 'GuestDriverLab.exe'),[IO.File]::ReadAllBytes((Join-Path $rvHelper 'GuestDriverLab.exe')))
-    foreach($rvName in @('RemoteVoiceAudio.sys','GuestDriverLab.exe')){
+    foreach($rvName in @('RemonteVoiceAudio.sys','GuestDriverLab.exe')){
         & $rvSignTool sign /fd SHA256 /f $rvPfx /p $rvPassword (Join-Path $rvOutput $rvName) *> (Join-Path $rvPrivate ($rvName+'.sign.log'))
         if($LASTEXITCODE -ne 0){throw ('Offline signing failed for '+$rvName+'; inspect private log without printing arguments')}
     }
     # The catalog MUST hash the already signed SYS, not the original unsigned SYS.
     & $rvInf2Cat "/driver:$rvOutput" /os:10_VB_X64 /verbose *> (Join-Path $rvOutput 'inf2cat.log')
     if($LASTEXITCODE -ne 0){throw 'Signed-SYS catalog generation failed'}
-    & $rvSignTool sign /fd SHA256 /f $rvPfx /p $rvPassword (Join-Path $rvOutput 'RemoteVoiceAudio.cat') *> (Join-Path $rvPrivate 'catalog.sign.log')
+    & $rvSignTool sign /fd SHA256 /f $rvPfx /p $rvPassword (Join-Path $rvOutput 'RemonteVoiceAudio.cat') *> (Join-Path $rvPrivate 'catalog.sign.log')
     if($LASTEXITCODE -ne 0){throw 'Offline catalog signing failed'}
     $rvFiles=[ordered]@{}
-    foreach($rvName in @('RemoteVoiceAudio.sys','RemoteVoiceAudio.inf','RemoteVoiceAudio.cat','RemoteVoiceLab.cer','GuestDriverLab.exe')){$rvFiles[$rvName]=Get-RvHash (Join-Path $rvOutput $rvName)}
+    foreach($rvName in @('RemonteVoiceAudio.sys','RemonteVoiceAudio.inf','RemonteVoiceAudio.cat','RemonteVoiceLab.cer','GuestDriverLab.exe')){$rvFiles[$rvName]=Get-RvHash (Join-Path $rvOutput $rvName)}
     $rvConfig=[ordered]@{vm_bios_uuid=$rvUuid;guest_build='19045';certificate_thumbprint=$rvCertificate.Thumbprint;files=$rvFiles}
     $rvConfig|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $rvOutput 'lab-config.json') -Encoding utf8
     $rvSignatures=@()
-    foreach($rvName in @('RemoteVoiceAudio.sys','RemoteVoiceAudio.cat','GuestDriverLab.exe')){
+    foreach($rvName in @('RemonteVoiceAudio.sys','RemonteVoiceAudio.cat','GuestDriverLab.exe')){
         $rvSignature=Get-AuthenticodeSignature -LiteralPath (Join-Path $rvOutput $rvName)
         if($rvSignature.SignerCertificate.Thumbprint -ne $rvCertificate.Thumbprint -or $rvSignature.Status -in @('NotSigned','HashMismatch')){throw ('Signed-file identity check failed: '+$rvName)}
         $rvSignatures += [ordered]@{file=$rvName;status=[string]$rvSignature.Status;signer_thumbprint=$rvSignature.SignerCertificate.Thumbprint}

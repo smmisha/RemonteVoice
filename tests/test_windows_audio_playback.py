@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from remotevoice.windows_audio_playback import guard_playback_buffer
+from remontevoice.windows_audio_playback import guard_playback_buffer
 
 
 def _original_play():
@@ -68,7 +68,7 @@ class PlaybackFramesGuardTests(unittest.TestCase):
         _SLEEP.reset_mock()
 
     def test_bridge_stop_cancels_soundcard_render_poll_without_new_native_frames(self):
-        from remotevoice.audio import AudioBridge, AudioStopError
+        from remontevoice.audio import AudioBridge, AudioStopError
         player=FakePlayer();native_release=player._render_release
         polling=threading.Event();release=threading.Event();closed=threading.Event()
         def available():
@@ -84,7 +84,7 @@ class PlaybackFramesGuardTests(unittest.TestCase):
         bridge._threads.append(worker)
         stopped_error=None
         try:
-            with patch('remotevoice.audio.sc.get_speaker',return_value=SimpleNamespace(player=player_context)), patch.object(_SLEEP,'side_effect',time.sleep):
+            with patch('remontevoice.audio.sc.get_speaker',return_value=SimpleNamespace(player=player_context)), patch.object(_SLEEP,'side_effect',time.sleep):
                 worker.start();self.assertTrue(polling.wait(1))
                 try: bridge.stop()
                 except AudioStopError as error: stopped_error=error

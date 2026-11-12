@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from remotevoice.driver_route_recovery import (
+from remontevoice.driver_route_recovery import (
     DriverRecoveryError, DriverRouteRecovery, load_driver_recovery, save_driver_recovery,
 )
 
@@ -25,7 +25,7 @@ class DriverRouteRecoveryTests(unittest.TestCase):
 
     def test_absence_is_none_and_save_load_preserves_record_without_device_calls(self):
         self.assertIsNone(load_driver_recovery(self.folder))
-        with patch('remotevoice.driver_route_recovery.os.fsync', wraps=__import__('os').fsync) as sync:
+        with patch('remontevoice.driver_route_recovery.os.fsync', wraps=__import__('os').fsync) as sync:
             save_driver_recovery(self.folder, PLAN)
         sync.assert_called_once()
         self.assertEqual(load_driver_recovery(self.folder), PLAN)
@@ -70,7 +70,7 @@ class DriverRouteRecoveryTests(unittest.TestCase):
         save_driver_recovery(self.folder, PLAN)
         original = self.target.read_bytes()
         replacement = DriverRouteRecovery('new-render', 'speaker', 'new-mic', 'mic')
-        with patch('remotevoice.driver_route_recovery.os.replace', side_effect=OSError('raw path secrets')):
+        with patch('remontevoice.driver_route_recovery.os.replace', side_effect=OSError('raw path secrets')):
             with self.assertRaises(DriverRecoveryError) as error:
                 save_driver_recovery(self.folder, replacement)
         self.assertNotIn('raw path secrets', str(error.exception))
@@ -80,7 +80,7 @@ class DriverRouteRecoveryTests(unittest.TestCase):
     def test_fsync_failure_preserves_original_and_removes_temp(self):
         save_driver_recovery(self.folder, PLAN)
         original = self.target.read_bytes()
-        with patch('remotevoice.driver_route_recovery.os.fsync', side_effect=OSError('disk failure')):
+        with patch('remontevoice.driver_route_recovery.os.fsync', side_effect=OSError('disk failure')):
             with self.assertRaises(DriverRecoveryError):
                 save_driver_recovery(self.folder, PLAN)
         self.assertEqual(self.target.read_bytes(), original)

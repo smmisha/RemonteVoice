@@ -1,4 +1,4 @@
-// RemoteVoice development PCM ingress ABI. No embedded pointers or variable buffers.
+// RemonteVoice development PCM ingress ABI. No embedded pointers or variable buffers.
 #pragma once
 #include <stdint.h>
 

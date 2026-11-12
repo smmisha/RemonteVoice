@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import numpy as np
 
-from remotevoice.audio import AudioBridge, AudioStopError, is_virtual_audio_device, virtual_device_family
-from remotevoice.protocol import FRAME_SAMPLES, SAMPLE_RATE, SYSTEM_CHANNELS, SYSTEM_FRAME
+from remontevoice.audio import AudioBridge, AudioStopError, is_virtual_audio_device, virtual_device_family
+from remontevoice.protocol import FRAME_SAMPLES, SAMPLE_RATE, SYSTEM_CHANNELS, SYSTEM_FRAME
 
 
 class AudioConversionTests(unittest.TestCase):
@@ -65,10 +65,10 @@ class AudioSystemCaptureBufferTests(unittest.TestCase):
 
         completed.result.side_effect = complete_send
         try:
-            with patch("remotevoice.audio.sc.get_microphone") as get_microphone, patch(
-                "remotevoice.audio.sc.get_speaker"
+            with patch("remontevoice.audio.sc.get_microphone") as get_microphone, patch(
+                "remontevoice.audio.sc.get_speaker"
             ) as get_speaker, patch(
-                "remotevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch_send
+                "remontevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch_send
             ) as dispatch, patch.object(bridge, "_report_failure") as report_failure:
                 source = get_microphone.return_value
                 recorder = source.recorder.return_value.__enter__.return_value
@@ -124,8 +124,8 @@ class AudioSystemCaptureNonFiniteTests(unittest.TestCase):
 
         completed.result.side_effect = complete_send
         try:
-            with patch("remotevoice.audio.sc.get_microphone") as get_microphone, patch(
-                "remotevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch_send
+            with patch("remontevoice.audio.sc.get_microphone") as get_microphone, patch(
+                "remontevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch_send
             ), patch.object(bridge, "_report_failure") as report_failure:
                 recorder = get_microphone.return_value.recorder.return_value.__enter__.return_value
                 recorder.record.side_effect = frames
@@ -159,10 +159,10 @@ class AudioWorkerFailureDiagnosticsTests(unittest.TestCase):
             coroutine.close()
             return pending
 
-        with patch("remotevoice.audio.sc.get_microphone") as source, patch(
-            "remotevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch
+        with patch("remontevoice.audio.sc.get_microphone") as source, patch(
+            "remontevoice.audio.asyncio.run_coroutine_threadsafe", side_effect=dispatch
         ), patch.object(bridge, "_report_failure") as failure, self.assertLogs(
-            "remotevoice.audio", level="WARNING"
+            "remontevoice.audio", level="WARNING"
         ) as logs:
             recorder = source.return_value.recorder.return_value.__enter__.return_value
             recorder.record.return_value = np.zeros((FRAME_SAMPLES, SYSTEM_CHANNELS), dtype="<f4")
@@ -192,9 +192,9 @@ class AudioWorkerFailureDiagnosticsTests(unittest.TestCase):
         for lookup, method, stage in cases:
             with self.subTest(stage=stage):
                 bridge = self.bridge()
-                with patch("remotevoice.audio." + lookup, side_effect=RuntimeError("private-endpoint")), patch.object(
+                with patch("remontevoice.audio." + lookup, side_effect=RuntimeError("private-endpoint")), patch.object(
                     bridge, "_report_failure"
-                ) as failure, self.assertLogs("remotevoice.audio", level="WARNING") as logs:
+                ) as failure, self.assertLogs("remontevoice.audio", level="WARNING") as logs:
                     getattr(bridge, method)()
                 self.assertEqual(len(logs.output), 1)
                 self.assertIn(f"audio_worker_failure stage={stage} error_type=RuntimeError", logs.output[0])
@@ -205,9 +205,9 @@ class AudioWorkerFailureDiagnosticsTests(unittest.TestCase):
     def test_shutdown_does_not_report_expected_native_exception(self):
         bridge = self.bridge()
         bridge._stop.set()
-        with patch("remotevoice.audio.sc.get_microphone", side_effect=RuntimeError("closed")), patch.object(
+        with patch("remontevoice.audio.sc.get_microphone", side_effect=RuntimeError("closed")), patch.object(
             bridge, "_report_failure"
-        ) as failure, self.assertNoLogs("remotevoice.audio", level="WARNING"):
+        ) as failure, self.assertNoLogs("remontevoice.audio", level="WARNING"):
             bridge._capture_system_audio()
         failure.assert_not_called()
         bridge.stop()
@@ -245,7 +245,7 @@ class AudioLifecycleTests(unittest.TestCase):
             self.assertTrue(bridge._stop.is_set())
             self.assertFalse(bridge.microphone_enabled)
             self.assertTrue(bridge._phone_frames.empty())
-            with patch("remotevoice.audio.sc.get_microphone") as get_microphone:
+            with patch("remontevoice.audio.sc.get_microphone") as get_microphone:
                 with self.assertRaises(RuntimeError):
                     bridge.start()
                 get_microphone.assert_not_called()
@@ -260,9 +260,9 @@ class AudioLifecycleTests(unittest.TestCase):
     def test_start_cannot_replace_running_worker_handles(self):
         bridge = self.bridge()
         release = threading.Event()
-        with patch("remotevoice.audio.sc.get_microphone", return_value=SimpleNamespace(
+        with patch("remontevoice.audio.sc.get_microphone", return_value=SimpleNamespace(
             name="VoiceMeeter Output"
-        )) as get_microphone, patch("remotevoice.audio.sc.get_speaker", return_value=SimpleNamespace(
+        )) as get_microphone, patch("remontevoice.audio.sc.get_speaker", return_value=SimpleNamespace(
             name="CABLE Input"
         )), patch.object(bridge, "_capture_system_audio", side_effect=release.wait), patch.object(
             bridge, "_play_phone_audio", side_effect=release.wait
@@ -292,11 +292,11 @@ class AudioLifecycleTests(unittest.TestCase):
         release = threading.Event()
         worker = threading.Thread(target=release.wait, name="inert-partial-start", daemon=True)
         unstarted = threading.Thread(target=lambda: None, daemon=True)
-        with patch("remotevoice.audio.sc.get_microphone", return_value=SimpleNamespace(
+        with patch("remontevoice.audio.sc.get_microphone", return_value=SimpleNamespace(
             name="VoiceMeeter Output"
-        )), patch("remotevoice.audio.sc.get_speaker", return_value=SimpleNamespace(
+        )), patch("remontevoice.audio.sc.get_speaker", return_value=SimpleNamespace(
             name="CABLE Input"
-        )), patch("remotevoice.audio.threading.Thread", side_effect=[worker, unstarted]), patch.object(
+        )), patch("remontevoice.audio.threading.Thread", side_effect=[worker, unstarted]), patch.object(
             unstarted, "start", side_effect=RuntimeError("controlled startup failure")
         ):
             try:
@@ -317,9 +317,9 @@ class AudioLifecycleTests(unittest.TestCase):
     def test_each_native_direction_requires_progress_even_without_phone_speech(self):
         bridge = self.bridge()
         bridge._progress = {'capture': 0.0, 'playback': 0.0}
-        with patch('remotevoice.audio.time.monotonic', return_value=1.0):
+        with patch('remontevoice.audio.time.monotonic', return_value=1.0):
             bridge.assert_progress()
-        with patch('remotevoice.audio.time.monotonic', return_value=2.1):
+        with patch('remontevoice.audio.time.monotonic', return_value=2.1):
             bridge._mark_progress('capture')
             with self.assertRaisesRegex(RuntimeError, 'Аудиоустройство'):
                 bridge.assert_progress()
@@ -332,9 +332,9 @@ class AudioLifecycleTests(unittest.TestCase):
         def lookup(*args, **kwargs):
             bridge._stop.set()
             return SimpleNamespace(name='VoiceMeeter Output')
-        with patch('remotevoice.audio.sc.get_microphone', side_effect=lookup), patch(
-            'remotevoice.audio.sc.get_speaker', return_value=SimpleNamespace(name='CABLE Input')
-        ), patch('remotevoice.audio.threading.Thread') as thread:
+        with patch('remontevoice.audio.sc.get_microphone', side_effect=lookup), patch(
+            'remontevoice.audio.sc.get_speaker', return_value=SimpleNamespace(name='CABLE Input')
+        ), patch('remontevoice.audio.threading.Thread') as thread:
             with self.assertRaisesRegex(RuntimeError, 'отменён'):
                 bridge.start()
         thread.assert_not_called()
@@ -349,7 +349,7 @@ class AudioInputValidationTests(unittest.TestCase):
 
     def test_nonfinite_microphone_frames_never_reach_queue_or_player(self):
         for value in (float("nan"), float("inf"), float("-inf")):
-            with self.subTest(value=value), patch("remotevoice.audio.sc.get_speaker") as get_speaker:
+            with self.subTest(value=value), patch("remontevoice.audio.sc.get_speaker") as get_speaker:
                 bridge = self.bridge()
                 bridge.set_microphone_enabled(True)
                 samples = np.zeros(FRAME_SAMPLES, dtype="<f4")

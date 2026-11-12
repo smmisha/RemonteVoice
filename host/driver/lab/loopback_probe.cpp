@@ -19,7 +19,7 @@
 
 namespace {
 constexpr wchar_t kRoot[] = L"ROOT\\MEDIA\\0000";
-constexpr wchar_t kHardware[] = L"ROOT\\RemoteVoiceAudio";
+constexpr wchar_t kHardware[] = L"ROOT\\RemonteVoiceAudio";
 constexpr double kTau = 6.2831853071795864769;
 constexpr double kFrequency = 900.0;
 constexpr double kAmplitude = 0.18;
@@ -31,11 +31,11 @@ class Report {
     size_t remaining_ = 32768;
 public:
     Report() {
-        const wchar_t* directory = L"C:\\Windows\\Temp\\RemoteVoiceLab-20261025";
+        const wchar_t* directory = L"C:\\Windows\\Temp\\RemonteVoiceLab-20261025";
         if (!CreateDirectoryW(directory, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) return;
         const DWORD attributes = GetFileAttributesW(directory);
         if (attributes == INVALID_FILE_ATTRIBUTES || !(attributes & FILE_ATTRIBUTE_DIRECTORY)) return;
-        _wfopen_s(&file_, L"C:\\Windows\\Temp\\RemoteVoiceLab-20261025\\loopback-probe.txt", L"w");
+        _wfopen_s(&file_, L"C:\\Windows\\Temp\\RemonteVoiceLab-20261025\\loopback-probe.txt", L"w");
     }
     ~Report() { if (file_) fclose(file_); }
     explicit operator bool() const { return file_ != nullptr; }
@@ -390,7 +390,7 @@ void run(Report& report) {
 int main() {
     Report report;
     if (!report) return 1;
-    report.log("RemoteVoice private shared render/loopback probe; report capped at 32768 bytes.\n");
+    report.log("RemonteVoice private shared render/loopback probe; report capped at 32768 bytes.\n");
     const HRESULT initialized = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(initialized)) {
         report.log("FAIL: CoInitializeEx HRESULT=0x%08lx\n", static_cast<unsigned long>(initialized));

@@ -1,4 +1,4 @@
-name: Build RemoteVoice
+name: Build RemonteVoice
 
 on:
   push:
@@ -22,11 +22,11 @@ jobs:
       - name: Install host dependencies
         run: |
           python -m pip install -r requirements.txt pyinstaller
-          python -c "import remotevoice"
+          python -c "import remontevoice"
         working-directory: host
 
       - name: Check Python sources
-        run: python -m compileall -q remotevoice ..\tests
+        run: python -m compileall -q remontevoice ..\tests
         working-directory: host
 
       - name: Run host tests
@@ -41,7 +41,7 @@ jobs:
         # onefile extraction supervisor sharing the owner's temporary files.
         run: >-
           python -m PyInstaller --noconfirm --clean --onedir --windowed
-          --name RemoteVoice --paths . --specpath build --workpath build\work
+          --name RemonteVoice --paths . --specpath build --workpath build\work
           --distpath build\dist --collect-all qrcode --collect-all PIL
           --collect-all soundcard --hidden-import websockets.asyncio.server
           launcher.py
@@ -49,8 +49,8 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: RemoteVoice-Windows
-          path: host/build/dist/RemoteVoice/
+          name: RemonteVoice-Windows
+          path: host/build/dist/RemonteVoice/
           if-no-files-found: error
 
   ios-build:
@@ -65,8 +65,8 @@ jobs:
       - name: Check strict pairing endpoint fixtures
         working-directory: ios
         run: |
-          swiftc RemoteVoice/PairingInfo.swift tests/PairingInfoProbe.swift -o "$RUNNER_TEMP/RemoteVoicePairingProbe"
-          "$RUNNER_TEMP/RemoteVoicePairingProbe"
+          swiftc RemonteVoice/PairingInfo.swift tests/PairingInfoProbe.swift -o "$RUNNER_TEMP/RemonteVoicePairingProbe"
+          "$RUNNER_TEMP/RemonteVoicePairingProbe"
 
       - name: Generate Xcode project
         run: xcodegen generate --spec project.yml
@@ -74,44 +74,44 @@ jobs:
 
       - name: Build iPhone simulator app
         run: >-
-          xcodebuild -project RemoteVoice.xcodeproj -scheme RemoteVoice
+          xcodebuild -project RemonteVoice.xcodeproj -scheme RemonteVoice
           -configuration Release -sdk iphonesimulator
           -destination 'generic/platform=iOS Simulator'
-          -derivedDataPath "$RUNNER_TEMP/RemoteVoiceSimulator"
+          -derivedDataPath "$RUNNER_TEMP/RemonteVoiceSimulator"
           CODE_SIGNING_ALLOWED=NO build
         working-directory: ios
 
       - name: Build unsigned iPhone app
         run: >-
-          xcodebuild -project RemoteVoice.xcodeproj -scheme RemoteVoice
+          xcodebuild -project RemonteVoice.xcodeproj -scheme RemonteVoice
           -configuration Release -sdk iphoneos
           -destination 'generic/platform=iOS'
-          -derivedDataPath "$RUNNER_TEMP/RemoteVoiceDevice"
+          -derivedDataPath "$RUNNER_TEMP/RemonteVoiceDevice"
           CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
         working-directory: ios
 
       - name: Package unsigned iPhone IPA for AltServer
         run: |
-          mkdir -p "$RUNNER_TEMP/RemoteVoiceIPA/Payload"
-          ditto "$RUNNER_TEMP/RemoteVoiceDevice/Build/Products/Release-iphoneos/RemoteVoice.app" \
-            "$RUNNER_TEMP/RemoteVoiceIPA/Payload/RemoteVoice.app"
-          cd "$RUNNER_TEMP/RemoteVoiceIPA"
-          ditto -c -k --sequesterRsrc --keepParent Payload "$RUNNER_TEMP/RemoteVoice-iPhone-unsigned.ipa"
+          mkdir -p "$RUNNER_TEMP/RemonteVoiceIPA/Payload"
+          ditto "$RUNNER_TEMP/RemonteVoiceDevice/Build/Products/Release-iphoneos/RemonteVoice.app" \
+            "$RUNNER_TEMP/RemonteVoiceIPA/Payload/RemonteVoice.app"
+          cd "$RUNNER_TEMP/RemonteVoiceIPA"
+          ditto -c -k --sequesterRsrc --keepParent Payload "$RUNNER_TEMP/RemonteVoice-iPhone-unsigned.ipa"
 
       - uses: actions/upload-artifact@v7
         with:
-          name: RemoteVoice-iOS-Simulator
-          path: ${{ runner.temp }}/RemoteVoiceSimulator/Build/Products/Release-iphonesimulator/RemoteVoice.app
+          name: RemonteVoice-iOS-Simulator
+          path: ${{ runner.temp }}/RemonteVoiceSimulator/Build/Products/Release-iphonesimulator/RemonteVoice.app
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v7
         with:
-          name: RemoteVoice-iPhone-unsigned
-          path: ${{ runner.temp }}/RemoteVoiceDevice/Build/Products/Release-iphoneos/RemoteVoice.app
+          name: RemonteVoice-iPhone-unsigned
+          path: ${{ runner.temp }}/RemonteVoiceDevice/Build/Products/Release-iphoneos/RemonteVoice.app
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v7
         with:
-          name: RemoteVoice-iPhone-unsigned-IPA
-          path: ${{ runner.temp }}/RemoteVoice-iPhone-unsigned.ipa
+          name: RemonteVoice-iPhone-unsigned-IPA
+          path: ${{ runner.temp }}/RemonteVoice-iPhone-unsigned.ipa
           if-no-files-found: error

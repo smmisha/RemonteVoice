@@ -9,19 +9,19 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from remotevoice.broker_package_manifest import (
+from remontevoice.broker_package_manifest import (
     MANIFEST_NAME, MAX_MANIFEST_BYTES, InstallationManifest, PackageManifestError,
     parse_manifest, build_manifest, _regular_metadata,
 )
 
 
-PINS = {"RemoteVoiceBroker.exe": "a" * 64, "RemoteVoice.exe": "b" * 64,
+PINS = {"RemonteVoiceBroker.exe": "a" * 64, "RemonteVoice.exe": "b" * 64,
         "_internal/base_library.zip": "c" * 64, "_internal/python314.dll": "d" * 64}
 TEMP_ROOT = Path(__file__).resolve().parents[1]
 
 
 def document(**changes):
-    result = dict(schema_version=1, broker="RemoteVoiceBroker.exe", client="RemoteVoice.exe",
+    result = dict(schema_version=1, broker="RemonteVoiceBroker.exe", client="RemonteVoice.exe",
                   driver_instance_id=r"ROOT\MEDIA\0000", files=dict(PINS))
     result.update(changes)
     return result
@@ -44,7 +44,7 @@ class ManifestParserTests(unittest.TestCase):
 
     def test_schema_types_unknown_keys_and_nonfinite_json_are_rejected(self):
         cases = [encoded(schema_version=True), encoded(schema_version=1.0), encoded(schema_version=2),
-                 encoded(extra=1), encoded(broker="remotevoicebroker.exe"), encoded(client=None),
+                 encoded(extra=1), encoded(broker="remontevoicebroker.exe"), encoded(client=None),
                  encoded(driver_instance_id=r"ROOT\MEDIA\0000\extra"),
                  encoded(driver_instance_id=r"root\media\0000"), encoded(files=[]),
                  b"[]", b"null", b"{}", b'{"schema_version":NaN}', b'{"schema_version":Infinity}',
@@ -59,8 +59,8 @@ class ManifestParserTests(unittest.TestCase):
     def test_duplicate_keys_are_rejected_at_top_level_and_in_files(self):
         raw = encoded()
         for case in (raw.replace(b'"schema_version": 1', b'"schema_version": 1, "schema_version": 1'),
-                     raw.replace(b'"RemoteVoice.exe": "' + b"b" * 64 + b'"',
-                                 b'"RemoteVoice.exe": "' + b"b" * 64 + b'", "RemoteVoice.exe": "' + b"b" * 64 + b'"')):
+                     raw.replace(b'"RemonteVoice.exe": "' + b"b" * 64 + b'"',
+                                 b'"RemonteVoice.exe": "' + b"b" * 64 + b'", "RemonteVoice.exe": "' + b"b" * 64 + b'"')):
             with self.assertRaises(PackageManifestError):
                 parse_manifest(case)
 
@@ -70,7 +70,7 @@ class ManifestParserTests(unittest.TestCase):
                "a /b.dll", "a./b.dll", "bad?.dll", "bad|.dll", "bad<.dll", "bad*.dll",
                "a/\x01.dll", "a/\ud800.dll", "CON", "nul.txt", "aux.dll", "COM1.dll", "Lpt9.log",
                "COM¹.txt", "CONIN$", "COM1 .txt", "clock$", "a" * 513, MANIFEST_NAME,
-               MANIFEST_NAME.upper(), "remotevoice.exe", "_INTERNAL/base_library.zip"]
+               MANIFEST_NAME.upper(), "remontevoice.exe", "_INTERNAL/base_library.zip"]
         for path in bad:
             with self.subTest(path=path), self.assertRaises(PackageManifestError):
                 parse_manifest(encoded(files={**PINS, path: "e" * 64}))
@@ -82,7 +82,7 @@ class ManifestParserTests(unittest.TestCase):
     def test_prefix_collisions_missing_artifacts_and_limits(self):
         for files in ({**PINS, "_INTERNAL": "a" * 64},
                       {**PINS, "x": "a" * 64, "X/y.dll": "b" * 64},
-                      {key: value for key, value in PINS.items() if key != "RemoteVoice.exe"},
+                      {key: value for key, value in PINS.items() if key != "RemonteVoice.exe"},
                       {key: value for key, value in PINS.items() if not key.endswith(".dll")},
                       {**PINS, **{f"x/{i}.dat": "a" * 64 for i in range(4093)}}):
             with self.subTest(count=len(files)), self.assertRaises(PackageManifestError):
@@ -152,7 +152,7 @@ class ManifestBuildTests(unittest.TestCase):
                 self.skipTest("Symlink creation unavailable; metadata rejection covered separately")
             with self.assertRaises(PackageManifestError):
                 build_manifest(alias, r"ROOT\MEDIA\0000")
-            (root / "other.dll").symlink_to(root / "RemoteVoice.exe")
+            (root / "other.dll").symlink_to(root / "RemonteVoice.exe")
             with self.assertRaises(PackageManifestError):
                 build_manifest(root, r"ROOT\MEDIA\0000")
 
@@ -172,7 +172,7 @@ class ManifestBuildTests(unittest.TestCase):
                         return iter(values + [values[0]])
                     def __exit__(self, *unused):
                         self.handle.close()
-                with patch("remotevoice.broker_package_manifest.os.scandir", return_value=Entries()):
+                with patch("remontevoice.broker_package_manifest.os.scandir", return_value=Entries()):
                     with self.assertRaises(PackageManifestError):
                         build_manifest(root, r"ROOT\MEDIA\0000")
             else:

@@ -1,4 +1,4 @@
-// Private VM synthetic test. Opens only the verified RemoteVoice lab microphone.
+// Private VM synthetic test. Opens only the verified RemonteVoice lab microphone.
 #define NOMINMAX
 #include <windows.h>
 #include <mmdeviceapi.h>
@@ -82,7 +82,7 @@ static bool endpoint_is_lab_root(IMMDevice* device, IPropertyStore* properties) 
                 return false;
             }
             for (const wchar_t* value = hardwareIds; *value; value += wcslen(value) + 1) {
-                if (!_wcsicmp(value, L"ROOT\\RemoteVoiceAudio")) {
+                if (!_wcsicmp(value, L"ROOT\\RemonteVoiceAudio")) {
                     fprintf(report, "endpoint root hardware ID verified=%ls\n", value);
                     return true;
                 }
@@ -135,7 +135,7 @@ static HANDLE open_filter() {
             if (type != REG_MULTI_SZ || required > sizeof(ids) - sizeof(wchar_t))
                 throw std::runtime_error("Invalid hardware ID property");
             for (const wchar_t* p = ids; *p; p += wcslen(p) + 1) {
-                if (!_wcsicmp(p, L"ROOT\\RemoteVoiceAudio")) {
+                if (!_wcsicmp(p, L"ROOT\\RemonteVoiceAudio")) {
                     selected = path;
                     ++matches;
                     break;
@@ -321,7 +321,7 @@ static void tone(HANDLE filter, Message& message, IAudioCaptureClient* capture,
 }
 
 int main() {
-    fopen_s(&report, "C:\\Windows\\Temp\\RemoteVoiceLab-20261025\\pcm-probe.txt", "w");
+    fopen_s(&report, "C:\\Windows\\Temp\\RemonteVoiceLab-20261025\\pcm-probe.txt", "w");
     if (!report) return 3;
     HRESULT initialized = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(initialized)) { fprintf(report, "CoInitializeEx HRESULT=0x%08lx\n", initialized); fclose(report); return 4; }

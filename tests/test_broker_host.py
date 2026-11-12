@@ -2,9 +2,9 @@ import threading
 import unittest
 from unittest.mock import Mock
 
-from remotevoice.broker_host import BrokerHost, BrokerHostError
-from remotevoice.broker_pipe_session import BrokerPipeSession, BrokerSessionError
-from remotevoice.mic_broker import BrokerPolicy, PeerIdentity
+from remontevoice.broker_host import BrokerHost, BrokerHostError
+from remontevoice.broker_pipe_session import BrokerPipeSession, BrokerSessionError
+from remontevoice.mic_broker import BrokerPolicy, PeerIdentity
 
 PEER = PeerIdentity("S-1-5-21-1000", "S-1-5-5-1-42", 1, "a" * 64)
 HELLO = b"RVMB\x01\x03\x00\x00"

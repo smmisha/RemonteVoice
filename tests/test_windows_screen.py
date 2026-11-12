@@ -6,7 +6,7 @@ import types
 import unittest
 from unittest.mock import Mock, call, patch
 
-from remotevoice import windows_screen
+from remontevoice import windows_screen
 
 
 class FakeWin32:
@@ -249,7 +249,7 @@ class WindowsCaptureTests(unittest.TestCase):
                 self.assert_cleanup(fake, ["DeleteObject", "DeleteDC", "ReleaseDC", "SetThreadDpiAwarenessContext:2"])
 
     def test_pixel_copy_and_pillow_failures_are_sanitized_and_release_every_resource(self):
-        for target in ("remotevoice.windows_screen.ctypes.string_at", "remotevoice.windows_screen.Image.frombytes"):
+        for target in ("remontevoice.windows_screen.ctypes.string_at", "remontevoice.windows_screen.Image.frombytes"):
             with self.subTest(target=target), patch(target, side_effect=ValueError("PRIVATE PIXELS")):
                 fake = FakeWin32()
                 self.assert_failed(fake)

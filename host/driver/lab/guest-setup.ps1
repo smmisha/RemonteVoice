@@ -19,7 +19,7 @@ try {
     $rvBefore = @(& $rvBcd /enum '{current}' 2>&1)
     if ($LASTEXITCODE -ne 0) { throw ('Guest BCD read failed: ' + ($rvBefore -join "`n")) }
     $rvResult.bcd_before = $rvBefore -join "`n"
-    $rvCertificate = New-Object Security.Cryptography.X509Certificates.X509Certificate2 (Join-Path $rvDirectory 'RemoteVoiceLab.cer')
+    $rvCertificate = New-Object Security.Cryptography.X509Certificates.X509Certificate2 (Join-Path $rvDirectory 'RemonteVoiceLab.cer')
     if ($rvCertificate.Thumbprint -ne $rvConfig.certificate_thumbprint) { throw 'Unexpected certificate' }
     foreach ($rvStoreName in @('Root','TrustedPublisher')) {
         $rvStore = New-Object Security.Cryptography.X509Certificates.X509Store ($rvStoreName, 'LocalMachine')

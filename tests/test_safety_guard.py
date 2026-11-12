@@ -9,10 +9,10 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from remotevoice.host_lease import HostLeaseError
-from remotevoice.input_routing import InputRoute as MemoryInputRoute
-from remotevoice.output_routing import OutputRoute as MemoryOutputRoute
-from remotevoice.safety_guard import (
+from remontevoice.host_lease import HostLeaseError
+from remontevoice.input_routing import InputRoute as MemoryInputRoute
+from remontevoice.output_routing import OutputRoute as MemoryOutputRoute
+from remontevoice.safety_guard import (
     SafetyGuard, SafetyGuardError, _Snapshot, _WindowsOwner,
     _MAX_MESSAGE_BYTES, _persist_receipt, _read_message, _recover, _run_guard,
 )
@@ -238,9 +238,9 @@ class SafetyGuardRecoveryTests(unittest.TestCase):
         }))
 
     def test_every_recovery_runs_independently_after_failures(self):
-        with patch("remotevoice.output_routing.OutputRoute") as output, patch(
-            "remotevoice.input_routing.InputRoute"
-        ) as input_route, patch("remotevoice.microphone_guard.MicrophoneMuteGuard.recover") as microphone:
+        with patch("remontevoice.output_routing.OutputRoute") as output, patch(
+            "remontevoice.input_routing.InputRoute"
+        ) as input_route, patch("remontevoice.microphone_guard.MicrophoneMuteGuard.recover") as microphone:
             output.return_value.restore.side_effect = RuntimeError("PRIVATE-output-error")
             microphone.side_effect = RuntimeError("PRIVATE-mic-error")
             outcome = _recover(snapshot())
@@ -258,9 +258,9 @@ class SafetyGuardRecoveryTests(unittest.TestCase):
                              set_default=lambda endpoint, role: outputs.__setitem__(role, endpoint))
         input_route = MemoryInputRoute(value.input_remote, value.input_fallback, get_default=inputs.__getitem__,
                                  set_default=lambda endpoint, role: inputs.__setitem__(role, endpoint))
-        with patch("remotevoice.output_routing.OutputRoute", return_value=output), patch(
-            "remotevoice.input_routing.InputRoute", return_value=input_route
-        ), patch("remotevoice.microphone_guard.MicrophoneMuteGuard.recover"):
+        with patch("remontevoice.output_routing.OutputRoute", return_value=output), patch(
+            "remontevoice.input_routing.InputRoute", return_value=input_route
+        ), patch("remontevoice.microphone_guard.MicrophoneMuteGuard.recover"):
             self.assertTrue(all(_recover(value).values()))
         self.assertEqual(outputs, {0: "manual-output", 1: value.output_fallback, 2: value.output_fallback})
         self.assertEqual(inputs, {0: value.input_fallback, 1: "manual-input", 2: value.input_fallback})
@@ -297,7 +297,7 @@ class SafetyGuardParentTests(unittest.TestCase):
 
     def test_source_launch_replaces_pythonpath_and_waits_for_ready(self):
         process = FakeProcess()
-        with patch("remotevoice.safety_guard.subprocess.Popen", return_value=process) as popen, patch.dict(
+        with patch("remontevoice.safety_guard.subprocess.Popen", return_value=process) as popen, patch.dict(
             os.environ, {"PYTHONPATH": "untrusted-inherited-path"}
         ):
             guard = self.start()
@@ -306,7 +306,7 @@ class SafetyGuardParentTests(unittest.TestCase):
         executable = Path(getattr(sys, "_base_executable", sys.executable))
         if os.name == "nt":
             executable = executable.with_name("python.exe")
-        self.assertEqual(args[0], [str(executable), "-m", "remotevoice.safety_guard"])
+        self.assertEqual(args[0], [str(executable), "-m", "remontevoice.safety_guard"])
         self.assertEqual(kwargs["env"]["PYTHONPATH"], str(Path(__file__).resolve().parents[1] / "host"))
         self.assertEqual(kwargs["stderr"], subprocess.DEVNULL)
         self.assertEqual(kwargs["creationflags"], getattr(subprocess, "CREATE_NO_WINDOW", 0))
@@ -323,7 +323,7 @@ class SafetyGuardParentTests(unittest.TestCase):
 
     def test_frozen_launch_uses_main_dispatch_without_pythonpath_override(self):
         process = FakeProcess()
-        with patch("remotevoice.safety_guard.subprocess.Popen", return_value=process) as popen, patch.object(
+        with patch("remontevoice.safety_guard.subprocess.Popen", return_value=process) as popen, patch.object(
             sys, "frozen", True, create=True
         ):
             guard = self.start()
@@ -335,7 +335,7 @@ class SafetyGuardParentTests(unittest.TestCase):
         for response in (b"", b'{"type":"wrong","version":1}\n', b"[]\n"):
             with self.subTest(response=response):
                 process = FakeProcess(response)
-                with patch("remotevoice.safety_guard.subprocess.Popen", return_value=process):
+                with patch("remontevoice.safety_guard.subprocess.Popen", return_value=process):
                     with self.assertRaises(SafetyGuardError):
                         self.start()
                 self.assertTrue(process.killed)
@@ -353,18 +353,18 @@ class SafetyGuardParentTests(unittest.TestCase):
                 raise BrokenPipeError("controlled child termination")
 
         process.stdin = BlockedInput()
-        with patch("remotevoice.safety_guard.subprocess.Popen", return_value=process), patch(
-            "remotevoice.safety_guard._READY_TIMEOUT_SECONDS", 0.02
+        with patch("remontevoice.safety_guard.subprocess.Popen", return_value=process), patch(
+            "remontevoice.safety_guard._READY_TIMEOUT_SECONDS", 0.02
         ):
             with self.assertRaisesRegex(SafetyGuardError, "ready in time"):
                 self.start()
         self.assertTrue(process.killed)
-        self.assertFalse(any(thread.name == "remotevoice-guard-handshake" and thread.is_alive()
+        self.assertFalse(any(thread.name == "remontevoice-guard-handshake" and thread.is_alive()
                              for thread in threading.enumerate()))
 
     def test_unexpected_helper_exit_is_observable(self):
         process = FakeProcess()
-        with patch("remotevoice.safety_guard.subprocess.Popen", return_value=process):
+        with patch("remontevoice.safety_guard.subprocess.Popen", return_value=process):
             guard = self.start()
         process.returncode = 2
         self.assertFalse(guard.armed)
@@ -382,7 +382,7 @@ class WindowsOwnerHandleTests(unittest.TestCase):
     def test_pythonw_owner_can_start_and_disarm_direct_console_helper(self):
         value = snapshot()
         code = (
-            "from pathlib import Path; from remotevoice.safety_guard import SafetyGuard; "
+            "from pathlib import Path; from remontevoice.safety_guard import SafetyGuard; "
             "import sys; guard=SafetyGuard.start(Path(sys.argv[1]), 'ro', 'fo', 'ri', 'fi'); "
             "assert guard.armed; guard.disarm(); assert not guard.armed"
         )
@@ -401,7 +401,7 @@ class WindowsOwnerHandleTests(unittest.TestCase):
 
     def test_pythonw_helper_main_recovers_inherited_pipes_when_streams_are_none(self):
         value = replace(snapshot(), owner_pid=os.getpid())
-        code = ("import sys; from remotevoice.safety_guard import main; "
+        code = ("import sys; from remontevoice.safety_guard import main; "
                 "sys.stdin=None; sys.stdout=None; raise SystemExit(main())")
         environment = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / "host"))
         process = subprocess.Popen([self.pythonw(), "-c", code], stdin=subprocess.PIPE,

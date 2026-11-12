@@ -16,8 +16,8 @@ This folder contains isolated checks, outside the application target. It does no
 On a machine with Swift and Foundation, from the repository root:
 
 ```sh
-swiftc ios/RemoteVoice/PairingInfo.swift ios/tests/PairingInfoProbe.swift -o /tmp/remotevoice-pairing-probe
-/tmp/remotevoice-pairing-probe
+swiftc ios/RemonteVoice/PairingInfo.swift ios/tests/PairingInfoProbe.swift -o /tmp/remontevoice-pairing-probe
+/tmp/remontevoice-pairing-probe
 ```
 
 The probe exercises the actual PairingInfo implementation against 29 accepted/rejected endpoints and the persisted-data URL path. It has no network/audio/account access. Do not report it as passed until it actually executes.

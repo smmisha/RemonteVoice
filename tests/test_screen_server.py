@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 
 from websockets.exceptions import ConnectionClosed
 
-from remotevoice import screen
-from remotevoice.server import RemoteVoiceServer
-from remotevoice.h264_stream import StreamError
+from remontevoice import screen
+from remontevoice.server import RemonteVoiceServer
+from remontevoice.h264_stream import StreamError
 
 
 _CLOSED = object()
@@ -103,9 +103,9 @@ class FakeEncoder:
 class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_missing_encoder_or_explicit_optout_keeps_jpeg_capability(self):
         for available, setting, expected in [(False, '1', False), (True, '0', False), (True, '', True)]:
-            with patch('remotevoice.server.encoder_available', return_value=available), \
-                    patch.dict('os.environ', {'REMOTEVOICE_VIDEO_EXPERIMENTAL': setting}):
-                server = RemoteVoiceServer('127.0.0.1', 8765, 'fake', 'fake', Path('.'), self.pairing, lambda _: None)
+            with patch('remontevoice.server.encoder_available', return_value=available), \
+                    patch.dict('os.environ', {'REMONTEVOICE_VIDEO_EXPERIMENTAL': setting}):
+                server = RemonteVoiceServer('127.0.0.1', 8765, 'fake', 'fake', Path('.'), self.pairing, lambda _: None)
             self.assertEqual(server._screen_video, expected)
             self.assertFalse(server._screen_video_peer)
             self.assertFalse(server._screen_permission_snapshot()[0])
@@ -115,12 +115,12 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
         self.pairing.authenticate.return_value = "SYNTHETIC_TOKEN_FOR_LOCAL_TEST_ONLY_123456"
         self.audio_statuses = []
         self.screen_statuses = []
-        self.server = RemoteVoiceServer("127.0.0.1", 8765, "fake-capture", "fake-playback", Path("."),
+        self.server = RemonteVoiceServer("127.0.0.1", 8765, "fake-capture", "fake-playback", Path("."),
                                         self.pairing, self.audio_statuses.append, self.screen_statuses.append)
         self.server._loop = asyncio.get_running_loop()
         self.server._client_lock = asyncio.Lock()
         self.server._screen_source = screen.ScreenFrameSource(lambda: _JPEG)
-        self.audio_patch = patch("remotevoice.server.AudioBridge", FakeAudio)
+        self.audio_patch = patch("remontevoice.server.AudioBridge", FakeAudio)
         self.audio_patch.start()
         self.tasks = []
         self.sockets = []
@@ -196,7 +196,7 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
         self.server.set_screen_allowed(True)
         self.server._screen_detail = True
         self.server._screen_video = False
-        with patch('remotevoice.server.create_encoder') as create:
+        with patch('remontevoice.server.create_encoder') as create:
             self.main.control({'type': 'screen_request', 'request_id': 'v1', 'profile': 'video'})
             self.assertEqual(await self.main.response(),
                              {'type': 'screen_error', 'message': 'invalid_request', 'request_id': 'v1'})
@@ -236,7 +236,7 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_video_pulls_one_access_unit_and_revocation_releases_encoder_only(self):
         encoder = FakeEncoder()
-        with patch('remotevoice.server.create_encoder', return_value=encoder):
+        with patch('remontevoice.server.create_encoder', return_value=encoder):
             preview = await self.video_preview()
             self.assertEqual(await preview.response(), {'type': 'screen_ok', 'codec': 'h264',
                                                        'width': 1280, 'height': 800, 'fps': 30})
@@ -253,7 +253,7 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_video_blocked_writer_is_cancelled_on_audio_disconnect(self):
         encoder = FakeEncoder()
-        with patch('remotevoice.server.create_encoder', return_value=encoder):
+        with patch('remontevoice.server.create_encoder', return_value=encoder):
             preview = await self.video_preview()
             await preview.response()
             preview.block_binary = True
@@ -269,7 +269,7 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
         for code, expected in [('encoder_unavailable', 'capture_failed'), ('busy', 'busy')]:
             encoder = FakeEncoder()
             encoder.start = MagicMock(side_effect=StreamError(code))
-            with patch('remotevoice.server.create_encoder', return_value=encoder):
+            with patch('remontevoice.server.create_encoder', return_value=encoder):
                 preview = await self.video_preview()
                 self.assertEqual(await preview.response(), {'type': 'screen_error', 'message': expected})
                 await asyncio.wait_for(preview.closed.wait(), 1)
@@ -292,7 +292,7 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
                 encoder.stopped.set()
 
         encoder.start, encoder.stop = start, stop
-        with patch('remotevoice.server.create_encoder', return_value=encoder):
+        with patch('remontevoice.server.create_encoder', return_value=encoder):
             preview = await self.video_preview()
             try:
                 self.assertTrue(await asyncio.to_thread(entered.wait, 1))
@@ -310,11 +310,11 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_video_unknown_cleanup_blocks_new_preview_but_preserves_audio(self):
         encoder = FakeEncoder()
         encoder.stop = MagicMock(side_effect=StreamError('cleanup_unconfirmed'))
-        with patch('remotevoice.server.create_encoder', return_value=encoder):
+        with patch('remontevoice.server.create_encoder', return_value=encoder):
             preview = await self.video_preview()
             await preview.response()
             preview.control({'type': 'unexpected'})
-            with self.assertLogs('remotevoice.server', level='WARNING'):
+            with self.assertLogs('remontevoice.server', level='WARNING'):
                 self.assertEqual(await preview.response(), {'type': 'screen_error', 'message': 'invalid_request'})
                 await asyncio.wait_for(preview.closed.wait(), 1)
             self.assertTrue(self.server._video_cleanup_failed)
@@ -533,15 +533,15 @@ class ScreenServerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_auth_capture_and_send_deadlines_only_end_screen(self):
         self.server.set_screen_allowed(True)
-        with patch("remotevoice.server._SCREEN_AUTH_TIMEOUT", 0.01):
+        with patch("remontevoice.server._SCREEN_AUTH_TIMEOUT", 0.01):
             unauthenticated = self.start_socket("/screen")
             self.assertEqual(await unauthenticated.response(), {"type": "screen_error", "message": "timeout"})
-        with patch("remotevoice.server._SCREEN_REQUEST_TIMEOUT", 0.01):
+        with patch("remontevoice.server._SCREEN_REQUEST_TIMEOUT", 0.01):
             idle, _ = await self.preview()
             self.assertEqual(await idle.response(), {"type": "screen_error", "message": "timeout"})
         preview, _ = await self.preview()
         preview.block_binary = True
-        with patch("remotevoice.server._SCREEN_SEND_TIMEOUT", 0.01):
+        with patch("remontevoice.server._SCREEN_SEND_TIMEOUT", 0.01):
             preview.control({"type": "screen_next"})
             self.assertEqual(await preview.response(), {"type": "screen_error", "message": "timeout"})
         await self.assert_audio_alive()

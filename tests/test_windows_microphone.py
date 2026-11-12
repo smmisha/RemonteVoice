@@ -3,8 +3,8 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
-from remotevoice import windows_microphone as microphone
-from remotevoice import windows_output
+from remontevoice import windows_microphone as microphone
+from remontevoice import windows_output
 
 
 class FakeComAdapter:

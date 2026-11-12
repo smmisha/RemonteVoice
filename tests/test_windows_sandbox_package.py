@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-from remotevoice.broker_package_manifest import MANIFEST_NAME, build_manifest
+from remontevoice.broker_package_manifest import MANIFEST_NAME, build_manifest
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("prepare_windows_sandbox", ROOT / "host/prepare_windows_sandbox.py")
@@ -22,7 +22,7 @@ class SandboxPreparationTests(unittest.TestCase):
         self.folder = Path(self.temporary.name)
         self.package, self.output = self.folder / "package & copy", self.folder / "sandbox"
         self.package.mkdir()
-        for name in ("RemoteVoiceBroker.exe", "RemoteVoice.exe", "_internal/base_library.zip",
+        for name in ("RemonteVoiceBroker.exe", "RemonteVoice.exe", "_internal/base_library.zip",
                      "_internal/python314.dll"):
             path = self.package / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -38,19 +38,19 @@ class SandboxPreparationTests(unittest.TestCase):
             self.assertEqual(xml.findtext(key), "Disable")
         mappings = [(Path(f.findtext("HostFolder")), f.findtext("SandboxFolder"), f.findtext("ReadOnly"))
                     for f in xml.findall("MappedFolders/MappedFolder")]
-        self.assertEqual(mappings, [(self.package.resolve(), r"C:\RemoteVoice-Package", "true"),
-                                    (self.output / "control", r"C:\RemoteVoice-Control", "true"),
-                                    (self.output / "reports", r"C:\RemoteVoice-Reports", "false")])
+        self.assertEqual(mappings, [(self.package.resolve(), r"C:\RemonteVoice-Package", "true"),
+                                    (self.output / "control", r"C:\RemonteVoice-Control", "true"),
+                                    (self.output / "reports", r"C:\RemonteVoice-Reports", "false")])
         self.assertEqual(list((self.output / "reports").iterdir()), [])
         self.assertEqual((self.output / "control/smoke.ps1").read_bytes(), builder.SCRIPT.read_bytes())
         expected = json.loads((self.output / "control/expected.json").read_text("utf-8"))
-        self.assertEqual(set(expected["files"]), {"RemoteVoice.exe", "RemoteVoiceBroker.exe",
+        self.assertEqual(set(expected["files"]), {"RemonteVoice.exe", "RemonteVoiceBroker.exe",
                                                 "_internal/base_library.zip", "_internal/python314.dll"})
         self.assertEqual((self.package / MANIFEST_NAME).read_bytes(), self.manifest)
         self.assertFalse(json.loads((self.output / "preparation.json").read_text("utf-8"))["started"])
 
     def test_stale_or_extra_package_files_are_rejected_before_output_creation(self):
-        (self.package / "RemoteVoice.exe").write_bytes(b"changed")
+        (self.package / "RemonteVoice.exe").write_bytes(b"changed")
         with self.assertRaises(ValueError):
             builder.prepare_sandbox(self.package, self.output)
         self.assertFalse(self.output.exists())
@@ -77,7 +77,7 @@ class SandboxPreparationTests(unittest.TestCase):
         self.assertEqual(xml.findtext("MemoryInMB"), "2048")
         self.assertEqual([(f.findtext("SandboxFolder"), f.findtext("ReadOnly"))
                           for f in xml.findall("MappedFolders/MappedFolder")],
-                         [(r"C:\RemoteVoice-Control", "true"), (r"C:\RemoteVoice-Reports", "false")])
+                         [(r"C:\RemonteVoice-Control", "true"), (r"C:\RemonteVoice-Reports", "false")])
         self.assertEqual((self.output / "control/inspect_environment.ps1").read_bytes(),
                          builder.ENVIRONMENT_SCRIPT.read_bytes())
         marker = json.loads((self.output / "control/probe.json").read_text("utf-8"))
@@ -121,7 +121,7 @@ $ast=[Management.Automation.Language.Parser]::ParseFile($env:RV_SANDBOX_ENV_SCRI
 if($errors.Count){exit 1}
 $definition=$ast.Find({param($node) $node -is [Management.Automation.Language.StringConstantExpressionAst] -and $node.Value.StartsWith('using System;')},$true)
 Add-Type -TypeDefinition $definition.Value
-$flags=[RemoteVoiceReadOnlyCI]::ReadFlags()
+$flags=[RemonteVoiceReadOnlyCI]::ReadFlags()
 if($flags -isnot [uint32]){exit 1}
 """
         parsed = subprocess.run([str(shell), "-NoProfile", "-NonInteractive", "-Command", command],
@@ -192,7 +192,7 @@ $ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
 $ast=[Management.Automation.Language.Parser]::ParseFile($env:RV_SANDBOX_SCRIPT,[ref]$null,[ref]$null)
 $definition=$ast.Find({param($node) $node -is [Management.Automation.Language.StringConstantExpressionAst] -and $node.Value.StartsWith('using System;')},$true)
 Add-Type -TypeDefinition $definition.Value
-$token=[RemoteVoiceSandboxToken]::Read()
+$token=[RemonteVoiceSandboxToken]::Read()
 if($token.Length -ne 2 -or $token[0] -notin @(1,2,3) -or $token[1] -notin @(0,1)){throw 'Token observation failed'}
 $fn=$ast.Find({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Invoke-BoundedCase'},$true)
 . ([scriptblock]::Create($fn.Extent.Text))

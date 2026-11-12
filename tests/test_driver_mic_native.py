@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-from remotevoice.driver_mic import (
+from remontevoice.driver_mic import (
     DriverBufferFull, DriverMicError, DriverMicWriter, MicWriterState,
     float_mono_to_pcm16,
 )

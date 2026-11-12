@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from remotevoice.audio_timing import SystemAudioTiming
+from remontevoice.audio_timing import SystemAudioTiming
 
 
 class TimingTests(unittest.TestCase):
@@ -20,7 +20,7 @@ class TimingTests(unittest.TestCase):
             points = [1_000_000_000]
             for duration in durations:
                 points.append(points[-1]+duration)
-            with self.subTest(selected=selected), self.assertLogs('remotevoice.audio', level='INFO'):
+            with self.subTest(selected=selected), self.assertLogs('remontevoice.audio', level='INFO'):
                 result = self.packet(SystemAudioTiming(), points)
             self.assertEqual(result[selected], 200)
             for other in ('capture_ms', 'dispatch_ms', 'lock_ms', 'send_ms'):
@@ -31,7 +31,7 @@ class TimingTests(unittest.TestCase):
     def test_normal_capture_batches_are_quiet_but_gap_between_sent_packets_is_visible(self):
         timing = SystemAudioTiming()
         self.assertIsNone(self.packet(timing, [0,100_000_000,101_000_000,102_000_000,103_000_000]))
-        with self.assertLogs('remotevoice.audio', level='INFO'):
+        with self.assertLogs('remontevoice.audio', level='INFO'):
             result = self.packet(timing, [400_000_000,401_000_000,402_000_000,403_000_000,404_000_000])
         self.assertEqual(result['frame'], 2)
         self.assertEqual(result['gap_ms'], 301)
@@ -39,7 +39,7 @@ class TimingTests(unittest.TestCase):
 
     def test_log_rate_is_bounded_and_data_contains_only_scalars(self):
         timing = SystemAudioTiming()
-        with patch('remotevoice.audio_timing.LOGGER.info') as log:
+        with patch('remontevoice.audio_timing.LOGGER.info') as log:
             first = self.packet(timing,[0,200_000_000,201_000_000,202_000_000,203_000_000])
             self.assertIsNone(self.packet(timing,[300_000_000,500_000_000,501_000_000,502_000_000,503_000_000]))
             self.packet(timing,[1_400_000_000,1_600_000_000,1_601_000_000,1_602_000_000,1_603_000_000])
@@ -52,7 +52,7 @@ class TimingTests(unittest.TestCase):
         timing.mark('read_start')
         self.assertIsNone(timing.finish())
         self.assertEqual(timing.points,{})
-        with patch('remotevoice.audio_timing.LOGGER.info',side_effect=RuntimeError('test logger')):
+        with patch('remontevoice.audio_timing.LOGGER.info',side_effect=RuntimeError('test logger')):
             self.assertIsNotNone(self.packet(timing,[0,200_000_000,201_000_000,202_000_000,203_000_000]))
         with self.assertRaises(ValueError):
             timing.mark('private-frame-data')
@@ -94,7 +94,7 @@ class TimingTests(unittest.TestCase):
             regular_file.write_text('preserve', encoding='utf-8')
             timing = SystemAudioTiming(trace_directory=regular_file)
             self.packet(timing, [0, 1, 2, 3, 4])
-            with self.assertLogs('remotevoice.audio', level='WARNING'):
+            with self.assertLogs('remontevoice.audio', level='WARNING'):
                 self.assertIsNone(timing.flush_trace())
             self.assertEqual(regular_file.read_text('utf-8'), 'preserve')
             incomplete = SystemAudioTiming(clock=lambda: 1, trace_directory=Path(directory))

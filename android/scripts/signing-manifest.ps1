@@ -61,3 +61,6 @@ $manifest = [ordered]@{
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $OutputDirectory 'signing-manifest.json') -Encoding utf8
 Write-Output "APK SHA-256: $apkSha256"
 if ($certificateSha256) { Write-Output "Signer certificate SHA-256: $certificateSha256" }
+# apksigner exits nonzero for the expected unsigned artifact; that status must
+# not become the script's exit code after the manifest has been written.
+exit 0

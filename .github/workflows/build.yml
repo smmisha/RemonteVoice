@@ -20,7 +20,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install host dependencies
-        run: python -m pip install -r requirements.txt pyinstaller
+        run: |
+          python -m pip install -r requirements.txt pyinstaller
+          python -c "import remotevoice"
         working-directory: host
 
       - name: Check Python sources
@@ -29,6 +31,8 @@ jobs:
 
       - name: Run host tests
         timeout-minutes: 15
+        env:
+          PYTHONPATH: ${{ github.workspace }}\host
         run: python run_tests.py
         working-directory: host
 

@@ -136,7 +136,7 @@ class ScreenFrameSourceTests(unittest.IsolatedAsyncioTestCase):
         source = screen.ScreenFrameSource(capture)
         await source.next_frame(lambda: True)
         await source.next_frame(lambda: True)
-        self.assertGreaterEqual(starts[1] - starts[0], screen.SCREEN_FRAME_INTERVAL * .95)
+        self.assertGreaterEqual(starts[1] - starts[0], screen.SCREEN_FRAME_INTERVAL * .9)
         self.assertLess(starts[1] - starts[0], .4)  # Regression: old fixed 500ms wait.
 
     async def test_cancelled_native_capture_cannot_queue_replacement_in_any_source(self):

@@ -135,8 +135,13 @@ class ScreenFrameSourceTests(unittest.IsolatedAsyncioTestCase):
 
         source = screen.ScreenFrameSource(capture)
         await source.next_frame(lambda: True)
+        deadline = source._next_frame_at
         await source.next_frame(lambda: True)
-        self.assertGreaterEqual(starts[1] - starts[0], screen.SCREEN_FRAME_INTERVAL * .9)
+        # Worker threads start a little after the pacing deadline, and that
+        # dispatch latency is subtracted from the gap between the two capture
+        # timestamps. Compare against the source's own deadline instead of
+        # requiring two thread timestamps to differ by the whole frame interval.
+        self.assertGreaterEqual(starts[1], deadline - .02)
         self.assertLess(starts[1] - starts[0], .4)  # Regression: old fixed 500ms wait.
 
     async def test_cancelled_native_capture_cannot_queue_replacement_in_any_source(self):

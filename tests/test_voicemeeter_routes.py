@@ -179,6 +179,21 @@ class VoicemeeterRoutesTests(unittest.TestCase):
         self.assertEqual(api.values, routes._ROUTES)
         api.VBVMR_Logout.assert_called_once()
 
+    def test_slow_cold_start_beyond_old_eight_second_budget_is_confirmed(self):
+        # Measured on this machine: the SDK accepted the launch and the process
+        # started, but the server only answered after 11.2 s. The old 8 s budget
+        # failed a launch that was actually in progress.
+        api = FakeApi()
+        api.VBVMR_Login.return_value = 1
+        clock = FakeClock()
+        api.VBVMR_IsParametersDirty.side_effect = lambda: -2 if clock.now < 11.2 else 1
+        with self.api_context(api), patch.object(routes, 'time', clock):
+            self.assertTrue(self.configure())
+        api.VBVMR_RunVoicemeeter.assert_called_once_with(2)
+        self.assertGreater(clock.now, 8.0)
+        self.assertLessEqual(clock.now, routes._START_TIMEOUT)
+        self.assertEqual(api.values, routes._ROUTES)
+
     def test_start_timeout_or_error_never_changes_routes(self):
         for launch_result in (0, -1):
             api = FakeApi()

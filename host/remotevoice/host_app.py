@@ -6,12 +6,10 @@ import asyncio
 import argparse
 import base64
 import io
-import ipaddress
 import json
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-import socket
 import sys
 import threading
 import time
@@ -35,9 +33,11 @@ from .desktop_ui import build_ui, device_choices
 from .host_lease import HostLease, HostLeaseError
 from .microphone_guard import MicrophoneGuardError, MicrophoneMuteGuard
 from .input_routing import InputRoute, InputRoutingError
+from .network_addresses import private_ipv4_addresses
 from .output_routing import OutputRoute, OutputRoutingError
 from .pairing import PairingManager
 from .server import RemoteVoiceServer
+from . import voicemeeter_window
 from .safety_guard import SafetyGuard, SafetyGuardError
 
 LOGGER = logging.getLogger("remotevoice.ui")
@@ -48,16 +48,6 @@ _CLOSE_GRACE_SECONDS = 5.0
 def app_data_dir() -> Path:
     base = os.environ.get("APPDATA")
     return Path(base) / "RemoteVoice" if base else Path.home() / ".remotevoice"
-
-
-def private_ipv4_addresses() -> list[str]:
-    found: set[str] = set()
-    for result in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
-        address = result[4][0]
-        parsed = ipaddress.ip_address(address)
-        if parsed.is_private and not parsed.is_loopback and not parsed.is_link_local:
-            found.add(address)
-    return sorted(found)
 
 
 def matching_system_output(capture_name: str, speakers: list[dict[str, str]]) -> str | None:
@@ -94,6 +84,14 @@ def matching_virtual_microphone(playback_id: str, playback_name: str, captures: 
     return candidates[0] if len(candidates) == 1 else None
 
 
+def window_icon_path() -> Path | None:
+    """Prefer the icon bundled next to the code, then the source tree copy."""
+    bundle = getattr(sys, "_MEIPASS", None)
+    candidates = [Path(bundle) / "RemoteVoice.ico"] if bundle else []
+    candidates.append(Path(__file__).resolve().parents[1] / "RemoteVoice.ico")
+    return next((candidate for candidate in candidates if candidate.is_file()), None)
+
+
 class HostWindow(tk.Tk):
     def __init__(self, *, driver_runtime_factory=None) -> None:
         if driver_runtime_factory is not None and not callable(driver_runtime_factory):
@@ -113,7 +111,7 @@ class HostWindow(tk.Tk):
             # Ownership precedes TLS/pairing, recovery and every device write.
             self._host_lease.acquire()
         except HostLeaseError as exc:
-            messagebox.showerror("RemoteVoice уже открыт", str(exc), parent=self)
+            messagebox.showerror("RemonteVoice уже открыт", str(exc), parent=self)
             self.destroy()
             raise
         try:
@@ -126,7 +124,15 @@ class HostWindow(tk.Tk):
     def _initialize(self) -> None:
         write_receipt(self.data_dir / "runtime.json")
         self._audio_backend = None
-        self.title("RemoteVoice — Windows Host")
+        self.title("RemonteVoice — Windows Host")
+        icon = window_icon_path()
+        if icon is not None:
+            try:
+                # On Windows this sets both the title bar and taskbar icons for
+                # this window and for dialogs that do not pass their own icon.
+                self.iconbitmap(default=str(icon))
+            except tk.TclError:
+                LOGGER.warning("Window icon could not be applied")
 
         self.config_path = self.data_dir / "config.json"
         self.config_data = self._read_config()
@@ -170,6 +176,8 @@ class HostWindow(tk.Tk):
         )
         self.pairing_code_var = tk.StringVar()
         self.endpoint_hint_var = tk.StringVar()
+        self.keep_voicemeeter_hidden_var = tk.BooleanVar(value=True)
+        self.voicemeeter_status_var = tk.StringVar(value="Voicemeeter: проверяю…")
         self.qr_image: tk.PhotoImage | None = None
         self.capture_choices: dict[str, str] = {}
         self.playback_choices: dict[str, str] = {}
@@ -332,7 +340,7 @@ class HostWindow(tk.Tk):
         if not self.fallback_output_choices:
             self.endpoint_hint_var.set(
                 "Динамики или наушники для автоматического возврата звука не найдены. "
-                "Подключите устройство вывода и перезапустите RemoteVoice."
+                "Подключите устройство вывода и перезапустите RemonteVoice."
             )
 
     def _update_microphone_controls(self) -> None:
@@ -494,7 +502,7 @@ class HostWindow(tk.Tk):
                 self._set_status_text('Аудиокомпонент недоступен — остановите подключение')
                 return False
             if not self._driver_cleanup_confirmed():
-                self._set_status_text('Перезапустите RemoteVoice: остановка аудиокомпонента не подтверждена')
+                self._set_status_text('Перезапустите RemonteVoice: остановка аудиокомпонента не подтверждена')
                 return False
         try:
             self._driver_runtime = self._driver_runtime_factory()  # Construction must be inert.
@@ -566,6 +574,55 @@ class HostWindow(tk.Tk):
         self._driver_cleanup_worker = threading.Thread(target=cleanup, name='remotevoice-driver-stop', daemon=True)
         self._driver_cleanup_worker.start()
 
+    @staticmethod
+    def _voicemeeter_window_module():
+        return voicemeeter_window
+
+    def _refresh_voicemeeter_status(self) -> None:
+        module = self._voicemeeter_window_module()
+        try:
+            running = module.running()
+        except Exception:
+            running = False
+        if not running:
+            text = "Не запущен — приложение запустит его при подключении"
+        elif self.keep_voicemeeter_hidden_var.get():
+            text = "Работает в фоне, окно скрыто"
+        else:
+            text = "Работает, окно можно открыть"
+        self.voicemeeter_status_var.set(text)
+
+    def _apply_voicemeeter_policy(self) -> None:
+        if not self.server_running:
+            return
+        module = self._voicemeeter_window_module()
+        try:
+            if self.keep_voicemeeter_hidden_var.get():
+                module.hide()
+        except Exception:
+            LOGGER.warning("Voicemeeter window supervision failed")
+        self._refresh_voicemeeter_status()
+
+    def _toggle_voicemeeter_window(self) -> None:
+        module = self._voicemeeter_window_module()
+        try:
+            if self.keep_voicemeeter_hidden_var.get():
+                module.hide()
+            else:
+                module.show()
+        except Exception:
+            LOGGER.warning("Voicemeeter window toggle failed")
+        self._refresh_voicemeeter_status()
+
+    def _show_voicemeeter(self) -> None:
+        module = self._voicemeeter_window_module()
+        try:
+            module.show()
+        except Exception:
+            LOGGER.warning("Voicemeeter window reveal failed")
+        self.keep_voicemeeter_hidden_var.set(False)
+        self._refresh_voicemeeter_status()
+
     def _start_host(self) -> None:
         if self.server_running:
             return
@@ -573,10 +630,10 @@ class HostWindow(tk.Tk):
             self._set_status_text("Предыдущее подключение ещё завершается")
             return
         if not self._host_lease.held:
-            self._set_status_text("Другое окно RemoteVoice управляет аудиоустройствами")
+            self._set_status_text("Другое окно RemonteVoice управляет аудиоустройствами")
             return
         if self.server is not None and self.server.cleanup_failed is True:
-            self._set_status_text("Перезапустите RemoteVoice: аудиопотоки не завершены")
+            self._set_status_text("Перезапустите RemonteVoice: аудиопотоки не завершены")
             return
         restored = self._recover_waiting_routes()
         if not restored:
@@ -742,6 +799,8 @@ class HostWindow(tk.Tk):
         self._refresh_pairing_ui()
         self.server_thread.start()
         self.after(500, self._check_safety_guard, generation)
+        for delay in (2000, 6000, 12000):
+            self.after(delay, lambda: self._apply_voicemeeter_policy())
 
     def _check_safety_guard(self, generation: int) -> None:
         if generation != self._server_generation or not self.server_running:
@@ -1167,7 +1226,7 @@ class HostWindow(tk.Tk):
         if status.startswith("audio_cleanup_failed:"):
             self._stopping = True
             self._route_activation_failed = True
-            self._session_restore_failure = "Аудиопотоки не завершены. Перезапустите RemoteVoice"
+            self._session_restore_failure = "Аудиопотоки не завершены. Перезапустите RemonteVoice"
             self.start_button.configure(state="disabled")
             self._set_status_text("Остановка аудио не подтверждена")
             return
@@ -1254,7 +1313,7 @@ class HostWindow(tk.Tk):
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="RemoteVoice Windows Host")
+    parser = argparse.ArgumentParser(description="RemonteVoice Windows Host")
     parser.add_argument("--autostart", action="store_true", help="Start with saved audio configuration")
     parser.add_argument("--safety-guard", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--driver-backend-lab", action="store_true", help=argparse.SUPPRESS)
@@ -1314,3 +1373,4 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
+

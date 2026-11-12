@@ -35,3 +35,7 @@ android/*.keystore
 
 host/driver/.tools/
 host/driver/reference/
+
+# Local release signing identity (owner backups only)
+android/keys/
+

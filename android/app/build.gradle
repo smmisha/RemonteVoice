@@ -26,8 +26,8 @@ android {
         applicationId 'dev.remotevoice.android'
         minSdk 26
         targetSdk 36
-        versionCode 37
-        versionName '0.1.36'
+        versionCode 41
+        versionName '0.1.40'
         testInstrumentationRunner 'dev.remotevoice.android.ViewerInstrumentation'
     }
     compileOptions {

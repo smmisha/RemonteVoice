@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RemoteVoice</string>
+    <string name="app_name">RemonteVoice</string>
     <string name="channel_name">Соединение с ноутбуком</string>
-    <string name="channel_description">Передача звука RemoteVoice в локальной сети</string>
+    <string name="channel_description">Передача звука RemonteVoice в локальной сети</string>
 </resources>

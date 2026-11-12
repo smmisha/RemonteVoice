@@ -204,7 +204,7 @@ class HostSessionSafetyTests(fixtures.HeadlessHostTests):
         window._start_host()
         window._recover_waiting_routes.assert_not_called()
         self.assertFalse(window.server_running)
-        self.assertIn('Перезапустите RemoteVoice', window.status_var.get())
+        self.assertIn('Перезапустите RemonteVoice', window.status_var.get())
 
     def test_clean_close_releases_lease_but_unclean_workers_keep_it_until_process_exit(self):
         for failed in (False, True):

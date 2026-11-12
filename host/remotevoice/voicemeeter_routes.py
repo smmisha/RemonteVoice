@@ -14,7 +14,12 @@ from pathlib import Path
 
 _READBACK_TIMEOUT = 3.0
 _POLL_INTERVAL = 0.03
-_START_TIMEOUT = 8.0
+# A measured cold start of the installed Banana (SDK launch accepted, process
+# started, server still reporting -2) took 11.2 s on this machine, so the old
+# 8 s budget failed a launch that was actually in progress. Keep a margin for
+# slower disks and first runs; a genuinely absent mixer still ends in the same
+# fixed user-facing error.
+_START_TIMEOUT = 20.0
 _ERROR = "Не удалось настроить раздельные аудиоканалы Voicemeeter."
 _NOT_RUNNING_ERROR = (
     "Не удалось автоматически запустить установленный Voicemeeter Banana. "

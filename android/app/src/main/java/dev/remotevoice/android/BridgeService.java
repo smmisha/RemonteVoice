@@ -131,7 +131,7 @@ public final class BridgeService extends Service {
         if (connecting || connected) return;
         PairingInfo pairing;
         try { pairing = PairingInfo.parse(link); }
-        catch (IllegalArgumentException exception) { close("Нужна корректная ссылка из QR-кода RemoteVoice на ноутбуке."); return; }
+        catch (IllegalArgumentException exception) { close("Нужна корректная ссылка из QR-кода RemonteVoice на ноутбуке."); return; }
         final long session = ++generation;
         final boolean readerWaitProbe = requestedReaderWaitProbe
                 && (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -376,7 +376,7 @@ public final class BridgeService extends Service {
         Intent openIntent = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent open = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = new Notification.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_remotevoice)
-                .setContentTitle("RemoteVoice · " + host).setContentText(status).setContentIntent(open)
+                .setContentTitle("RemonteVoice · " + host).setContentText(status).setContentIntent(open)
                 .setOngoing(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_SERVICE)
                 .setVisibility(Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(null, "Отключиться", command(DISCONNECT, 1)).build());

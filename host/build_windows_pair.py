@@ -27,7 +27,7 @@ def _hash(path):
 
 def _sources():
     sources = [SPEC, Path(__file__).resolve(), HOST / "broker_launcher.py",
-               HOST / "launcher.py", HOST / "requirements.txt"]
+               HOST / "launcher.py", HOST / "requirements.txt", HOST / "RemoteVoice.ico"]
     sources += sorted((HOST / "remotevoice").rglob("*.py"))
     return {path.relative_to(HOST).as_posix(): _hash(path) for path in sources}
 

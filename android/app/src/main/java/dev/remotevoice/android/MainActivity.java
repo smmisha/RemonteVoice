@@ -159,7 +159,7 @@ public final class MainActivity extends Activity {
         TextView eyebrow = text("ТЕЛЕФОН И НОУТБУК · ОДНО ПОДКЛЮЧЕНИЕ", 10, GREEN);
         eyebrow.setLetterSpacing(0.08f);
         root.addView(eyebrow);
-        TextView title = text("RemoteVoice", 28, INK);
+        TextView title = text("RemonteVoice", 28, INK);
         title.setTypeface(null, Typeface.BOLD);
         root.addView(title, margin(0, 6, 0, 6));
         root.addView(text("Говорите с телефона. Слушайте ноутбук в наушниках.", 15, MUTED));
@@ -180,7 +180,7 @@ public final class MainActivity extends Activity {
         panel.addView(endpoint, margin(0, 8, 0, 0));
 
         pairingPanel = card(root, "Подключить ноутбук");
-        pairingHint = text("Откройте RemoteVoice на ноутбуке и отсканируйте QR-код.", 14, MUTED);
+        pairingHint = text("Откройте RemonteVoice на ноутбуке и отсканируйте QR-код.", 14, MUTED);
         pairingPanel.addView(pairingHint, margin(0, 8, 0, 16));
         connect = button("Подключиться", true);
         pairingPanel.addView(connect, margin(0, 0, 0, 12));
@@ -189,7 +189,7 @@ public final class MainActivity extends Activity {
         pairingPanel.addView(scan, margin(0, 0, 0, 16));
         scan.setOnClickListener(view -> new IntentIntegrator(this)
                 .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-                .setPrompt("QR-код находится в Windows Host RemoteVoice")
+                .setPrompt("QR-код находится в Windows Host RemonteVoice")
                 .setBeepEnabled(false).setOrientationLocked(false).initiateScan());
 
         TextView label = text("Или вставьте ссылку сопряжения", 13, MUTED);
@@ -237,7 +237,7 @@ public final class MainActivity extends Activity {
             if (previewRequested) stopPreview("Экран скрыт.", PreviewCloseReason.HIDDEN);
             else beginPreview();
         });
-        screenStatus = text("Разрешите просмотр в RemoteVoice на ноутбуке. Здесь можно смотреть экран без управления.", 13, MUTED);
+        screenStatus = text("Разрешите просмотр в RemonteVoice на ноутбуке. Здесь можно смотреть экран без управления.", 13, MUTED);
         screenStatus.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         screenPanel.addView(screenStatus, margin(0, 0, 0, 10));
         screenImage = new ZoomImageView(this);
@@ -320,7 +320,7 @@ public final class MainActivity extends Activity {
         catch (IllegalArgumentException ignored) { /* An invalid old endpoint needs a new QR. */ }
         pairingHint.setText(hasSaved
                 ? "Ноутбук сохранён. Подключитесь снова или отсканируйте QR-код другого ноутбука."
-                : "Откройте RemoteVoice на ноутбуке и отсканируйте QR-код. После подключения появятся микрофон и просмотр экрана.");
+                : "Откройте RemonteVoice на ноутбуке и отсканируйте QR-код. После подключения появятся микрофон и просмотр экрана.");
         connect.setEnabled(!active && (hasSaved || !link.getText().toString().trim().isEmpty()));
         scan.setEnabled(!active);
         disconnect.setEnabled(active);
@@ -668,7 +668,7 @@ public final class MainActivity extends Activity {
     }
     private void setPairingLink(String value) {
         try { PairingInfo.parse(value); link.setText(value); toast("Ссылка готова. Нажми «Подключиться»."); }
-        catch (IllegalArgumentException exception) { toast("Это не QR-код RemoteVoice. Получи новый код на ноутбуке."); }
+        catch (IllegalArgumentException exception) { toast("Это не QR-код RemonteVoice. Получи новый код на ноутбуке."); }
     }
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);

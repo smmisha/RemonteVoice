@@ -1,5 +1,5 @@
 # Elevated: place the built pair into a protected Program Files location and start the broker.
-$ErrorActionPreference = 'Continue'
+$ErrorActionPreference = 'Stop'
 $log = Join-Path $env:TEMP 'rv-protected-install.log'
 Start-Transcript -Path $log -Force | Out-Null
 try {
@@ -22,7 +22,11 @@ try {
     Start-Sleep -Milliseconds 500
 
     if (-not (Test-Path -LiteralPath $target)) { New-Item -ItemType Directory -Path $target | Out-Null }
-    Copy-Item -Path (Join-Path $source '*') -Destination $target -Recurse -Force
+    Copy-Item -Path (Join-Path $source '*') -Destination $target -Recurse -Force -ErrorAction Stop
+    $sourceHash = (Get-FileHash -LiteralPath (Join-Path $source 'RemonteVoice.exe') -Algorithm SHA256).Hash
+    $targetHash = (Get-FileHash -LiteralPath (Join-Path $target 'RemonteVoice.exe') -Algorithm SHA256).Hash
+    if ($sourceHash -ne $targetHash) { throw "Deployed executable hash mismatch: $targetHash vs $sourceHash" }
+    Write-Host "verified executable hash: $targetHash"
 
     Write-Host '=== owner before ==='
     (Get-Acl -LiteralPath $target).Owner

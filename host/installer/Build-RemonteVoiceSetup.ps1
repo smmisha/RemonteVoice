@@ -22,6 +22,7 @@ param(
     [string]$DriverInstance = '',
     [string]$DriverPackage = '',
     [string]$Output = '',
+    [string]$Archive = '',
     [switch]$SkipPairBuild
 )
 $ErrorActionPreference = 'Stop'
@@ -106,7 +107,8 @@ try {
     if (-not $Output) { $Output = Join-Path $buildRoot ('setup-' + $Version) }
     $Output = [IO.Path]::GetFullPath($Output)
     if (Test-Path -LiteralPath $Output) { throw "Output directory already exists: $Output" }
-    $zip = Join-Path $buildRoot ('RemonteVoice-Setup-' + $Version + '.zip')
+    if (-not $Archive) { $Archive = Join-Path $buildRoot ('RemonteVoice-Setup-' + $Version + '.zip') }
+    $zip = [IO.Path]::GetFullPath($Archive)
     if (Test-Path -LiteralPath $zip) { throw "Package archive already exists: $zip" }
 
     New-Item -ItemType Directory -Path $Output -Force | Out-Null
@@ -242,7 +244,7 @@ RemonteVoice $Version — установка для Windows 10/11 x64
         driver_certificate_thumbprint = $certificate.Thumbprint
         created_utc = [DateTime]::UtcNow.ToString('o')
     }
-    $receiptPath = Join-Path $buildRoot ('RemonteVoice-Setup-' + $Version + '.build.json')
+    $receiptPath = $zip + '.build.json'
     $receipt | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $receiptPath -Encoding utf8
     Write-Step 'receipt' $receiptPath
     Write-Host ('RESULT: ok version={0} archive={1} sha256={2} files={3}' -f

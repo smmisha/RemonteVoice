@@ -108,6 +108,16 @@ host\installer\acceptance\Run-Acceptance.cmd
 свежий архив `RemonteVoice-Setup-*.zip` из `host\build` и требует одно
 подтверждение UAC. Квитанция: `host\build\package-acceptance\acceptance.json`.
 
+После перезагрузки или нового входа проверка того, что задача подняла broker без
+окна и установка является продуктовой, выполняется без прав администратора:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File host\installer\acceptance\Check-Logon.ps1
+```
+
+Квитанция: `host\build\package-acceptance\logon-check.json`. Её же можно выполнить
+до установки продукта — тогда `ok=false` покажет, что стоит dev-развёртывание.
+
 ## Границы
 
 - Пакет не подписан: это development-сборка. Production-подпись, WHCP и

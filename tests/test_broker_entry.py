@@ -1,10 +1,13 @@
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import unittest
+from pathlib import Path
 from unittest.mock import Mock, patch
 
+import remontevoice.broker_entry as entry
 from remontevoice.broker_entry import BrokerBootstrapHost, _run_muted_lab, main
 
 
@@ -107,3 +110,38 @@ raise SystemExit(99)
         result=subprocess.run([sys.executable,'-c',code],timeout=5,capture_output=True,
                               creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
         self.assertEqual(result.returncode,70)
+
+
+class WindowlessDiagnosticsTests(unittest.TestCase):
+    def test_failure_is_recorded_and_log_rotates_at_the_bound(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "logs" / "broker.log"
+            diagnostics = entry._open_diagnostics(path)
+            diagnostics.note("start pid=1 laboratory=False")
+            diagnostics.failure(RuntimeError("protected installation rejected"))
+            diagnostics.stream.close()
+            text = path.read_text("utf-8")
+            self.assertIn("start pid=1 laboratory=False", text)
+            self.assertIn("failure RuntimeError: protected installation rejected", text)
+            path.write_text("x" * (entry._LOG_LIMIT_BYTES + 1), "utf-8")
+            entry._open_diagnostics(path).stream.close()
+            self.assertTrue((path.parent / "broker.log.1").is_file())
+
+    def test_unusable_profile_and_source_run_write_nothing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            blocker = Path(temporary) / "file"
+            blocker.write_text("x", "utf-8")
+            self.assertIsNone(entry._open_diagnostics(blocker / "broker.log"))
+        self.assertIsNone(entry._install_diagnostics())
+
+    def test_refused_manifest_reaches_the_log_before_the_exit_code(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "broker.log"
+            diagnostics = entry._open_diagnostics(path)
+            with patch.object(entry, "_DIAGNOSTICS", diagnostics), \
+                 patch("remontevoice.broker_entry.PinnedInstalledManifest",
+                       side_effect=RuntimeError("refused")):
+                with self.assertRaises(RuntimeError):
+                    BrokerBootstrapHost().serve(threading.Event())
+            diagnostics.stream.close()
+            self.assertIn("refused", path.read_text("utf-8"))

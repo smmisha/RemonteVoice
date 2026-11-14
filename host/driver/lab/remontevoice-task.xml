@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-16"?>
+<!-- Product task: starts the installed broker directly. The broker is a windowed
+     (GUI-subsystem) executable, so no console window appears and the task keeps
+     owning the process. -->
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Description>RemonteVoice privileged audio broker (own microphone)</Description>

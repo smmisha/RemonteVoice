@@ -1,4 +1,7 @@
 # Elevated: deploy the current build, register the broker logon task and start the broker.
+# Superseded for pair installations by deploy-windowless-broker.ps1: that script verifies
+# the windowed broker, drops files outside the new manifest, waits for the broker pipe and
+# rolls back to the previous build. This script keeps its original simpler behaviour.
 $ErrorActionPreference = 'Stop'
 $log = Join-Path $env:TEMP 'rv-broker-setup.log'
 Start-Transcript -Path $log -Force | Out-Null

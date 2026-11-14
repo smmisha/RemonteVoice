@@ -56,12 +56,14 @@ class PairSpecTests(unittest.TestCase):
         executables = [call for call in calls if call[0] == "exe"]
         self.assertEqual(len(executables), 2)
         for call, entry, name, console in zip(executables, ("broker_launcher", "launcher"),
-                                            ("RemonteVoiceBroker", "RemonteVoice"), (True, False)):
+                                            ("RemonteVoiceBroker", "RemonteVoice"), (False, False)):
             self.assertEqual([script[0] for script in call[1][1]], ["pyi_rth_inspect", entry])
             self.assertEqual(call[2]["name"], name)
             self.assertIs(call[2]["console"], console)
             self.assertTrue(call[2]["exclude_binaries"])
             self.assertFalse(call[2]["upx"])
+        # Neither executable may create a console window; the broker reports to its log.
+        self.assertTrue(executables[0][2]["disable_windowed_traceback"])
         self.assertIs(executables[0][1][0], executables[1][1][0])
         collection = calls[-1]
         self.assertEqual(collection[1][:2], tuple(call[3] for call in executables))

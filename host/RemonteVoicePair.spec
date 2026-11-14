@@ -38,8 +38,8 @@ def entry_scripts(entry):
 
 broker = EXE(
     pyz, entry_scripts("broker_launcher"), [], exclude_binaries=True,
-    name="RemonteVoiceBroker", icon=str(host / "RemonteVoice.ico"), console=True, debug=False, strip=False, upx=False,
-    contents_directory="_internal", bootloader_ignore_signals=False,
+    name="RemonteVoiceBroker", icon=str(host / "RemonteVoice.ico"), console=False, debug=False, strip=False, upx=False,
+    contents_directory="_internal", bootloader_ignore_signals=False, disable_windowed_traceback=True,
 )
 client = EXE(
     pyz, entry_scripts("launcher"), [], exclude_binaries=True,

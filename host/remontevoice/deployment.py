@@ -9,7 +9,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "0.1.40"
+VERSION = "0.1.41"
 
 
 def build_identity() -> dict:

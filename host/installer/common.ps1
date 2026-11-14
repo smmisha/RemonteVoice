@@ -457,13 +457,25 @@ function Start-RvBrokerTaskAndWait([int]$TimeoutSeconds = 60) {
     return Wait-RvBrokerReady -TimeoutSeconds $TimeoutSeconds
 }
 
-function Start-RvApplication([string]$InstallRoot) {    $exe = Get-RvAppPath $InstallRoot
-    $shell = New-Object -ComObject Shell.Application
+function Start-RvApplication([string]$InstallRoot) {
+    $exe = Get-RvAppPath $InstallRoot
+    $started = $false
     try {
-        $desktop = $shell.Windows().Item([uint32]8).Document
-        if ($null -eq $desktop) { throw 'Windows desktop shell is unavailable' }
-        $desktop.Application.ShellExecute($exe, '--autostart', $InstallRoot, 'open', 1)
-    } finally {
-        [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell)
+        $shell = New-Object -ComObject Shell.Application
+        try {
+            $desktop = $shell.Windows().Item([uint32]8).Document
+            if ($null -eq $desktop) { throw 'Windows desktop shell is unavailable' }
+            $desktop.Application.ShellExecute($exe, '--autostart', $InstallRoot, 'open', 1)
+            $started = $true
+        } finally {
+            [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell)
+        }
+    } catch {
+        $started = $false
+    }
+    if (-not $started) {
+        # An elevated setup may be denied Explorer automation. The shell launch
+        # through the running explorer goes to the interactive user token.
+        & explorer.exe $exe | Out-Null
     }
 }

@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
   Elevated acceptance of a built RemonteVoice setup package:
   install -> update (repair) -> uninstall -> final install, with checks.
@@ -122,6 +122,38 @@ function Get-ProductState {
     }
 }
 
+function Start-ProductApp {
+    $exe = 'C:\Program Files\RemonteVoice\RemonteVoice.exe'
+    try {
+        $shell = New-Object -ComObject Shell.Application
+        try {
+            $desktop = $shell.Windows().Item([uint32]8).Document
+            if ($null -ne $desktop) {
+                $desktop.Application.ShellExecute($exe, '--autostart', 'C:\Program Files\RemonteVoice', 'open', 1)
+                return
+            }
+        } finally { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) }
+    } catch { }
+    & explorer.exe $exe | Out-Null
+}
+
+function Wait-ProductApp([int]$TimeoutSeconds = 40) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        $app = Get-Process -Name RemonteVoice -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
+        if ($app) { return $app }
+        Start-Sleep -Milliseconds 500
+    } while ((Get-Date) -lt $deadline)
+    return $null
+}
+
+function Get-RuntimeReceipt {
+    $path = Join-Path $env:APPDATA 'RemonteVoice\runtime.json'
+    if (-not (Test-Path $path)) { return $null }
+    return (Get-Content -LiteralPath $path -Raw | ConvertFrom-Json)
+}
+
 try {
     $resolved = Resolve-PackageRoot $Package
     $extracted = $resolved.Temporary
@@ -133,14 +165,24 @@ try {
     # 1. Fresh product install over the previous (development) deployment.
     Invoke-SetupScript $packageRoot 'Install-RemonteVoice.ps1' @('-Package', ('"' + $packageRoot + '"'), '-StartApp')
     Record-Step 'install' 'Install-RemonteVoice.ps1'
+    if ($null -eq (Wait-ProductApp 10)) { Start-ProductApp; $null = Wait-ProductApp 40 }
+    $installedApp = Wait-ProductApp 1
+    $runtime = Get-RuntimeReceipt
     $state = Get-ProductState
+    $state.app_running = [bool]$installedApp
+    $state.runtime_version = if ($runtime) { $runtime.version } else { $null }
+    $state.runtime_build_sha256 = if ($runtime) { $runtime.build.sha256 } else { $null }
     $evidence.install = $state
+    $evidence.runtime = $runtime
     Record-Check 'install.files' ($state.files -eq 1211) $state.files
     Record-Check 'install.manifest-instance' ($state.manifest_instance -eq 'ROOT\MEDIA\0001') $state.manifest_instance
     Record-Check 'install.owner-trusted' ($state.owner_sid -in @('S-1-5-32-544', 'S-1-5-18')) $state.owner_sid
     Record-Check 'install.task' ($state.task_command -eq 'C:\Program Files\RemonteVoice\RemonteVoiceBroker.exe') $state.task_command
     Record-Check 'install.broker' ($null -ne $state.broker_pid -and $state.pipes.Count -eq 1) ("pid=$($state.broker_pid) pipes=$($state.pipes.Count)")
     Record-Check 'install.broker-windowless' ($state.broker_visible_window -eq 0) $state.broker_visible_window
+    Record-Check 'install.app-running' $state.app_running $state.app_running
+    Record-Check 'install.runtime-version' ($state.runtime_version -eq $manifest.version) $state.runtime_version
+    Record-Check 'install.runtime-build' ($state.runtime_build_sha256 -eq $manifest.files.'app/RemonteVoice.exe') $state.runtime_build_sha256
     Record-Check 'install.shortcuts' ($state.shortcuts -eq 2) $state.shortcuts
     Record-Check 'install.uninstall-entry' ($state.uninstall_version -eq $manifest.version) $state.uninstall_version
     Record-Check 'install.state' ($state.state_version -eq $manifest.version) $state.state_version
@@ -172,12 +214,22 @@ try {
     # 4. Final product installation: the delivered state.
     Invoke-SetupScript $packageRoot 'Install-RemonteVoice.ps1' @('-Package', ('"' + $packageRoot + '"'), '-StartApp')
     Record-Step 'reinstall' 'Install-RemonteVoice.ps1'
+    if ($null -eq (Wait-ProductApp 10)) { Start-ProductApp; $null = Wait-ProductApp 40 }
+    $finalApp = Wait-ProductApp 1
+    $finalRuntime = Get-RuntimeReceipt
     $final = Get-ProductState
+    $final.app_running = [bool]$finalApp
+    $final.runtime_version = if ($finalRuntime) { $finalRuntime.version } else { $null }
+    $final.runtime_build_sha256 = if ($finalRuntime) { $finalRuntime.build.sha256 } else { $null }
     $evidence.final = $final
     Record-Check 'final.files' ($final.files -eq 1211) $final.files
     Record-Check 'final.task' ($final.task_command -eq 'C:\Program Files\RemonteVoice\RemonteVoiceBroker.exe') $final.task_command
     Record-Check 'final.broker' ($null -ne $final.broker_pid -and $final.pipes.Count -eq 1 -and $final.broker_visible_window -eq 0) ("pid=$($final.broker_pid) pipes=$($final.pipes.Count)")
     Record-Check 'final.uninstall-entry' ($final.uninstall_version -eq $manifest.version) $final.uninstall_version
+    Record-Check 'final.app-running' $final.app_running $final.app_running
+    Record-Check 'final.runtime-version' ($final.runtime_version -eq $manifest.version) $final.runtime_version
+    Record-Check 'final.runtime-build' ($final.runtime_build_sha256 -eq $manifest.files.'app/RemonteVoice.exe') $final.runtime_build_sha256
+    Record-Check 'final.config-preserved' $final.config_preserved $final.config_preserved
     $evidence.ok = $true
     $evidence.finished_utc = [DateTime]::UtcNow.ToString('o')
     ($evidence | ConvertTo-Json -Depth 8) | Set-Content -LiteralPath (Join-Path $EvidenceDir 'acceptance.json') -Encoding utf8

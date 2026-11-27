@@ -38,6 +38,23 @@ final class BridgeModel: ObservableObject {
         }
     }
 
+    func applyPayload(_ payload: String) {
+        let trimmed = payload.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed), url.scheme?.lowercased() == "remontevoice" else {
+            errorMessage = "Это не ссылка сопряжения RemonteVoice."
+            return
+        }
+        acceptPairingLink(url)
+    }
+
+    func forgetPairing() {
+        disconnect()
+        pairingInfo = nil
+        UserDefaults.standard.removeObject(forKey: pairingDefaultsKey)
+        status = "Не подключено"
+        errorMessage = nil
+    }
+
     func connect() {
         guard !isConnecting, !isConnected, let pairingInfo else { return }
         generation &+= 1

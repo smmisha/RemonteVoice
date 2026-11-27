@@ -6,6 +6,8 @@
 	<string>RemonteVoice</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleName</key>
 	<string>RemonteVoice</string>
 	<key>CFBundlePackageType</key>
@@ -16,6 +18,8 @@
 	<string>6</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>RemonteVoice uses the camera only to scan the pairing QR code shown by the Windows host.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>RemonteVoice connects directly to your Windows computer on the same Wi-Fi network to stream audio.</string>
 	<key>NSMicrophoneUsageDescription</key>

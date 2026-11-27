@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 import UIKit
 import VisionKit
 
@@ -33,11 +33,7 @@ struct ContentView: View {
 
     private var header: some View {
         VStack(spacing: 10) {
-            Image("Logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 96, height: 96)
-                .accessibilityHidden(true)
+            Logomark()
             Text("RemonteVoice")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
             HStack(spacing: 8) {
@@ -57,7 +53,7 @@ struct ContentView: View {
     // MARK: - Pairing
 
     private var pairingCard: some View {
-        card(title: "Ноутбук", systemImage: "laptopcomputer") {
+        card(title: "РќРѕСѓС‚Р±СѓРє", systemImage: "laptopcomputer") {
             if let pairing = model.pairingInfo {
                 pairedContent(pairing)
             } else {
@@ -71,13 +67,13 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: "\(pairing.host):\(pairing.port)")
                     .font(.system(.title3, design: .monospaced))
-                Text(model.isConnected ? "Подключено" : "Сопряжение сохранено")
+                Text(model.isConnected ? "РџРѕРґРєР»СЋС‡РµРЅРѕ" : "РЎРѕРїСЂСЏР¶РµРЅРёРµ СЃРѕС…СЂР°РЅРµРЅРѕ")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
 
             primaryButton(
-                model.isConnected ? "Отключить" : "Подключить",
+                model.isConnected ? "РћС‚РєР»СЋС‡РёС‚СЊ" : "РџРѕРґРєР»СЋС‡РёС‚СЊ",
                 systemImage: model.isConnected ? "stop.circle" : "play.circle",
                 tint: model.isConnected ? .red : .green
             ) {
@@ -89,29 +85,28 @@ struct ContentView: View {
             }
             .disabled(model.isConnecting || model.pairingInfo == nil)
 
-            HStack(spacing: 10) {
-                secondaryButton("Сканировать QR", systemImage: "qrcode.viewfinder") {
+            VStack(spacing: 10) {
+                secondaryButton("РЎРєР°РЅРёСЂРѕРІР°С‚СЊ QR-РєРѕРґ", systemImage: "qrcode.viewfinder") {
                     showingScanner = true
                 }
-                secondaryButton("Другой ноутбук", systemImage: "arrow.triangle.2.circlepath") {
+                secondaryButton("РЎРјРµРЅРёС‚СЊ РЅРѕСѓС‚Р±СѓРє", systemImage: "arrow.triangle.2.circlepath") {
                     model.forgetPairing()
                     showingScanner = true
                 }
             }
         }
     }
-
     private var unpairedContent: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Откройте RemonteVoice на ноутбуке, нажмите «Начать подключение» и отсканируйте QR-код прямо здесь.")
+            Text("РћС‚РєСЂРѕР№С‚Рµ RemonteVoice РЅР° РЅРѕСѓС‚Р±СѓРєРµ, РЅР°Р¶РјРёС‚Рµ В«РќР°С‡Р°С‚СЊ РїРѕРґРєР»СЋС‡РµРЅРёРµВ» Рё РѕС‚СЃРєР°РЅРёСЂСѓР№С‚Рµ QR-РєРѕРґ РїСЂСЏРјРѕ Р·РґРµСЃСЊ.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            primaryButton("Активировать", systemImage: "qrcode.viewfinder", tint: .green) {
+            primaryButton("РђРєС‚РёРІРёСЂРѕРІР°С‚СЊ", systemImage: "qrcode.viewfinder", tint: .green) {
                 showingScanner = true
             }
 
-            secondaryButton("Вставить ссылку из буфера", systemImage: "doc.on.clipboard") {
+            secondaryButton("Р’СЃС‚Р°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ РёР· Р±СѓС„РµСЂР°", systemImage: "doc.on.clipboard") {
                 pastePairingLink()
             }
         }
@@ -120,10 +115,10 @@ struct ContentView: View {
     // MARK: - Microphone
 
     private var microphoneCard: some View {
-        card(title: "Микрофон iPhone → ноутбук", systemImage: "mic") {
+        card(title: "РњРёРєСЂРѕС„РѕРЅ iPhone в†’ РЅРѕСѓС‚Р±СѓРє", systemImage: "mic") {
             VStack(spacing: 12) {
                 primaryButton(
-                    model.microphoneEnabled ? "Выключить микрофон" : "Включить микрофон",
+                    model.microphoneEnabled ? "Р’С‹РєР»СЋС‡РёС‚СЊ РјРёРєСЂРѕС„РѕРЅ" : "Р’РєР»СЋС‡РёС‚СЊ РјРёРєСЂРѕС„РѕРЅ",
                     systemImage: model.microphoneEnabled ? "mic.slash.fill" : "mic.fill",
                     tint: model.microphoneEnabled ? .red : .green
                 ) {
@@ -132,8 +127,8 @@ struct ContentView: View {
                 .disabled(!model.isConnected || model.isChangingMicrophone)
 
                 Text(model.microphoneEnabled
-                     ? "Голос поступает в виртуальный микрофон Windows."
-                     : "Микрофон выключен. Звук ноутбука продолжает идти на iPhone.")
+                     ? "Р“РѕР»РѕСЃ РїРѕСЃС‚СѓРїР°РµС‚ РІ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ РјРёРєСЂРѕС„РѕРЅ Windows."
+                     : "РњРёРєСЂРѕС„РѕРЅ РІС‹РєР»СЋС‡РµРЅ. Р—РІСѓРє РЅРѕСѓС‚Р±СѓРєР° РїСЂРѕРґРѕР»Р¶Р°РµС‚ РёРґС‚Рё РЅР° iPhone.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -145,7 +140,7 @@ struct ContentView: View {
     // MARK: - Footer and scanner sheet
 
     private var footer: some View {
-        Text("Оба устройства должны быть в одной Wi-Fi сети. Подключите наушники к iPhone для приватного прослушивания.")
+        Text("РћР±Р° СѓСЃС‚СЂРѕР№СЃС‚РІР° РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РІ РѕРґРЅРѕР№ Wi-Fi СЃРµС‚Рё. РџРѕРґРєР»СЋС‡РёС‚Рµ РЅР°СѓС€РЅРёРєРё Рє iPhone РґР»СЏ РїСЂРёРІР°С‚РЅРѕРіРѕ РїСЂРѕСЃР»СѓС€РёРІР°РЅРёСЏ.")
             .font(.footnote)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
@@ -164,17 +159,17 @@ struct ContentView: View {
                     .ignoresSafeArea()
                 } else {
                     ContentUnavailableView(
-                        "Сканер недоступен",
+                        "РЎРєР°РЅРµСЂ РЅРµРґРѕСЃС‚СѓРїРµРЅ",
                         systemImage: "camera",
-                        description: Text("Отсканируйте QR-код камерой iPhone или вставьте ссылку из буфера обмена.")
+                        description: Text("РћС‚СЃРєР°РЅРёСЂСѓР№С‚Рµ QR-РєРѕРґ РєР°РјРµСЂРѕР№ iPhone РёР»Рё РІСЃС‚Р°РІСЊС‚Рµ СЃСЃС‹Р»РєСѓ РёР· Р±СѓС„РµСЂР° РѕР±РјРµРЅР°.")
                     )
                 }
             }
-            .navigationTitle("Сканирование QR")
+            .navigationTitle("РЎРєР°РЅРёСЂРѕРІР°РЅРёРµ QR")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { showingScanner = false }
+                    Button("РћС‚РјРµРЅР°") { showingScanner = false }
                 }
             }
         }
@@ -222,6 +217,8 @@ struct ContentView: View {
         Button(action: action) {
             Label(title, systemImage: systemImage)
                 .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 2)
         }
@@ -231,9 +228,31 @@ struct ContentView: View {
 
     private func pastePairingLink() {
         guard let text = UIPasteboard.general.string else {
-            model.errorMessage = "Буфер обмена пуст."
+            model.errorMessage = "Р‘СѓС„РµСЂ РѕР±РјРµРЅР° РїСѓСЃС‚."
             return
         }
         model.applyPayload(text)
+    }
+}
+
+/// Brand mark drawn in SwiftUI: a ring with a waveform. Drawing it in code
+/// keeps the mark crisp and avoids the clipping the image asset showed.
+private struct Logomark: View {
+    private let brand = Color(red: 0.494, green: 0.906, blue: 0.529)
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(brand, lineWidth: 6)
+            HStack(alignment: .center, spacing: 6) {
+                ForEach(Array([0.42, 0.72, 1.0, 0.72, 0.42].enumerated()), id: \.offset) { _, factor in
+                    Capsule()
+                        .fill(brand)
+                        .frame(width: 7, height: 44 * factor)
+                }
+            }
+        }
+        .frame(width: 92, height: 92)
+        .accessibilityHidden(true)
     }
 }

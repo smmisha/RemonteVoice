@@ -2,8 +2,8 @@ import AVFAudio
 import Foundation
 
 final class PhoneAudioEngine {
-    private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
+    private var engine = AVAudioEngine()
+    private var player = AVAudioPlayerNode()
     private let targetFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32,
         sampleRate: 48_000,
@@ -28,7 +28,10 @@ final class PhoneAudioEngine {
         defer { lock.unlock() }
         guard !stopped else { throw CancellationError() }
         do {
-            try configureSession(category: .playback, mode: .default)
+            // One category for the whole connection. Switching between playback
+            // and play-and-record restarts the engine and used to fail with
+            // AVAudioEngineGraph error 2003329396 when the microphone was muted.
+            try configureSession()
             try startEngineIfNeeded()
         } catch {
             stopLocked()
@@ -50,9 +53,7 @@ final class PhoneAudioEngine {
 
         do {
             resetPlaybackLocked()
-            try configureSession(category: .playAndRecord, mode: .voiceChat)
             let input = engine.inputNode
-            try input.setVoiceProcessingEnabled(true)
             let sourceFormat = input.outputFormat(forBus: 0)
             guard sourceFormat.sampleRate > 0,
                   let converter = AVAudioConverter(from: sourceFormat, to: monoFormat) else {
@@ -65,11 +66,12 @@ final class PhoneAudioEngine {
                 self?.convertMicrophoneBuffer(buffer, onFrame: onFrame)
             }
             captureInstalled = true
-            try startEngineIfNeeded()
+            try startEngine()
         } catch {
             let startupError = error
+            removeCaptureLocked()
             do {
-                try returnToPlaybackLocked()
+                try recoverPlaybackLocked()
             } catch {
                 stopLocked()
                 throw PhoneAudioError.playbackRecoveryFailed
@@ -84,26 +86,18 @@ final class PhoneAudioEngine {
         guard !stopped else { throw CancellationError() }
         guard captureInstalled else { return }
         do {
-            try returnToPlaybackLocked()
+            engine.stop()
+            player.stop()
+            removeCaptureLocked()
+            try startEngineIfNeeded()
         } catch {
-            stopLocked()
-            throw PhoneAudioError.playbackRecoveryFailed
+            do {
+                try recoverPlaybackLocked()
+            } catch {
+                stopLocked()
+                throw PhoneAudioError.playbackRecoveryFailed
+            }
         }
-    }
-
-    private func returnToPlaybackLocked() throws {
-        resetPlaybackLocked()
-        if captureInstalled {
-            engine.inputNode.removeTap(onBus: 0)
-            captureInstalled = false
-        }
-        if engine.inputNode.isVoiceProcessingEnabled {
-            try engine.inputNode.setVoiceProcessingEnabled(false)
-        }
-        converter = nil
-        pendingSamples.removeAll(keepingCapacity: true)
-        try configureSession(category: .playback, mode: .default)
-        try startEngineIfNeeded()
     }
 
     func playSystemFrame(_ payload: Data) throws {
@@ -183,15 +177,7 @@ final class PhoneAudioEngine {
 
     private func stopLocked() {
         resetPlaybackLocked()
-        if captureInstalled {
-            engine.inputNode.removeTap(onBus: 0)
-            captureInstalled = false
-        }
-        if engine.inputNode.isVoiceProcessingEnabled {
-            try? engine.inputNode.setVoiceProcessingEnabled(false)
-        }
-        converter = nil
-        pendingSamples.removeAll(keepingCapacity: false)
+        removeCaptureLocked()
         if sessionConfigured {
             try? AVAudioSession.sharedInstance().setActive(
                 false,
@@ -201,32 +187,59 @@ final class PhoneAudioEngine {
         }
     }
 
+    private func removeCaptureLocked() {
+        if captureInstalled {
+            engine.inputNode.removeTap(onBus: 0)
+            captureInstalled = false
+        }
+        converter = nil
+        pendingSamples.removeAll(keepingCapacity: false)
+    }
+
+    /// Builds a new engine and player after a failed restart. Recreating the
+    /// graph is cheaper than debugging a wedged one, and playback resumes.
+    private func recoverPlaybackLocked() throws {
+        engine.stop()
+        player.stop()
+        if playerAttached {
+            engine.detach(player)
+            playerAttached = false
+        }
+        engine = AVAudioEngine()
+        player = AVAudioPlayerNode()
+        try configureSession()
+        try startEngineIfNeeded()
+    }
+
     private var monoFormat: AVAudioFormat {
         AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 48_000, channels: 1, interleaved: false)!
     }
 
-    private func configureSession(category: AVAudioSession.Category, mode: AVAudioSession.Mode) throws {
+    private func configureSession() throws {
         let session = AVAudioSession.sharedInstance()
         sessionConfigured = true
         try session.setPreferredSampleRate(48_000)
-        let options: AVAudioSession.CategoryOptions = category == .playAndRecord
-            ? [.defaultToSpeaker]
-            : []
-        try session.setCategory(category, mode: mode, options: options)
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
         try session.setActive(true)
     }
 
-    private func startEngineIfNeeded() throws {
+    private func startEngine() throws {
         if !playerAttached {
             engine.attach(player)
             engine.connect(player, to: engine.mainMixerNode, format: targetFormat)
             playerAttached = true
         }
-        if !engine.isRunning {
-            engine.prepare()
-            try engine.start()
-        }
+        engine.prepare()
+        try engine.start()
         if !player.isPlaying {
+            player.play()
+        }
+    }
+
+    private func startEngineIfNeeded() throws {
+        if !engine.isRunning {
+            try startEngine()
+        } else if playerAttached, !player.isPlaying {
             player.play()
         }
     }
